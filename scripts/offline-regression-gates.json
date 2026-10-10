@@ -1,0 +1,469 @@
+{
+  "schemaVersion": 1,
+  "truthScope": "offline-contract",
+  "liveProductBehavior": false,
+  "gates": [
+    {
+      "id": "AsidePreflight",
+      "script": "mathsecr-paper-builder-kit/scripts/test_aside_preflight.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/aside-preflight/daemon-auth-transport-2026-10-07.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Captured daemon failure fixture is withheld; its publication status is unconfirmed.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "BodyComparison",
+      "script": "mathsecr-paper-builder-kit/scripts/test_body_comparison_contract.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/body-comparison/synthetic_selection_test_support.ps1",
+        "mathsecr-paper-builder-kit/test-fixtures/state-machine/cases.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "The original synthetic support and state cases are absent; no replacement oracle is claimed.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "BodyExactBenchmark",
+      "script": "mathsecr-paper-builder-kit/scripts/test_body_exact_benchmark.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/docs",
+        "mathsecr-paper-builder-kit/test-fixtures/evaluation/ground-truth-claims.json",
+        ".omo/evidence"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Private body-exact corpus and independent evidence are deliberately withheld.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "DbInference",
+      "script": "mathsecr-paper-builder-kit/scripts/test_db_inference.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/db-inference/cases.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Original inference cases are absent; publication status is unconfirmed.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "FailedProblemReport",
+      "script": "mathsecr-paper-builder-kit/scripts/test_failed_problem_report.ps1",
+      "grade": "public",
+      "requiredPaths": [],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Creates local synthetic PNG/PDF inputs under an owned system-temp directory.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "FailedProblemReport PASS"
+    },
+    {
+      "id": "GroundTruth",
+      "script": "mathsecr-paper-builder-kit/scripts/test_ground_truth_contract.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/evaluation/ground-truth-claims.json",
+        "mathsecr-paper-builder-kit/test-fixtures/docs",
+        "mathsecr-paper-builder-kit/test-fixtures/pdf-pages"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Original registry, corpus and independent oracle artifacts are withheld.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "IdleSearchCharacterization",
+      "script": "mathsecr-paper-builder-kit/scripts/test_idle_search_characterization.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/search-characterization/idle-first-query-2026-07-31.json",
+        ".omo/evidence/mathsecr_idle_search_characterization_2026-07-31.md"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Dated service characterization and its original evidence are withheld.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "InstallContract",
+      "script": "mathsecr-paper-builder-kit/scripts/test_install_contract.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/lessons/re0-memo-registry.json",
+        "mathsecr-paper-builder-kit/test-fixtures/evaluation/ground-truth-claims.json",
+        "mathsecr-paper-builder-kit/test-fixtures/pdf-segmentation",
+        "mathsecr-paper-builder-kit/test-fixtures/docs",
+        ".omo/evidence"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "The full installer bundle, rendered corpus and canonical evidence are absent.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "PartialSavePhases",
+      "script": "mathsecr-paper-builder-kit/scripts/test_partial_save_phases.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/body-comparison/synthetic_selection_test_support.ps1",
+        "mathsecr-paper-builder-kit/test-fixtures/state-machine/cases.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "The original support and state cases are absent.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "PdfSegmentation",
+      "script": "mathsecr-paper-builder-kit/scripts/test_pdf_segmentation.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/pdf-segmentation/segmentation-corpus-2026-07-31.json",
+        "mathsecr-paper-builder-kit/test-fixtures/pdf-segmentation/rendered-pages"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Original exam segmentation manifest and rendered pages are intentionally excluded.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "PrepareSelectionEvidence",
+      "script": "mathsecr-paper-builder-kit/scripts/test_prepare_selection_evidence.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/body-comparison/synthetic_selection_test_support.ps1"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "The original synthetic support file is absent; publication status is unconfirmed.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "ProductionValidation",
+      "script": "mathsecr-paper-builder-kit/scripts/test_production_validation.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/body-comparison/synthetic_selection_test_support.ps1",
+        "mathsecr-paper-builder-kit/test-fixtures/production-validation/source-roster.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Roster is public, but the original synthetic observation helper is absent.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "Re0Memo",
+      "script": "mathsecr-paper-builder-kit/scripts/test_re0_memo.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/lessons/re0-memo-registry.json",
+        "mathsecr-paper-builder-kit/test-fixtures/evaluation/ground-truth-claims.json",
+        "mathsecr-paper-builder-kit/test-fixtures/docs",
+        ".omo/evidence"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Original lesson registry, evaluator fixtures and private evidence are withheld.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "RegressionEvidence",
+      "script": "mathsecr-paper-builder-kit/scripts/test_regression_evidence_contract.ps1",
+      "grade": "public",
+      "requiredPaths": [],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Creates its own synthetic registry, installer, evidence and corrupt cases in system temp.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "RegressionEvidence PASS"
+    },
+    {
+      "id": "ReportLint",
+      "script": "mathsecr-paper-builder-kit/scripts/test_report_lint.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/search-attempts/goguk2-mid-q2.json",
+        "mathsecr-paper-builder-kit/test-fixtures/body-comparison/synthetic_selection_test_support.ps1"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Original search fixture and synthetic selection support are absent.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "SearchAttempt",
+      "script": "mathsecr-paper-builder-kit/scripts/test_search_attempt_contract.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/search-attempts/goguk2-mid-q2.json",
+        "mathsecr-paper-builder-kit/test-fixtures/body-comparison/synthetic_selection_test_support.ps1"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Original search-attempt cases and support are absent.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "SearchCharacterization",
+      "script": "mathsecr-paper-builder-kit/scripts/test_search_characterization.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/search-characterization/phrase-stability-2026-07-31.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Dated service observations are absent; they cannot be reconstructed as current evidence.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "SearchObservationContract",
+      "script": "mathsecr-paper-builder-kit/scripts/test_search_observation.ps1",
+      "grade": "public",
+      "requiredPaths": [],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "Contract"
+      },
+      "reason": "All receipt schema/freshness/replay negative cases are generated in the test.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "PASS Search Observation Contract"
+    },
+    {
+      "id": "SearchObservationCollector",
+      "script": "mathsecr-paper-builder-kit/scripts/test_search_observation.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/search-observation/collector_dom_test.js",
+        "mathsecr-paper-builder-kit/test-fixtures/search-observation/simulator-adapter.json",
+        "mathsecr-paper-builder-kit/test-fixtures/iab-simulator/index.html"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "Collector"
+      },
+      "reason": "Isolated headless local simulator; HTTP(S) requests are aborted. Requires Node, Playwright and Edge/Chrome.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "PASS Search Observation Collector Packet"
+    },
+    {
+      "id": "SearchObservationCuaRestricted",
+      "script": "mathsecr-paper-builder-kit/scripts/test_search_observation.ps1",
+      "grade": "public",
+      "requiredPaths": [],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "CuaRestricted"
+      },
+      "reason": "Node VM uses a synthetic restricted DOM and date clock; no browser account or live service.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "PASS Search Observation CUA Restricted Packet"
+    },
+    {
+      "id": "SearchQueryPlan",
+      "script": "mathsecr-paper-builder-kit/scripts/test_search_query_plan.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/search-query-plan/source-order-input.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "The supplied source-order fixture is synthetic and public.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "SearchQueryPlan PASS"
+    },
+    {
+      "id": "SelectionJournal",
+      "script": "mathsecr-paper-builder-kit/scripts/test_selection_journal.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/selection-journal/cases.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Public synthetic journal cases include real temp file round trips and corrupt-tail rejection.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "SelectionJournal PASS"
+    },
+    {
+      "id": "StateMachine",
+      "script": "mathsecr-paper-builder-kit/scripts/test_state_machine.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/body-comparison/synthetic_selection_test_support.ps1",
+        "mathsecr-paper-builder-kit/test-fixtures/state-machine/cases.json",
+        "mathsecr-paper-builder-kit/test-fixtures/db-inference/cases.json",
+        "mathsecr-paper-builder-kit/test-fixtures/search-attempts/goguk2-mid-q2.json",
+        "mathsecr-paper-builder-kit/test-fixtures/pdf-pages"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Original synthetic support/state cases and artifact-bound corpus are absent.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "YearRangeSerializerGuard",
+      "script": "mathsecr-paper-builder-kit/scripts/test_year_range_serialization_baseline.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/year-range-serialization/bundle-observation.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Checks the published dated serializer fragment and claim limits; original service bundle is optional and not loaded.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "YearRangeSerializerGuard PASS"
+    },
+    {
+      "id": "YearRangeLocalAdapter",
+      "script": "mathsecr-paper-builder-kit/scripts/test_year_range_serialization_contract.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/year-range-serialization/cases.json",
+        "mathsecr-paper-builder-kit/test-fixtures/year-range-serialization/bundle-observation.json"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Case": "All"
+      },
+      "reason": "Public conservative local adapter plus corrupt provenance rejection; includes PS5.1 child CLI cases.",
+      "publicationStatus": "public-synthetic-or-dated-contract",
+      "passPattern": "YearRangeLocalAdapter PASS"
+    },
+    {
+      "id": "FullDocumentValidator",
+      "script": "mathsecr-paper-builder-kit/scripts/validate_mathsecr_docs.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "AGENTS.md",
+        "mathsecr-paper-builder-kit/test-fixtures/lessons",
+        "mathsecr-paper-builder-kit/test-fixtures/evaluation",
+        "mathsecr-paper-builder-kit/test-fixtures/docs",
+        ".omo/evidence"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}",
+        "Scenario": "All"
+      },
+      "reason": "Full installed canonical mirrors, evidence and registries are absent; public packaging has its own unchanged validator.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "FullKitCheck",
+      "script": "mathsecr-paper-builder-kit/scripts/check.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "AGENTS.md",
+        "mathsecr-paper-builder-kit/test-fixtures/lessons",
+        "mathsecr-paper-builder-kit/test-fixtures/evaluation",
+        "mathsecr-paper-builder-kit/test-fixtures/docs",
+        ".omo/evidence"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Full installed skill mirrors, original fixture bundle and canonical evidence are absent.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "OriginalFixtureGeneration",
+      "script": "mathsecr-paper-builder-kit/scripts/new_test_fixtures.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/pdf-pages/goguk2-print2",
+        "mathsecr-paper-builder-kit/test-fixtures/pdf-pages/baekyang2-geometry-print1"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Despite the legacy gate name, this generator assembles PDFs from withheld original page renders.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "BodyExactCorpusVerifier",
+      "script": "mathsecr-paper-builder-kit/scripts/verify_body_exact_benchmark.ps1",
+      "grade": "private-bundle",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/docs",
+        "mathsecr-paper-builder-kit/test-fixtures/evaluation/ground-truth-claims.json",
+        ".omo/evidence"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Private blinded/gold corpus and independent evidence are deliberately excluded.",
+      "publicationStatus": "withheld-or-unconfirmed"
+    },
+    {
+      "id": "OfflineRunner",
+      "script": "scripts/test_offline_runner.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "scripts/perf/append_history_support.ps1",
+        "scripts/perf/measure_after_reload.ps1"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "New Phase 0 synthetic harness; inputs are generated only under system temp, with no private fixture provenance claim.",
+      "publicationStatus": "public-new-synthetic",
+      "passPattern": "OfflineRunner PASS"
+    },
+    {
+      "id": "AppendHistoryFixture",
+      "script": "scripts/test_append_history_fixture.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "scripts/perf/append_history_support.ps1",
+        "scripts/perf/measure_after_reload.ps1"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "New Phase 0 synthetic harness; inputs are generated only under system temp, with no private fixture provenance claim.",
+      "publicationStatus": "public-new-synthetic",
+      "passPattern": "AppendHistoryFixture PASS"
+    }
+  ]
+}

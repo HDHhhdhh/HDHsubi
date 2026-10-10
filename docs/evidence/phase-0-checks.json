@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-10 22:18:32 UTC",
+  "scope": "Phase 0 local public checks",
+  "liveProductBehavior": false,
+  "publication": {
+    "command": "python ./scripts/validate_publication.py",
+    "status": "PASS",
+    "archivedSnapshotFiles": 72,
+    "hashDrift": 0
+  },
+  "publicChecks": {
+    "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_public_checks.ps1",
+    "status": "PASS"
+  },
+  "offlineRegression": {
+    "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_offline_regression.ps1",
+    "status": "PASS",
+    "passed": 11,
+    "failed": 0,
+    "skipped": 20,
+    "privateBundleTestsExecuted": false
+  },
+  "performance": {
+    "command": "pwsh -NoProfile -File ./scripts/perf/write_perf_baseline.ps1 -Repeat 3",
+    "status": "PASS",
+    "problemCount": 15,
+    "historyDepths": [
+      1,
+      2,
+      6
+    ],
+    "repeatsPerDepth": 3,
+    "stateMachineCalls": [
+      4,
+      9,
+      49
+    ],
+    "phase0FormulaMatches": true
+  },
+  "syntax": {
+    "status": "PASS",
+    "scope": "Phase 0 PowerShell scripts"
+  },
+  "ciEvidence": "Use the GitHub Actions run for this PR commit; local checks do not establish CI success.",
+  "ciPortabilityRecheck": {
+    "status": "PASS",
+    "publicGatesRechecked": [
+      "YearRangeSerializerGuard",
+      "YearRangeLocalAdapter",
+      "AppendHistoryFixture"
+    ],
+    "pythonUtf8": true,
+    "assertionsPreserved": true,
+    "isoTimestampOffsetPreserved": true
+  },
+  "sourceProvenance": "All 72 archived sourceSha256 values were preserved. Two year-test readers now preserve ISO timestamp strings; their export hashes, byte sizes and transformations are declared in SOURCE_SNAPSHOT. Assertions, fixtures and production code are unchanged. New Phase 0 artifacts are newly authored synthetic tests, not recovered private fixture exports."
+}

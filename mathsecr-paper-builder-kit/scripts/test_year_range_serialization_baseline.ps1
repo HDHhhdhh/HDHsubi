@@ -6,6 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
+. (Join-Path $PSScriptRoot 'read_contract_json.ps1')
 
 function Assert-Equal {
   param($Actual, $Expected, [string]$Message)
@@ -24,7 +25,7 @@ $fixturePath = if ($FixturePath) {
 } else {
   Join-Path $ProjectRoot "mathsecr-paper-builder-kit\test-fixtures\year-range-serialization\bundle-observation.json"
 }
-$fixture = Get-Content -LiteralPath $fixturePath -Raw -Encoding UTF8 | ConvertFrom-Json
+$fixture = ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $fixturePath -Raw -Encoding UTF8)
 $provenance = $fixture.provenance
 $claimScope = $fixture.claimScope
 $observed = $fixture.observedSerialization

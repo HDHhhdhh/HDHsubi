@@ -1,0 +1,39 @@
+name: Offline regression
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-regression:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install offline test dependencies
+        shell: pwsh
+        run: |
+          python -m pip install Pillow reportlab pypdf
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm install --prefix "$env:RUNNER_TEMP/mathsecr-dom" playwright@1.62.1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Validate public source publication
+        run: python ./scripts/validate_publication.py
+      - name: Run original public checks
+        shell: pwsh
+        run: ./scripts/run_public_checks.ps1
+      - name: Run offline regression
+        shell: pwsh
+        run: |
+          $module = Join-Path $env:RUNNER_TEMP 'mathsecr-dom/node_modules/playwright'
+          $browser = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft/Edge/Application/msedge.exe'
+          ./scripts/run_offline_regression.ps1 -PlaywrightModule $module -BrowserPath $browser

@@ -2,7 +2,7 @@
 
 ## 시작 조건
 
-사용자가 Issue #1에서 결정 D1을 승인한 뒤에만 시작한다. 승인이 없으면 이 Phase를 시작하지 않는다.
+사용자가 Issue #2에서 결정 D1을 승인한 뒤에만 시작한다. 승인이 없으면 이 Phase를 시작하지 않는다.
 
 ## 목표
 
@@ -59,7 +59,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./mathsecr-paper-builder-kit/scrip
 ```
 
 - 네 surface 양성, 세 가지 음성이 모두 기대대로다.
-- `validate_mathsecr_docs.ps1 -Scenario All`은 비공개 bundle이 필요하다. 사용자가 로컬에서 실행하고 결과를 Issue #1에 남긴다. PR 본문에 이 사실을 쓴다.
+- `validate_mathsecr_docs.ps1 -Scenario All`은 비공개 bundle이 필요하다. 사용자가 로컬에서 실행하고 결과를 Issue #2에 남긴다. PR 본문에 이 사실을 쓴다.
 - CI가 녹색이다.
 
 ## PR

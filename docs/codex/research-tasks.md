@@ -58,4 +58,4 @@ Claude가 2026-10-11에 확인한 공개 정보는 다음과 같다. 조사의 �
 
 ## 결과 전달
 
-각 결과는 PR로 올린다. 브랜치 `codex/research-r1` 등. Issue #1에 링크를 남긴다. 코드와 fixture 변경은 R2의 JSON만 허용한다.
+각 결과는 PR로 올린다. 브랜치 `codex/research-r1` 등. Issue #2에 링크를 남긴다. 코드와 fixture 변경은 R2의 JSON만 허용한다.

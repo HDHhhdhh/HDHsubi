@@ -1,6 +1,6 @@
 # 협업 규칙 · Claude와 Codex
 
-이 저장소는 GitHub으로 협업한다. 허브는 Issue #1이다.
+이 저장소는 GitHub으로 협업한다. 허브는 Issue #2이다.
 
 ## 역할
 
@@ -41,7 +41,7 @@ flowchart LR
 
 ## Codex 작업 시작 방법
 
-1. Issue #1에서 현재 Phase를 확인한다.
+1. Issue #2에서 현재 Phase를 확인한다.
 2. `docs/codex/phase-N.md`를 읽는다. 그 내용을 Codex 프롬프트로 넣는다.
 3. 새 스레드 하나에서 한 Phase를 끝낸다.
-4. PR을 올리고 Issue #1에 링크를 남긴다.
+4. PR을 올리고 Issue #2에 링크를 남긴다.

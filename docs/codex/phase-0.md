@@ -23,7 +23,7 @@
 
 ## 작업
 
-1. 각 테스트 스크립트가 필요로 하는 fixture 경로를 표로 만든다. 열은 `테스트`, `필요 경로`, `공개 가능 여부`, `등급(public|private-bundle)`이다. 표를 `docs/evidence/regression-inventory.md`에 저장한다. 공개 가능 여부가 불명확하면 Issue #1에 질문한다.
+1. 각 테스트 스크립트가 필요로 하는 fixture 경로를 표로 만든다. 열은 `테스트`, `필요 경로`, `공개 가능 여부`, `등급(public|private-bundle)`이다. 표를 `docs/evidence/regression-inventory.md`에 저장한다. 공개 가능 여부가 불명확하면 Issue #2에 질문한다.
 2. 사용자가 제공한 합성 파일을 추가한다. 추가한 파일은 `SOURCE_SNAPSHOT.json`의 규칙에 맞게 처리한다. 해시 기록이 필요하면 `validate_publication.py`가 PASS하도록 갱신한다.
 3. `scripts/run_offline_regression.ps1`를 만든다. `public` 등급만 실행한다. 각 gate의 PASS/FAIL과 시간을 JSON 한 줄로 출력한다. 하나라도 FAIL이면 종료 코드 1이다. 기존 `run_mathsecr_regression.ps1`는 수정하지 않는다.
 4. `.github/workflows/offline-regression.yaml`을 만든다. runner는 `windows-latest`다. 단계는 Python 설치, `pip install Pillow reportlab pypdf`, `validate_publication.py`, `run_public_checks.ps1`, `run_offline_regression.ps1`이다. 확장자는 반드시 `.yaml`이다. `.yml`은 publication 검사가 거부한다. `validate_publication.py`의 `FORBIDDEN_PARTS`나 루트 규칙이 `.github` 폴더를 막으면 그 규칙에 `.github`을 허용하는 최소 변경을 한다.

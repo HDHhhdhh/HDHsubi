@@ -45,7 +45,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./mathsecr-paper-builder-kit/scrip
 
 - 회귀와 CI가 두 PowerShell에서 녹색이다.
 - PR 본문에 세션 시작 읽기 분량(줄 수) 전후가 있다. 목표는 537줄에서 160줄 이하다.
-- `validate_mathsecr_docs.ps1 -Scenario All`은 사용자가 비공개 bundle에서 실행하고 결과를 Issue #1에 남긴다.
+- `validate_mathsecr_docs.ps1 -Scenario All`은 사용자가 비공개 bundle에서 실행하고 결과를 Issue #2에 남긴다.
 
 ## PR
 

@@ -34,6 +34,7 @@ Python 3과 PowerShell 7을 준비한다. 서비스 로그인과 브라우저는
 ```powershell
 python ./scripts/validate_publication.py
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_public_checks.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_offline_regression.ps1
 ```
 
 검사 범위는 다음과 같다.
@@ -43,8 +44,13 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_public_checks.ps1
 | publication validator | 새 문서의 로컬 링크, JSON 형식, public allowlist, 복사 해시, 실제 개인 경로·키·토큰·금지 확장자 |
 | Selection Journal All | 요청·재시도·ACK·재개, 실파일 왕복, 중복과 손상 입력 거부 |
 | Search Query Plan | 원본 순서, literal 단서, 원본 위치, 입력 shape의 허용·거부 |
+| Phase 0 public offline regression | 11개 공개 gate: 연도 계약, 관측/collector, 회귀 receipt, PDF 생성, 저널, 검색어, 새 이력 fixture·runner 검증 |
 
 이들은 공개 packaging과 독립 가능한 지역 계약의 검사다. 전체 production 회귀, 브라우저 연결, 저장, 수학적 정답을 증명하지 않는다. 기존 전체 검사 PASS 기록을 새로 실행한 것처럼 표시하지 않는다.
+
+Phase 0은 원래 full runner를 수정하지 않고 별도 public runner와 Windows CI를 추가했다. [회귀 inventory](evidence/regression-inventory.md)에 필요한 경로와 공개 가능 여부를 기록했다. 공개되지 않은 20개 gate는 SKIP이며, public gate의 입력이 없으면 FAIL이다. 누락된 원래 helper 또는 oracle을 합성 자료로 대체하지 않았다.
+
+새 성능 입력은 OS 임시 폴더에서 생성하고 검증한다. 생성한 PNG, PDF, session과 실행 artifact는 커밋하지 않는다. 공개 계약을 만족시키기 위한 합성 시각과 판정은 실제 관측이나 본문 정답의 증거가 아니다. 수치와 실행 명령은 [Phase 0 성능 기준선](evidence/phase-0.md)에 있다.
 
 ## 실제 제작에 필요한 것
 

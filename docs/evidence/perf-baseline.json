@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-10-10T22:08:41.1060736+00:00",
+  "truthScope": "offline-contract",
+  "liveProductBehavior": false,
+  "fixtureProvenance": "new Phase 0 synthetic inputs from public contracts; private fixture bundle not used",
+  "environment": {
+    "os": "Microsoft Windows NT 10.0.26200.0",
+    "powerShell": "7.6.5",
+    "cpu": [
+      "Intel(R) Core(TM) Ultra 9 285K"
+    ],
+    "storage": {
+      "fileSystem": "NTFS",
+      "physicalDisks": [
+        {
+          "FriendlyName": "WD_BLACK SN850X 2000GB",
+          "MediaType": "SSD",
+          "BusType": "NVMe"
+        },
+        {
+          "FriendlyName": "ST8000DM004-2U9188",
+          "MediaType": "HDD",
+          "BusType": "SATA"
+        }
+      ],
+      "diskModelObservation": "observed"
+    }
+  },
+  "contractSha256": {
+    "production_validation.ps1": "05bc6d9932213ece96fd84129e185671e86e089d3d215f11d3103a9e9937de15",
+    "state_machine.ps1": "09b2be660ea37b222db2f4200d782da36dadc6bf02dd80a859d0f06684bb92ff",
+    "read_contract_json.ps1": "60b40be0c4fd957bde00f96f41ee8e89fd6311d2e4739890783cb5d8dfafbd31"
+  },
+  "measurements": [
+    {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "truthScope": "offline-contract",
+      "liveProductBehavior": false,
+      "problemCount": 15,
+      "historyDepth": 1,
+      "repeat": 3,
+      "timingScope": "warmed module, function proxies, AfterReload only; fixture generation and cleanup excluded",
+      "proxyInstrumentationIncludedInElapsedTime": true,
+      "expectedPhase0StateMachineCalls": 4,
+      "phase0FormulaMatches": true,
+      "median": {
+        "elapsedMs": 1429.8489,
+        "calls": {
+          "Invoke-MathSecrStateMachine": 4,
+          "Get-FileHash": 194,
+          "ConvertFrom-MathSecrContractJson": 25,
+          "Invoke-MathSecrProductionStep": 2
+        }
+      },
+      "samples": [
+        {
+          "repeat": 1,
+          "elapsedMs": 1438.9699,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 4,
+            "Get-FileHash": 194,
+            "ConvertFrom-MathSecrContractJson": 25,
+            "Invoke-MathSecrProductionStep": 2
+          },
+          "status": "PASS"
+        },
+        {
+          "repeat": 2,
+          "elapsedMs": 1429.8489,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 4,
+            "Get-FileHash": 194,
+            "ConvertFrom-MathSecrContractJson": 25,
+            "Invoke-MathSecrProductionStep": 2
+          },
+          "status": "PASS"
+        },
+        {
+          "repeat": 3,
+          "elapsedMs": 1213.9507,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 4,
+            "Get-FileHash": 194,
+            "ConvertFrom-MathSecrContractJson": 25,
+            "Invoke-MathSecrProductionStep": 2
+          },
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "truthScope": "offline-contract",
+      "liveProductBehavior": false,
+      "problemCount": 15,
+      "historyDepth": 2,
+      "repeat": 3,
+      "timingScope": "warmed module, function proxies, AfterReload only; fixture generation and cleanup excluded",
+      "proxyInstrumentationIncludedInElapsedTime": true,
+      "expectedPhase0StateMachineCalls": 9,
+      "phase0FormulaMatches": true,
+      "median": {
+        "elapsedMs": 2015.7243,
+        "calls": {
+          "Invoke-MathSecrStateMachine": 9,
+          "Get-FileHash": 425,
+          "ConvertFrom-MathSecrContractJson": 68,
+          "Invoke-MathSecrProductionStep": 3
+        }
+      },
+      "samples": [
+        {
+          "repeat": 1,
+          "elapsedMs": 2015.7243,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 9,
+            "Get-FileHash": 425,
+            "ConvertFrom-MathSecrContractJson": 68,
+            "Invoke-MathSecrProductionStep": 3
+          },
+          "status": "PASS"
+        },
+        {
+          "repeat": 2,
+          "elapsedMs": 2029.9631,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 9,
+            "Get-FileHash": 425,
+            "ConvertFrom-MathSecrContractJson": 68,
+            "Invoke-MathSecrProductionStep": 3
+          },
+          "status": "PASS"
+        },
+        {
+          "repeat": 3,
+          "elapsedMs": 1969.343,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 9,
+            "Get-FileHash": 425,
+            "ConvertFrom-MathSecrContractJson": 68,
+            "Invoke-MathSecrProductionStep": 3
+          },
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "status": "PASS",
+      "truthScope": "offline-contract",
+      "liveProductBehavior": false,
+      "problemCount": 15,
+      "historyDepth": 6,
+      "repeat": 3,
+      "timingScope": "warmed module, function proxies, AfterReload only; fixture generation and cleanup excluded",
+      "proxyInstrumentationIncludedInElapsedTime": true,
+      "expectedPhase0StateMachineCalls": 49,
+      "phase0FormulaMatches": true,
+      "median": {
+        "elapsedMs": 8664.3042,
+        "calls": {
+          "Invoke-MathSecrStateMachine": 49,
+          "Get-FileHash": 2049,
+          "ConvertFrom-MathSecrContractJson": 440,
+          "Invoke-MathSecrProductionStep": 7
+        }
+      },
+      "samples": [
+        {
+          "repeat": 1,
+          "elapsedMs": 8815.1559,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 49,
+            "Get-FileHash": 2049,
+            "ConvertFrom-MathSecrContractJson": 440,
+            "Invoke-MathSecrProductionStep": 7
+          },
+          "status": "PASS"
+        },
+        {
+          "repeat": 2,
+          "elapsedMs": 8581.4271,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 49,
+            "Get-FileHash": 2049,
+            "ConvertFrom-MathSecrContractJson": 440,
+            "Invoke-MathSecrProductionStep": 7
+          },
+          "status": "PASS"
+        },
+        {
+          "repeat": 3,
+          "elapsedMs": 8664.3042,
+          "calls": {
+            "Invoke-MathSecrStateMachine": 49,
+            "Get-FileHash": 2049,
+            "ConvertFrom-MathSecrContractJson": 440,
+            "Invoke-MathSecrProductionStep": 7
+          },
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "comparisonLimit": "Synthetic inputs and proxy overhead differ from the single historical live 113.83 s observation."
+}

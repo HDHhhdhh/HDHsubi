@@ -18,6 +18,8 @@
 | [최적화·리팩터링 계획](docs/refactor-plan.md) | 진단, Phase 0~5, 완료 기준, 사용자 결정 항목 (2026-10-11) |
 | [Codex 작업 지시서](docs/codex/README.md) | Phase별 구현 프롬프트와 연구 과제 |
 | [협업 규칙](docs/collaboration.md) | Claude·Codex·사용자 역할, 브랜치·PR 규칙 |
+| [Phase 0 회귀 inventory](docs/evidence/regression-inventory.md) | public 11개와 private-bundle 20개의 실행 범위 |
+| [Phase 0 성능 기준선](docs/evidence/phase-0.md) | 합성 입력, 재현 명령, 계측 수치와 한계 |
 
 ## 제작 흐름
 
@@ -52,8 +54,11 @@ Python 3와 PowerShell 7이 있는 Windows에서 실행한다.
 ```powershell
 python ./scripts/validate_publication.py
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_public_checks.ps1
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_offline_regression.ps1
 ```
 
 첫 명령은 공개 문서의 링크, 파일 목록, 복사 해시와 공개 금지 자료를 확인한다. 둘째 명령은 공개본에 포함한 합성 자료로 선택 저널과 검색어 준비를 검사한다. 실제 수학비서 연결·검색·저장을 검사하는 명령은 아니다.
+
+셋째 명령은 공개 gate 11개를 실행하고, 원래 bundle이 필요한 20개는 이유를 포함한 SKIP으로 표시한다. Python의 Pillow/reportlab/pypdf, Node, Playwright와 Edge/Chrome이 필요하다. 설정과 실행 범위는 [회귀 inventory](docs/evidence/regression-inventory.md)를 따른다. CI는 필요한 의존성을 설치한다.
 
 외부 서비스의 로그인과 문제 DB 접근 권한은 사용자가 준비한다. `출제하기`는 사용자가 별도로 지시하기 전에는 누르지 않는다.

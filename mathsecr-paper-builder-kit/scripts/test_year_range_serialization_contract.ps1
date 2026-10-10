@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"
 $ProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
 
 . (Join-Path $PSScriptRoot "year_range_serialization.ps1")
+. (Join-Path $PSScriptRoot 'read_contract_json.ps1')
 
 function Assert-Equal {
   param($Actual, $Expected, [string]$Message)
@@ -48,7 +49,7 @@ function Assert-BaselineRejects {
   )
 
   $sourceFixture = Join-Path $ProjectRoot "mathsecr-paper-builder-kit\test-fixtures\year-range-serialization\bundle-observation.json"
-  $fixture = Get-Content -LiteralPath $sourceFixture -Raw -Encoding UTF8 | ConvertFrom-Json
+  $fixture = ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $sourceFixture -Raw -Encoding UTF8)
   & $Mutate $fixture
   $tempFixture = Join-Path $TempDirectory "$Name.json"
   $fixture | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $tempFixture -Encoding UTF8

@@ -43,5 +43,16 @@
     "scope": "Phase 0 PowerShell scripts"
   },
   "ciEvidence": "Use the GitHub Actions run for this PR commit; local checks do not establish CI success.",
-  "sourceProvenance": "Archived SOURCE_SNAPSHOT records were preserved. New Phase 0 artifacts are newly authored synthetic tests, not recovered private fixture exports."
+  "ciPortabilityRecheck": {
+    "status": "PASS",
+    "publicGatesRechecked": [
+      "YearRangeSerializerGuard",
+      "YearRangeLocalAdapter",
+      "AppendHistoryFixture"
+    ],
+    "pythonUtf8": true,
+    "assertionsPreserved": true,
+    "isoTimestampOffsetPreserved": true
+  },
+  "sourceProvenance": "All 72 archived sourceSha256 values were preserved. Two year-test readers now preserve ISO timestamp strings; their export hashes, byte sizes and transformations are declared in SOURCE_SNAPSHOT. Assertions, fixtures and production code are unchanged. New Phase 0 artifacts are newly authored synthetic tests, not recovered private fixture exports."
 }

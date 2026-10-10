@@ -11,6 +11,8 @@
 
 테스트 코드 한 곳의 기기 표시명은 합성 이름으로 바꿨다. SOURCE_SNAPSHOT의 transformation에 표시했다. production 실행 구현과 로컬 canonical 정책은 바꾸지 않았다.
 
+Phase 0에서는 연도 테스트 2개의 JSON reader를 기존 contract reader로 연결했다. PowerShell 버전과 PC 시간대가 달라도 원래 ISO 날짜 문자열과 offset을 보존한다. 단정과 fixture는 그대로 유지했다. 원본 sourceSha256은 보존하고 변경한 export의 해시·크기·transformation만 기록했다.
+
 ## 제외한 내용
 
 원본 PDF/HWPX, 문항 렌더와 크롭, 실제 문제 DB inventory, 개인 문제지 주소, 원시 세션 JSONL, 실제 브라우저 캡처·프로필·인증 자료를 제외했다. 임시 OCR/Python 환경과 개별 문제지용 one-off 스크립트도 제외했다.

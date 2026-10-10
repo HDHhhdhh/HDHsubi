@@ -4,6 +4,8 @@ Phase 0은 기존 production 코드를 바꾸지 않고 공개 회귀 실행기,
 
 로컬 실행 결과는 [phase-0-checks.json](phase-0-checks.json)에 있다. GitHub CI 성공 여부는 해당 PR commit의 Actions 실행에서 따로 확인한다.
 
+첫 Windows CI에서는 날짜 자동 변환과 Python 출력 인코딩 차이로 3개 gate가 실패했다. 연도 테스트 2개를 기존 contract reader에 연결해 관측 시각의 원래 `+09:00` offset을 보존했다. fixture와 단정은 바꾸지 않았다. CI에는 `PYTHONUTF8=1`을 설정해 합성 PDF 검사의 한국어 출력도 UTF-8로 기록한다.
+
 ## 측정 결과
 
 문항 수 N=15, 저장 이력 H=1/2/6에서 각각 3회 측정했다. 원시 반복 값, 중앙값, 환경과 계약 SHA-256은 [perf-baseline.json](perf-baseline.json)에 있다.
@@ -33,6 +35,7 @@ PNG는 서로 다른 색의 합성 16×16 이미지다. 본문 판정, control �
 Python 3.12와 Pillow/reportlab/pypdf, Windows PowerShell 7이 필요하다.
 
 ```powershell
+$env:PYTHONUTF8 = '1'
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('mathsecr-phase0-manual-' + [guid]::NewGuid().ToString('N'))
 pwsh -NoProfile -File ./scripts/perf/new_append_history_fixture.ps1 -ProblemCount 15 -HistoryDepth 6 -OutRoot $fixture
 pwsh -NoProfile -File ./scripts/perf/measure_after_reload.ps1 -ProblemCount 15 -HistoryDepth 6 -Repeat 3

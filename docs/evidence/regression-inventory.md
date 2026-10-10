@@ -51,9 +51,10 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_offline_regression.p
 Python 3.12와 Pillow/reportlab/pypdf, PowerShell 7이 필요하다. YearRangeLocalAdapter는 Windows PowerShell 5.1도 호출한다. CuaRestricted에는 Node가 필요하다. Collector에는 Playwright 1.62.1과 Edge/Chrome 실행 파일이 필요하다. CI는 Node 22와 Playwright를 runner의 임시 폴더에 설치한다. 이 경로는 서비스 로그인 또는 사용자 프로필을 사용하지 않는다.
 
 ```powershell
+$env:PYTHONUTF8 = '1'
 pwsh -NoProfile -File ./scripts/run_offline_regression.ps1 -PlaywrightModule <module-directory> -BrowserPath <browser-executable>
 ```
 
 Collector는 저장소의 local simulator만 열고 HTTP(S) 요청을 중단한다. 이는 재사용 가능한 합성 회귀이며 수학비서의 live 조작이나 browser 가용성 증명이 아니다. 새 AppendHistoryFixture gate는 원래 helper를 복원한 것이 아니라 공개 계약으로 만든 별도 합성 시험이다. 기존 ProductionValidation/StateMachine/PartialSavePhases 전체 suite는 여전히 SKIP이다.
 
-기존 단정, production 계약, full runner, 설치된 skill, AGENTS/SKILL/prompts 및 SOURCE_SNAPSHOT의 원본 복사 기록은 변경하지 않았다. 새 파일은 Phase 0에서 작성한 파일이며 원본 export 파일로 기록하지 않는다.
+기존 단정, production 계약, full runner, 설치된 skill 및 AGENTS/SKILL/prompts는 변경하지 않았다. 연도 테스트 2개는 기존 contract reader로 날짜 문자열의 시간대 정보를 보존한다. SOURCE_SNAPSHOT의 원본 sourceSha256은 보존하고 이 두 export의 해시·크기·transformation을 갱신했다. 새 파일은 Phase 0에서 작성한 파일이며 원본 export 파일로 기록하지 않는다.

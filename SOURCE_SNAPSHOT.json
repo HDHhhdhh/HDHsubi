@@ -393,16 +393,16 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_year_range_serialization_baseline.ps1",
       "sourceSha256": "fa05d98d78c00df0743f3487de0143d5a188c0c78b933bcd880bcff2c0fa76d9",
-      "exportSha256": "fa05d98d78c00df0743f3487de0143d5a188c0c78b933bcd880bcff2c0fa76d9",
-      "bytes": 5019,
-      "transformation": null
+      "exportSha256": "80c5d3866f6a09d4f8a6edb826a873218159e4d898096b023c8a36af2631fcb6",
+      "bytes": 5088,
+      "transformation": "Phase 0: preserve ISO JSON timestamp strings with the existing contract reader; test assertions unchanged."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_year_range_serialization_contract.ps1",
       "sourceSha256": "d34fe7494865bc3aa46ceb24eccee7a3c53bdbfe91428b8c8885a888d7702a47",
-      "exportSha256": "d34fe7494865bc3aa46ceb24eccee7a3c53bdbfe91428b8c8885a888d7702a47",
-      "bytes": 8075,
-      "transformation": null
+      "exportSha256": "8790333f865254353d24ea870a7a37fc9acd95e4fd6956d9d45e2f033123694e",
+      "bytes": 8144,
+      "transformation": "Phase 0: preserve ISO JSON timestamp strings with the existing contract reader; test assertions unchanged."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/validate_mathsecr_docs.ps1",

@@ -71,6 +71,8 @@ flowchart TD
 
 state machine 안의 artifact 해시는 이 표에 넣지 않았다. 실제 횟수는 Phase 0 계측으로 확정한다.
 
+Phase 0 계측 결과(2026-10-11, N=15, 3회 중앙값, `docs/evidence/perf-baseline.json`): state machine 실행은 H=1/2/6에서 4/9/49회로 공식과 일치했다. `Get-FileHash`는 194/425/2,049회였다. state machine 안의 crop·candidate 해시(`state_machine.ps1:422-423`)가 대부분이다. 시간은 1.430/2.016/8.664초였다. 이 값이 Phase 1의 기준선이다.
+
 정책상 과거 PASS 재사용은 금지다. 그러나 **한 호출 안에서** 같은 바이트를 여러 번 검증하는 것은 정책이 요구하지 않는다. 해결은 호출 범위 캐시다. 캐시 key는 (artifact 경로, SHA-256, 단계, 계약 버전)이다. 호출이 끝나면 캐시를 버린다.
 
 ### 3.2 F1·F2 · 제작 흐름 병목
@@ -159,8 +161,9 @@ Phase 1과 Phase 2는 서로 독립이다. 병렬로 진행할 수 있다.
 
 - Phase 0의 N=15, H=1/2/6 입력에서 결과 JSON이 변경 전과 바이트 단위로 같다. 시각 필드는 제외한다.
 - `test_production_validation.ps1`, `test_partial_save_phases.ps1`, `test_state_machine.ps1`의 모든 음성 사례가 계속 거부된다.
-- 계측에서 state machine 호출 수가 H+1이다. `Get-FileHash` 호출 수가 artifact 수 이하다.
-- H=6 총 시간이 기준선 대비 1/5 이하다. 이 목표는 계측 뒤 조정할 수 있다. 조정하면 이유를 PR에 쓴다.
+- 계측에서 state machine 호출 수가 H+1이다. 해시 호출 합계(`Get-FileHash` + `Read-MathSecrArtifactBytes`)가 생성 artifact 수 이하다.
+- H=6 총 시간이 2.2초 이하다. 기준선 8.664초의 1/4이다. Phase 0 계측 뒤 1/5에서 1/4로 조정했다. 이유: H=1→H=6 증가분으로 추정한 state machine 1회 비용이 약 0.15초다. 7회면 약 1.9초다. 달성하지 못하면 실제 비율을 PR에 쓴다.
+- 공개 clone에서 `test_production_validation.ps1`, `test_partial_save_phases.ps1`, `test_state_machine.ps1`은 SKIP이다. 캐시 격리와 음성 사례는 공개 시험 `scripts/test_validation_context.ps1`로 검사한다. D4 자료가 있으면 세 suite도 실행한다.
 - 캐시가 호출 사이에 남지 않는다는 테스트가 있다. 같은 프로세스에서 변조 입력을 두 번째로 넣으면 거부돼야 한다.
 
 금지:

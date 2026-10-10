@@ -161,7 +161,7 @@ Phase 1과 Phase 2는 서로 독립이다. 병렬로 진행할 수 있다.
 
 - Phase 0의 N=15, H=1/2/6 입력에서 결과 JSON이 변경 전과 바이트 단위로 같다. 시각 필드는 제외한다.
 - `test_production_validation.ps1`, `test_partial_save_phases.ps1`, `test_state_machine.ps1`의 모든 음성 사례가 계속 거부된다.
-- 계측에서 state machine 호출 수가 H+1이다. 해시 호출 합계(`Get-FileHash` + `Read-MathSecrArtifactBytes`)가 생성 artifact 수 이하다.
+- 계측에서 state machine 호출 수가 H+1이다. 해시 호출 합계(`Get-FileHash` + `Read-MathSecrArtifactBytes`)가 생성 artifact 수 이하다. 같은 경로는 최대 1회다.
 - H=6 총 시간이 2.2초 이하다. 기준선 8.664초의 1/4이다. Phase 0 계측 뒤 1/5에서 1/4로 조정했다. 이유: H=1→H=6 증가분으로 추정한 state machine 1회 비용이 약 0.15초다. 7회면 약 1.9초다. 달성하지 못하면 실제 비율을 PR에 쓴다.
 - 공개 clone에서 `test_production_validation.ps1`, `test_partial_save_phases.ps1`, `test_state_machine.ps1`은 SKIP이다. 캐시 격리와 음성 사례는 공개 시험 `scripts/test_validation_context.ps1`로 검사한다. D4 자료가 있으면 세 suite도 실행한다.
 - 캐시가 호출 사이에 남지 않는다는 테스트가 있다. 같은 프로세스에서 변조 입력을 두 번째로 넣으면 거부돼야 한다.

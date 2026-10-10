@@ -15,6 +15,9 @@
 | [현재 상태와 다음 작업](docs/status-and-next.md) | 연결 오류와 성능 문제를 해결할 순서 |
 | [근거와 검토 범위](docs/evidence/README.md) | 세션 재검토 방법과 주장의 한계 |
 | [공개본의 범위와 실행](docs/publication.md) | 포함한 코드, 제외한 자료, 실행 가능한 검사 |
+| [최적화·리팩터링 계획](docs/refactor-plan.md) | 진단, Phase 0~5, 완료 기준, 사용자 결정 항목 (2026-10-11) |
+| [Codex 작업 지시서](docs/codex/README.md) | Phase별 구현 프롬프트와 연구 과제 |
+| [협업 규칙](docs/collaboration.md) | Claude·Codex·사용자 역할, 브랜치·PR 규칙 |
 
 ## 제작 흐름
 

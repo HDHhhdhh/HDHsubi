@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "contract": {
+    "format": "utf8-lf-jsonl",
+    "occurrence_identity": "occurrenceKey",
+    "effective_once": true,
+    "default_max_attempts": 3
+  },
+  "cases": [
+    {
+      "name": "AckAfterRetry",
+      "maxAttempts": 3,
+      "events": [
+        { "schemaVersion": 1, "eventId": "req-o1-a1", "eventType": "selection_requested", "occurrenceKey": "o1", "problemId": "p7", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "timeout-o1-a1", "eventType": "selection_timeout", "occurrenceKey": "o1", "problemId": "p7", "attempt": 1, "requestEventId": "req-o1-a1" },
+        { "schemaVersion": 1, "eventId": "retry-o1-a2", "eventType": "selection_retry", "occurrenceKey": "o1", "problemId": "p7", "attempt": 2, "retryOfEventId": "timeout-o1-a1" },
+        { "schemaVersion": 1, "eventId": "req-o1-a2", "eventType": "selection_requested", "occurrenceKey": "o1", "problemId": "p7", "attempt": 2 },
+        { "schemaVersion": 1, "eventId": "ack-o1-a1-late", "eventType": "selection_ack", "occurrenceKey": "o1", "problemId": "p7", "attempt": 1, "requestEventId": "req-o1-a1" },
+        { "schemaVersion": 1, "eventId": "ack-o1-a2-duplicate", "eventType": "selection_ack", "occurrenceKey": "o1", "problemId": "p7", "attempt": 2, "requestEventId": "req-o1-a2" }
+      ],
+      "expected": {
+        "effectiveOccurrenceKeys": [ "o1" ],
+        "effectiveProblemIds": [ "p7" ],
+        "effectiveAttempts": [ 1 ],
+        "ignoredEventCount": 1,
+        "ignoredReasons": [ "ack_after_effective_ack" ],
+        "pendingOccurrenceCount": 0
+      }
+    },
+    {
+      "name": "PostEffectiveEventsIgnored",
+      "maxAttempts": 3,
+      "events": [
+        { "schemaVersion": 1, "eventId": "req-o6-a1", "eventType": "selection_requested", "occurrenceKey": "o6", "problemId": "p10", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "ack-o6-a1", "eventType": "selection_ack", "occurrenceKey": "o6", "problemId": "p10", "attempt": 1, "requestEventId": "req-o6-a1" },
+        { "schemaVersion": 1, "eventId": "timeout-o6-after-ack", "eventType": "selection_timeout", "occurrenceKey": "o6", "problemId": "p10", "attempt": 1, "requestEventId": "req-o6-a1" },
+        { "schemaVersion": 1, "eventId": "retry-o6-after-ack", "eventType": "selection_retry", "occurrenceKey": "o6", "problemId": "p10", "attempt": 2 },
+        { "schemaVersion": 1, "eventId": "req-o6-after-ack", "eventType": "selection_requested", "occurrenceKey": "o6", "problemId": "p10", "attempt": 2 },
+        { "schemaVersion": 1, "eventId": "ack-o6-after-ack", "eventType": "selection_ack", "occurrenceKey": "o6", "problemId": "p10", "attempt": 2, "requestEventId": "req-o6-after-ack" }
+      ],
+      "expected": {
+        "effectiveOccurrenceKeys": [ "o6" ],
+        "effectiveProblemIds": [ "p10" ],
+        "effectiveAttempts": [ 1 ],
+        "ignoredEventCount": 4,
+        "ignoredReasons": [ "timeout_after_effective_ack", "retry_after_effective_ack", "request_after_effective_ack", "ack_after_effective_ack" ],
+        "pendingOccurrenceCount": 0
+      }
+    },
+    {
+      "name": "DuplicateProblemDifferentOccurrences",
+      "maxAttempts": 3,
+      "events": [
+        { "schemaVersion": 1, "eventId": "req-o2-a1", "eventType": "selection_requested", "occurrenceKey": "o2", "problemId": "p7", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "ack-o2-a1", "eventType": "selection_ack", "occurrenceKey": "o2", "problemId": "p7", "attempt": 1, "requestEventId": "req-o2-a1" },
+        { "schemaVersion": 1, "eventId": "req-o3-a1", "eventType": "selection_requested", "occurrenceKey": "o3", "problemId": "p7", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "ack-o3-a1", "eventType": "selection_ack", "occurrenceKey": "o3", "problemId": "p7", "attempt": 1, "requestEventId": "req-o3-a1" }
+      ],
+      "expected": {
+        "effectiveOccurrenceKeys": [ "o2", "o3" ],
+        "effectiveProblemIds": [ "p7", "p7" ],
+        "effectiveAttempts": [ 1, 1 ],
+        "ignoredEventCount": 0,
+        "pendingOccurrenceCount": 0
+      }
+    },
+    {
+      "name": "PostEffectiveProblemMismatch",
+      "maxAttempts": 3,
+      "events": [
+        { "schemaVersion": 1, "eventId": "req-o8-a1", "eventType": "selection_requested", "occurrenceKey": "o8", "problemId": "p12", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "ack-o8-a1", "eventType": "selection_ack", "occurrenceKey": "o8", "problemId": "p12", "attempt": 1, "requestEventId": "req-o8-a1" },
+        { "schemaVersion": 1, "eventId": "ack-o8-wrong-problem", "eventType": "selection_ack", "occurrenceKey": "o8", "problemId": "different-problem", "attempt": 1, "requestEventId": "req-o8-a1" }
+      ],
+      "expected": {
+        "rejected": true,
+        "errorContains": "changed problemId"
+      }
+    },
+    {
+      "name": "CaseSensitiveOccurrenceKeys",
+      "maxAttempts": 3,
+      "events": [
+        { "schemaVersion": 1, "eventId": "req-occ-lower", "eventType": "selection_requested", "occurrenceKey": "occ", "problemId": "p13", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "ack-occ-lower", "eventType": "selection_ack", "occurrenceKey": "occ", "problemId": "p13", "attempt": 1, "requestEventId": "req-occ-lower" },
+        { "schemaVersion": 1, "eventId": "req-occ-upper", "eventType": "selection_requested", "occurrenceKey": "OCC", "problemId": "p13", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "ack-occ-upper", "eventType": "selection_ack", "occurrenceKey": "OCC", "problemId": "p13", "attempt": 1, "requestEventId": "req-occ-upper" }
+      ],
+      "expected": {
+        "effectiveOccurrenceKeys": [ "occ", "OCC" ],
+        "effectiveProblemIds": [ "p13", "p13" ],
+        "effectiveAttempts": [ 1, 1 ],
+        "ignoredEventCount": 0,
+        "pendingOccurrenceCount": 0
+      }
+    },
+    {
+      "name": "CrashResume",
+      "maxAttempts": 3,
+      "prefixEvents": [
+        { "schemaVersion": 1, "eventId": "req-o4-a1", "eventType": "selection_requested", "occurrenceKey": "o4", "problemId": "p8", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "timeout-o4-a1", "eventType": "selection_timeout", "occurrenceKey": "o4", "problemId": "p8", "attempt": 1, "requestEventId": "req-o4-a1" }
+      ],
+      "resumeEvents": [
+        { "schemaVersion": 1, "eventId": "retry-o4-a2", "eventType": "selection_retry", "occurrenceKey": "o4", "problemId": "p8", "attempt": 2, "retryOfEventId": "timeout-o4-a1" },
+        { "schemaVersion": 1, "eventId": "req-o4-a2", "eventType": "selection_requested", "occurrenceKey": "o4", "problemId": "p8", "attempt": 2 },
+        { "schemaVersion": 1, "eventId": "ack-o4-a2", "eventType": "selection_ack", "occurrenceKey": "o4", "problemId": "p8", "attempt": 2, "requestEventId": "req-o4-a2" }
+      ],
+      "expected": {
+        "prefixEffectiveOccurrenceCount": 0,
+        "prefixPendingOccurrenceCount": 1,
+        "effectiveOccurrenceKeys": [ "o4" ],
+        "effectiveProblemIds": [ "p8" ],
+        "effectiveAttempts": [ 2 ],
+        "pendingOccurrenceCount": 0
+      }
+    },
+    {
+      "name": "RetryExhausted",
+      "maxAttempts": 2,
+      "events": [
+        { "schemaVersion": 1, "eventId": "req-o5-a1", "eventType": "selection_requested", "occurrenceKey": "o5", "problemId": "p9", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "timeout-o5-a1", "eventType": "selection_timeout", "occurrenceKey": "o5", "problemId": "p9", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "retry-o5-a2", "eventType": "selection_retry", "occurrenceKey": "o5", "problemId": "p9", "attempt": 2 },
+        { "schemaVersion": 1, "eventId": "req-o5-a2", "eventType": "selection_requested", "occurrenceKey": "o5", "problemId": "p9", "attempt": 2 },
+        { "schemaVersion": 1, "eventId": "timeout-o5-a2", "eventType": "selection_timeout", "occurrenceKey": "o5", "problemId": "p9", "attempt": 2 },
+        { "schemaVersion": 1, "eventId": "retry-o5-a3-red", "eventType": "selection_retry", "occurrenceKey": "o5", "problemId": "p9", "attempt": 3 }
+      ],
+      "expected": {
+        "rejected": true,
+        "errorContains": "MaxAttempts=2"
+      }
+    },
+    {
+      "name": "TimeoutRequestMismatch",
+      "maxAttempts": 3,
+      "events": [
+        { "schemaVersion": 1, "eventId": "req-o7-a1", "eventType": "selection_requested", "occurrenceKey": "o7", "problemId": "p11", "attempt": 1 },
+        { "schemaVersion": 1, "eventId": "timeout-o7-wrong-request", "eventType": "selection_timeout", "occurrenceKey": "o7", "problemId": "p11", "attempt": 1, "requestEventId": "req-not-o7" }
+      ],
+      "expected": {
+        "rejected": true,
+        "errorContains": "timeout attempt 1 references the wrong request event"
+      }
+    },
+    {
+      "name": "SchemaAliasConflict",
+      "redEvent": { "schemaVersion": 1, "schema_version": 999, "eventId": "red-schema-conflict", "eventType": "selection_requested", "occurrenceKey": "red-schema", "problemId": "p14", "attempt": 1 },
+      "expected": {
+        "rejected": true,
+        "errorContains": "schema_version"
+      }
+    },
+    {
+      "name": "EventTypeAliasConflict",
+      "redEvent": { "schemaVersion": 1, "eventId": "red-type-conflict", "eventType": "selection_requested", "type": "selection_ack", "occurrenceKey": "red-type", "problemId": "p15", "attempt": 1 },
+      "expected": {
+        "rejected": true,
+        "errorContains": "type"
+      }
+    },
+    {
+      "name": "SchemaAliasOnly",
+      "redEvent": { "schema_version": 1, "eventId": "red-schema-only", "eventType": "selection_requested", "occurrenceKey": "red-schema-only", "problemId": "p16", "attempt": 1 },
+      "expected": {
+        "rejected": true,
+        "errorContains": "schemaVersion is required"
+      }
+    },
+    {
+      "name": "EventTypeAliasOnly",
+      "redEvent": { "schemaVersion": 1, "eventId": "red-type-only", "type": "selection_requested", "occurrenceKey": "red-type-only", "problemId": "p17", "attempt": 1 },
+      "expected": {
+        "rejected": true,
+        "errorContains": "eventType is required"
+      }
+    },
+    {
+      "name": "PropertyCasingAlias",
+      "redEvent": { "SchemaVersion": 1, "eventId": "red-schema-casing", "eventType": "selection_requested", "occurrenceKey": "red-schema-casing", "problemId": "p18", "attempt": 1 },
+      "expected": {
+        "rejected": true,
+        "errorContains": "schemaVersion is required"
+      }
+    }
+  ]
+}

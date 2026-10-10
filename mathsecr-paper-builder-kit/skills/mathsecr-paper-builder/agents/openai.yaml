@@ -1,0 +1,4 @@
+interface:
+  display_name: "MathSecr Paper Builder"
+  short_description: "수학비서 문제지를 PDF/HWPX 원본 순서대로 재구성"
+  default_prompt: "수학비서에서 이 PDF/HWPX 문제들을 원본 순서대로 찾아 문제지로 만들어줘. 출제하기 전까지만 진행해."

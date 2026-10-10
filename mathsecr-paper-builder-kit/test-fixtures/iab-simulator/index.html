@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MathSecr iab simulator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, "Malgun Gothic", sans-serif;
+      background: #f6f7f9;
+      color: #1d232a;
+    }
+    body {
+      margin: 0;
+      padding: 24px;
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    header, section {
+      background: #fff;
+      border: 1px solid #d6dae0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    h1, h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+    h2 {
+      font-size: 16px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .source-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border: 1px solid #c9d1dc;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .source-row input {
+      width: 0;
+      height: 0;
+      opacity: 0;
+      position: absolute;
+    }
+    .visible-box {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #4d6075;
+      border-radius: 4px;
+      display: inline-grid;
+      place-items: center;
+      font-weight: 700;
+      color: #fff;
+      background: #fff;
+    }
+    .source-row[data-selected="true"] .visible-box {
+      background: #216869;
+      border-color: #216869;
+    }
+    .source-row[data-selected="true"] .visible-box::after {
+      content: "✓";
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: #e8f1ef;
+      color: #164b4c;
+      font-size: 13px;
+      border: 1px solid #b9d4ce;
+    }
+    input[type="text"] {
+      height: 34px;
+      border: 1px solid #b8c0ca;
+      border-radius: 6px;
+      padding: 0 10px;
+      min-width: 160px;
+    }
+    button {
+      height: 34px;
+      border: 1px solid #516074;
+      border-radius: 6px;
+      background: #2f4d5c;
+      color: #fff;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #fff;
+      color: #2d3d4f;
+    }
+    button.danger {
+      border-color: #9e2a2b;
+      background: #9e2a2b;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 8px;
+    }
+    .card {
+      border: 1px solid #d1d7df;
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfcfd;
+    }
+    .status {
+      min-height: 40px;
+      white-space: pre-wrap;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      background: #1f252d;
+      color: #e9eef3;
+      border-radius: 6px;
+      padding: 10px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>MathSecr iab simulator</h1>
+      <div class="row">
+        <span id="modeChip" class="chip" data-testid="mode-chip"></span>
+        <span id="selectedChip" class="chip" data-testid="selected-source-chip">출처 미선택</span>
+        <span id="resultCount" class="chip" data-testid="result-count">검색결과 : 0개</span>
+      </div>
+    </header>
+
+    <section>
+      <h2>Source Selector</h2>
+      <label id="educationSourceLabel" class="source-row" data-testid="education-eval-label" data-selected="false">
+        <input id="educationSourceCheckbox" type="checkbox" data-testid="hidden-source-checkbox" aria-label="교육청, 평가원">
+        <span class="visible-box" aria-hidden="true"></span>
+        <span>작업공간 &gt; 교육청, 평가원</span>
+      </label>
+    </section>
+
+    <section>
+      <h2>Query Chips</h2>
+      <div class="row">
+        <input id="queryInput" type="text" data-testid="query-input" placeholder="단서어">
+        <button id="addChip" data-testid="add-chip">추가</button>
+        <button id="presetGongcha" type="button" data-testid="chip-preset-gongcha">공차</button>
+        <button id="presetNatural" type="button" data-testid="chip-preset-natural">자연수</button>
+        <button id="searchButton" data-testid="search-button">검색하기</button>
+      </div>
+      <div id="chips" class="row" data-testid="query-chips" style="margin-top: 10px;"></div>
+    </section>
+
+    <section>
+      <h2>Results</h2>
+      <div id="cards" class="grid" data-testid="result-cards"></div>
+      <div class="row" style="margin-top: 12px;">
+        <button id="nextButton" data-testid="next-step">다음 단계</button>
+        <button id="reloadButton" class="secondary" data-testid="reload-verify">reload/fresh-tab verify</button>
+        <button id="issueButton" class="danger" data-testid="forbidden-issue">출제하기</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Status</h2>
+      <div id="status" class="status" data-testid="status"></div>
+    </section>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const mode = params.get("mode") || "success";
+    const modeChip = document.querySelector("#modeChip");
+    const selectedChip = document.querySelector("#selectedChip");
+    const resultCount = document.querySelector("#resultCount");
+    const sourceLabel = document.querySelector("#educationSourceLabel");
+    const sourceCheckbox = document.querySelector("#educationSourceCheckbox");
+    const queryInput = document.querySelector("#queryInput");
+    const chipsEl = document.querySelector("#chips");
+    const cardsEl = document.querySelector("#cards");
+    const statusEl = document.querySelector("#status");
+    const selectedIds = [];
+    const chips = [];
+    let persistedIds = [];
+    let issueClicked = false;
+
+    const fixtures = {
+      success: ["7231357", "7231365", "7231367", "7232191", "7232217", "7232220", "7232227", "7232230"],
+      collapse: ["1475258", "593644", "226193", "1475366", "1419409", "1819", "62005"],
+      zero: [],
+      broad: ["broad-001", "broad-002", "broad-003"],
+      "iab-unavailable-doc": []
+    };
+
+    function writeStatus(extra = {}) {
+      const state = {
+        mode,
+        sourceSelected: sourceCheckbox.checked,
+        sourceChip: selectedChip.textContent,
+        queryChips: chips,
+        selectedIds,
+        persistedIds,
+        resultCount: resultCount.textContent,
+        issueClicked,
+        ...extra
+      };
+      statusEl.textContent = JSON.stringify(state, null, 2);
+      statusEl.dataset.state = JSON.stringify(state);
+    }
+
+    function renderCards() {
+      cardsEl.innerHTML = "";
+      const ids = fixtures[mode] || fixtures.success;
+      ids.forEach((id, index) => {
+        const card = document.createElement("label");
+        card.className = "card";
+        card.dataset.selectableId = id;
+        card.innerHTML = `
+          <input type="checkbox" data-testid="select-card" data-selectable-id="${id}">
+          <strong>${String(index + 1).padStart(2, "0")}</strong>
+          <span>body-exact fixture ${id}</span>
+        `;
+        const input = card.querySelector("input");
+        input.addEventListener("change", () => {
+          const next = input.dataset.selectableId;
+          const idx = selectedIds.indexOf(next);
+          if (input.checked && idx === -1) selectedIds.push(next);
+          if (!input.checked && idx !== -1) selectedIds.splice(idx, 1);
+          writeStatus();
+        });
+        cardsEl.appendChild(card);
+      });
+    }
+
+    function updateResultCount() {
+      if (mode === "broad" && !sourceCheckbox.checked) {
+        resultCount.textContent = "검색결과 : 197,341개";
+      } else {
+        resultCount.textContent = `검색결과 : ${(fixtures[mode] || fixtures.success).length}개`;
+      }
+    }
+
+    sourceLabel.addEventListener("click", (event) => {
+      if (event.target !== sourceCheckbox) {
+        event.preventDefault();
+        sourceCheckbox.checked = !sourceCheckbox.checked;
+      }
+      sourceLabel.dataset.selected = String(sourceCheckbox.checked);
+      selectedChip.textContent = sourceCheckbox.checked ? "교육청, 평가원" : "출처 미선택";
+      updateResultCount();
+      writeStatus();
+    });
+
+    function addChipValue(rawValue) {
+      const value = rawValue.trim();
+      if (!value) return;
+      chips.push(value);
+      const chip = document.createElement("span");
+      chip.className = "chip";
+      chip.dataset.testid = "query-chip";
+      chip.textContent = value;
+      chipsEl.appendChild(chip);
+      queryInput.value = "";
+      writeStatus();
+    }
+
+    document.querySelector("#addChip").addEventListener("click", () => {
+      addChipValue(queryInput.value);
+    });
+
+    document.querySelector("#presetGongcha").addEventListener("click", () => addChipValue("공차"));
+    document.querySelector("#presetNatural").addEventListener("click", () => addChipValue("자연수"));
+
+    queryInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        document.querySelector("#addChip").click();
+      }
+    });
+
+    document.querySelector("#searchButton").addEventListener("click", () => {
+      updateResultCount();
+      const countText = resultCount.textContent;
+      if (mode === "broad" && countText.includes("197,341")) {
+        writeStatus({ status: "scope-recovery-required", blockedAction: "selection" });
+        return;
+      }
+      writeStatus({ status: "search-ready" });
+    });
+
+    document.querySelector("#nextButton").addEventListener("click", () => {
+      if (mode === "zero") {
+        persistedIds = [];
+        writeStatus({ finalStatus: "검색 완료/0선택" });
+        return;
+      }
+      if (mode === "collapse") {
+        persistedIds = ["221076", "287145", "991190", "62005"];
+        writeStatus({ finalStatus: "차단", reason: "selected-bundle collapse/stale IDs" });
+        return;
+      }
+      persistedIds = [...selectedIds];
+      const complete = selectedIds.length > 0 && selectedIds.join("|") === persistedIds.join("|");
+      writeStatus({ finalStatus: complete ? "완료" : "부분 완료" });
+    });
+
+    document.querySelector("#reloadButton").addEventListener("click", () => {
+      const match = selectedIds.join("|") === persistedIds.join("|");
+      writeStatus({ reloadVerified: true, orderMatchesExpected: match });
+    });
+
+    document.querySelector("#issueButton").addEventListener("click", () => {
+      issueClicked = true;
+      writeStatus({ forbiddenAction: "출제하기 clicked" });
+    });
+
+    modeChip.textContent = `mode=${mode}`;
+    renderCards();
+    updateResultCount();
+    writeStatus();
+  </script>
+</body>
+</html>

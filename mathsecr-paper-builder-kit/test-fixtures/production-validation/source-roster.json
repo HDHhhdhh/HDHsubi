@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "truthScope": "offline-contract",
+  "targets": [
+    { "number": "1", "occurrenceKey": "source-row-1", "sourceBodyArtifact": { "path": "source.png", "sha256": "6b1048f8a6d40bac0b2954c18fefa40c4ea7a96120fc2e54b7317c0e43c2bbec" } },
+    { "number": "2", "occurrenceKey": "source-row-2", "sourceBodyArtifact": { "path": "source.png", "sha256": "6b1048f8a6d40bac0b2954c18fefa40c4ea7a96120fc2e54b7317c0e43c2bbec" } },
+    { "number": "3", "occurrenceKey": "source-row-3", "sourceBodyArtifact": { "path": "source.png", "sha256": "6b1048f8a6d40bac0b2954c18fefa40c4ea7a96120fc2e54b7317c0e43c2bbec" } },
+    { "number": "4", "occurrenceKey": "source-row-4", "sourceBodyArtifact": { "path": "source.png", "sha256": "6b1048f8a6d40bac0b2954c18fefa40c4ea7a96120fc2e54b7317c0e43c2bbec" } },
+    { "number": "5", "occurrenceKey": "source-row-5", "sourceBodyArtifact": { "path": "source.png", "sha256": "6b1048f8a6d40bac0b2954c18fefa40c4ea7a96120fc2e54b7317c0e43c2bbec" } }
+  ]
+}

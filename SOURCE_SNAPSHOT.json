@@ -1,0 +1,513 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-10",
+  "kind": "allowlisted-public-source-snapshot",
+  "originalGitHistoryIncluded": false,
+  "fullPrivateBundleIncluded": false,
+  "files": [
+    {
+      "path": "mathsecr-paper-builder-kit/AGENTS.md",
+      "sourceSha256": "c3e26773c5886a2566583049145453377a78d80fdd9ac731da4cf188974dd454",
+      "exportSha256": "c3e26773c5886a2566583049145453377a78d80fdd9ac731da4cf188974dd454",
+      "bytes": 34528,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/docs/db_inference_contract.md",
+      "sourceSha256": "1d57b558549938db51b65632d2805a3beb1a15553fbb19a257203e92ced334b0",
+      "exportSha256": "1d57b558549938db51b65632d2805a3beb1a15553fbb19a257203e92ced334b0",
+      "bytes": 7641,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/docs/mathsecr_success_algorithm.md",
+      "sourceSha256": "777c2814a342fbf260dd6a4b9039fc3dc71196b788014174543a92b9a630c84b",
+      "exportSha256": "777c2814a342fbf260dd6a4b9039fc3dc71196b788014174543a92b9a630c84b",
+      "bytes": 31350,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/docs/production_validation.md",
+      "sourceSha256": "0486b11649795ae42af206e55364345dfee35581474759a418a5f5e973bb0cb8",
+      "exportSha256": "0486b11649795ae42af206e55364345dfee35581474759a418a5f5e973bb0cb8",
+      "bytes": 18494,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/docs/search_observation_contract.md",
+      "sourceSha256": "466d4325ea177c2462497036f041903dbb3f2b8eebe16cc108600de3063a204d",
+      "exportSha256": "466d4325ea177c2462497036f041903dbb3f2b8eebe16cc108600de3063a204d",
+      "bytes": 10196,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/docs/search_preparation_and_selection_evidence.md",
+      "sourceSha256": "143a4613bdeddfa03ea6a2d5784feee1b8224dcbc4a3519f20fc6e773618cc03",
+      "exportSha256": "143a4613bdeddfa03ea6a2d5784feee1b8224dcbc4a3519f20fc6e773618cc03",
+      "bytes": 6017,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/docs/search_query_plan.md",
+      "sourceSha256": "4318ca8eac6abb9d8143232616bdb67e4f31a7c576126cf4c5964392a0adfdec",
+      "exportSha256": "4318ca8eac6abb9d8143232616bdb67e4f31a7c576126cf4c5964392a0adfdec",
+      "bytes": 4388,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/docs/selection_evidence_preparation.md",
+      "sourceSha256": "39e70eae278516fdc738bcc52ef522d439c4dafd7d50f0814f82308686b3fb4b",
+      "exportSha256": "39e70eae278516fdc738bcc52ef522d439c4dafd7d50f0814f82308686b3fb4b",
+      "bytes": 3013,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/prompts/mathsecr_new_paper_prompt.md",
+      "sourceSha256": "bb60879ae2bb62bbb290ceec6abc5d154be0610e2699651f4c0a192685516810",
+      "exportSha256": "bb60879ae2bb62bbb290ceec6abc5d154be0610e2699651f4c0a192685516810",
+      "bytes": 10690,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/prompts/start-prompt.md",
+      "sourceSha256": "2e13aa96a0e461b0abf119f9059b8e9daf86a0afa987ab591803eafccc984120",
+      "exportSha256": "2e13aa96a0e461b0abf119f9059b8e9daf86a0afa987ab591803eafccc984120",
+      "bytes": 2070,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/README.md",
+      "sourceSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
+      "exportSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
+      "bytes": 14606,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/aside_preflight.ps1",
+      "sourceSha256": "92248ecb4392c8a9713f782896d2e051e627e6aca2ece3e117bfc63586b40822",
+      "exportSha256": "92248ecb4392c8a9713f782896d2e051e627e6aca2ece3e117bfc63586b40822",
+      "bytes": 4059,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/body_comparison_contract.ps1",
+      "sourceSha256": "71c105bf232c310d9faf6449a7997cde10777855a56894571808fdac44819845",
+      "exportSha256": "71c105bf232c310d9faf6449a7997cde10777855a56894571808fdac44819845",
+      "bytes": 8792,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/check.ps1",
+      "sourceSha256": "6bb508e2be96b36411a494dcff7a330baa15396db9e65a1b61d0de0e17c99507",
+      "exportSha256": "6bb508e2be96b36411a494dcff7a330baa15396db9e65a1b61d0de0e17c99507",
+      "bytes": 301,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/check_aside_repl.ps1",
+      "sourceSha256": "6739c1f0f570c8464332a1ff6d7c573dd9be2ae5466d0a115d274d952bd62f12",
+      "exportSha256": "6739c1f0f570c8464332a1ff6d7c573dd9be2ae5466d0a115d274d952bd62f12",
+      "bytes": 5295,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/create_failed_problem_report.py",
+      "sourceSha256": "b94f929b4131241f0adcb39c3debc60b30dd36f76fe0fb2653f6f8a229cefc09",
+      "exportSha256": "b94f929b4131241f0adcb39c3debc60b30dd36f76fe0fb2653f6f8a229cefc09",
+      "bytes": 9022,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/db_inference.ps1",
+      "sourceSha256": "a69e6dc575ed5c50828e062166160003200f0f1502bda3e33f698b873e915442",
+      "exportSha256": "a69e6dc575ed5c50828e062166160003200f0f1502bda3e33f698b873e915442",
+      "bytes": 27339,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/export_body_exact_blind_run.ps1",
+      "sourceSha256": "63539aaf81bbd66193e406f723a6b7fac3d06f5fe8625fcd545b1556ed4dcd1d",
+      "exportSha256": "63539aaf81bbd66193e406f723a6b7fac3d06f5fe8625fcd545b1556ed4dcd1d",
+      "bytes": 3229,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/ground_truth_contract.ps1",
+      "sourceSha256": "49fcd3ffe7f626544ea5e37bed71f90511b9497d5692b3f88fee620ea6e55875",
+      "exportSha256": "49fcd3ffe7f626544ea5e37bed71f90511b9497d5692b3f88fee620ea6e55875",
+      "bytes": 25873,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/install.ps1",
+      "sourceSha256": "9cc7423a8210fab525df0e35d23a1dcd5228838bde4198ae78c68373de1f58a1",
+      "exportSha256": "9cc7423a8210fab525df0e35d23a1dcd5228838bde4198ae78c68373de1f58a1",
+      "bytes": 35365,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/new_test_fixtures.ps1",
+      "sourceSha256": "1696880ef9d25b78e1cd1dcc4e7e80839a8d9e3054fb8f530e2678f6a3f53e02",
+      "exportSha256": "1696880ef9d25b78e1cd1dcc4e7e80839a8d9e3054fb8f530e2678f6a3f53e02",
+      "bytes": 2804,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/prepare_selection_evidence.ps1",
+      "sourceSha256": "fb1356a2d82dfb04f8752aa1c1b2a479fdf310dcebdd77b318e2f9efc3c4f8d8",
+      "exportSha256": "fb1356a2d82dfb04f8752aa1c1b2a479fdf310dcebdd77b318e2f9efc3c4f8d8",
+      "bytes": 9208,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/production_validation.ps1",
+      "sourceSha256": "05bc6d9932213ece96fd84129e185671e86e089d3d215f11d3103a9e9937de15",
+      "exportSha256": "05bc6d9932213ece96fd84129e185671e86e089d3d215f11d3103a9e9937de15",
+      "bytes": 24918,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/read_contract_json.ps1",
+      "sourceSha256": "60b40be0c4fd957bde00f96f41ee8e89fd6311d2e4739890783cb5d8dfafbd31",
+      "exportSha256": "60b40be0c4fd957bde00f96f41ee8e89fd6311d2e4739890783cb5d8dfafbd31",
+      "bytes": 439,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/regression_evidence_contract.ps1",
+      "sourceSha256": "7dc5a179a0ce347e02aadc46bd1f615cd9a8d7ec199e61d9e889dbfa6f3e2f65",
+      "exportSha256": "7dc5a179a0ce347e02aadc46bd1f615cd9a8d7ec199e61d9e889dbfa6f3e2f65",
+      "bytes": 22996,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/report_contract.ps1",
+      "sourceSha256": "17e5c11d94a15ffbf5387dd73e2fe13220b82d932cf9a03370649a7a36eeaaa8",
+      "exportSha256": "17e5c11d94a15ffbf5387dd73e2fe13220b82d932cf9a03370649a7a36eeaaa8",
+      "bytes": 43034,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/run_mathsecr_regression.ps1",
+      "sourceSha256": "ad9126f731c2c97b14cdbbece73990ffb78b8146b8511e6792a86072f30c8510",
+      "exportSha256": "ad9126f731c2c97b14cdbbece73990ffb78b8146b8511e6792a86072f30c8510",
+      "bytes": 18680,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/run_validations.ps1",
+      "sourceSha256": "958eef3e95baa891772f84d8adbcab8baeaa2fdb7ccbad87cb189d1aa0e42f75",
+      "exportSha256": "958eef3e95baa891772f84d8adbcab8baeaa2fdb7ccbad87cb189d1aa0e42f75",
+      "bytes": 907,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/search_attempt_contract.ps1",
+      "sourceSha256": "7fc80ecd443940cee1c598bb1330b3dd0a355b16e6bad63568050af1a21e2dbb",
+      "exportSha256": "7fc80ecd443940cee1c598bb1330b3dd0a355b16e6bad63568050af1a21e2dbb",
+      "bytes": 39119,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/search_observation.js",
+      "sourceSha256": "a7452efa0f3a1b11472d5d2f504d136dc5414b7d4fb3e754edc58c62ae8a1ecf",
+      "exportSha256": "a7452efa0f3a1b11472d5d2f504d136dc5414b7d4fb3e754edc58c62ae8a1ecf",
+      "bytes": 7453,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/search_observation_contract.ps1",
+      "sourceSha256": "c4aa6d18adc1c32ae7a986281b18523a47723a448aef460f3b12fcce1d3174e3",
+      "exportSha256": "c4aa6d18adc1c32ae7a986281b18523a47723a448aef460f3b12fcce1d3174e3",
+      "bytes": 16661,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/search_query_plan.ps1",
+      "sourceSha256": "685d709ce1f0ef67e328902f3801d060e53e4d2deff102db697816911fe76b83",
+      "exportSha256": "685d709ce1f0ef67e328902f3801d060e53e4d2deff102db697816911fe76b83",
+      "bytes": 12288,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/selection_journal.ps1",
+      "sourceSha256": "aa8af406343eedd84a46c6a1bd4000e36cc36bb35de63ac8afb9ecec735ac912",
+      "exportSha256": "aa8af406343eedd84a46c6a1bd4000e36cc36bb35de63ac8afb9ecec735ac912",
+      "bytes": 27613,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/state_machine.ps1",
+      "sourceSha256": "09b2be660ea37b222db2f4200d782da36dadc6bf02dd80a859d0f06684bb92ff",
+      "exportSha256": "09b2be660ea37b222db2f4200d782da36dadc6bf02dd80a859d0f06684bb92ff",
+      "bytes": 101601,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_aside_preflight.ps1",
+      "sourceSha256": "af2fa1fd1d9b1c582e0c28406041bdc2b924af6565c6a1d95550c240a2be389c",
+      "exportSha256": "1ffaba841139a31ba402a983747c622b1e111fb13a07735d13ccdc6c0ac5624e",
+      "bytes": 10352,
+      "transformation": "Synthetic host display names anonymized; no production implementation changed."
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_body_comparison_contract.ps1",
+      "sourceSha256": "2f5304f9937af12956830f18edd38d90da419f0b24591dd4938d1cee1dd69370",
+      "exportSha256": "2f5304f9937af12956830f18edd38d90da419f0b24591dd4938d1cee1dd69370",
+      "bytes": 15697,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_body_exact_benchmark.ps1",
+      "sourceSha256": "2819f29f79c70681e51db01596ebcc95c02b758aa4478aa87f7f94dc5b600012",
+      "exportSha256": "2819f29f79c70681e51db01596ebcc95c02b758aa4478aa87f7f94dc5b600012",
+      "bytes": 28206,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_db_inference.ps1",
+      "sourceSha256": "1e42150565d69b874101a33042e40074c5d84eb5737624380be0187998c76fb4",
+      "exportSha256": "1e42150565d69b874101a33042e40074c5d84eb5737624380be0187998c76fb4",
+      "bytes": 13239,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_failed_problem_report.ps1",
+      "sourceSha256": "e60493c138838092184d764275e7e323f6c86e5ca029ce8dff6c4a216400730b",
+      "exportSha256": "e60493c138838092184d764275e7e323f6c86e5ca029ce8dff6c4a216400730b",
+      "bytes": 7689,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_ground_truth_contract.ps1",
+      "sourceSha256": "19ebe94f7ad328762c07c5a6cfc664cdb613dc629ddd7689f010a8107e2baebc",
+      "exportSha256": "19ebe94f7ad328762c07c5a6cfc664cdb613dc629ddd7689f010a8107e2baebc",
+      "bytes": 20496,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_idle_search_characterization.ps1",
+      "sourceSha256": "128b46a1757712221c66257bb538a28deb0fed0df3913bbdf66cefd1acaba206",
+      "exportSha256": "128b46a1757712221c66257bb538a28deb0fed0df3913bbdf66cefd1acaba206",
+      "bytes": 21537,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_install_contract.ps1",
+      "sourceSha256": "e80d6b96135e7a3ec61daf0c01826c4a35c52f11f2010841c169a0d96e913e15",
+      "exportSha256": "e80d6b96135e7a3ec61daf0c01826c4a35c52f11f2010841c169a0d96e913e15",
+      "bytes": 35636,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_partial_save_phases.ps1",
+      "sourceSha256": "6f6c8fff0737c392cd5902c013f55b910f7cb8427cc1bba4f5ebfe85d735bd54",
+      "exportSha256": "6f6c8fff0737c392cd5902c013f55b910f7cb8427cc1bba4f5ebfe85d735bd54",
+      "bytes": 19254,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_pdf_segmentation.ps1",
+      "sourceSha256": "80b3bba053bdb10cb20e27e97d84a658095ee4b688458ac75c813a8db3211e7b",
+      "exportSha256": "80b3bba053bdb10cb20e27e97d84a658095ee4b688458ac75c813a8db3211e7b",
+      "bytes": 18983,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_prepare_selection_evidence.ps1",
+      "sourceSha256": "a9c04e4413bb757ae07d5002c1710f39638d4ce3b356498354db726857adb4bc",
+      "exportSha256": "a9c04e4413bb757ae07d5002c1710f39638d4ce3b356498354db726857adb4bc",
+      "bytes": 11331,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_production_validation.ps1",
+      "sourceSha256": "e5ec6546cb5a37e47d9614c622c992a804a8af6d4271072c4d30aba5030d58a3",
+      "exportSha256": "e5ec6546cb5a37e47d9614c622c992a804a8af6d4271072c4d30aba5030d58a3",
+      "bytes": 41913,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_re0_memo.ps1",
+      "sourceSha256": "2da6887b8d68ef192f0cb0e92b7fe8264d462f9424b82a6aecf90d0b5ee3774b",
+      "exportSha256": "2da6887b8d68ef192f0cb0e92b7fe8264d462f9424b82a6aecf90d0b5ee3774b",
+      "bytes": 74191,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_regression_evidence_contract.ps1",
+      "sourceSha256": "9b21781b5bea6ea79fb959107b2b171790e2fda5541d9dc2104b816aa5d58b02",
+      "exportSha256": "9b21781b5bea6ea79fb959107b2b171790e2fda5541d9dc2104b816aa5d58b02",
+      "bytes": 11886,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_report_lint.ps1",
+      "sourceSha256": "6a723cda7b54ff73b896e000b36c403c2891533aaee25147cf81b424d398a9f0",
+      "exportSha256": "6a723cda7b54ff73b896e000b36c403c2891533aaee25147cf81b424d398a9f0",
+      "bytes": 71521,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_search_attempt_contract.ps1",
+      "sourceSha256": "b410c074a80c33e8f592c78ac63d2cd2bac20c15c0ec5d4c57cbd37d8e882f92",
+      "exportSha256": "b410c074a80c33e8f592c78ac63d2cd2bac20c15c0ec5d4c57cbd37d8e882f92",
+      "bytes": 28415,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_search_characterization.ps1",
+      "sourceSha256": "0227025819d738d76cc487eedfd076185d9a90816640856d98ada389fe02ebe3",
+      "exportSha256": "0227025819d738d76cc487eedfd076185d9a90816640856d98ada389fe02ebe3",
+      "bytes": 10920,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_search_observation.ps1",
+      "sourceSha256": "c0fafb0656306e21e0aeb848d857b6b76208de13dd475c8784f7b54868bad95a",
+      "exportSha256": "c0fafb0656306e21e0aeb848d857b6b76208de13dd475c8784f7b54868bad95a",
+      "bytes": 23737,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_search_query_plan.ps1",
+      "sourceSha256": "26e00ceedbc7dd4d3bd15475451b83f657405ebcf162aabe7111ee383ab60426",
+      "exportSha256": "26e00ceedbc7dd4d3bd15475451b83f657405ebcf162aabe7111ee383ab60426",
+      "bytes": 11055,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_selection_journal.ps1",
+      "sourceSha256": "0664bc732fb48d8a278414ea5c7e29b7cf348ed9f7ebc33b1e1fb4c39c220438",
+      "exportSha256": "0664bc732fb48d8a278414ea5c7e29b7cf348ed9f7ebc33b1e1fb4c39c220438",
+      "bytes": 18097,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_state_machine.ps1",
+      "sourceSha256": "9975cec5f19e8a80046e1d968a0d2c8f46de3272e7849821c39bf95db0ca83df",
+      "exportSha256": "9975cec5f19e8a80046e1d968a0d2c8f46de3272e7849821c39bf95db0ca83df",
+      "bytes": 64989,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_year_range_serialization_baseline.ps1",
+      "sourceSha256": "fa05d98d78c00df0743f3487de0143d5a188c0c78b933bcd880bcff2c0fa76d9",
+      "exportSha256": "fa05d98d78c00df0743f3487de0143d5a188c0c78b933bcd880bcff2c0fa76d9",
+      "bytes": 5019,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_year_range_serialization_contract.ps1",
+      "sourceSha256": "d34fe7494865bc3aa46ceb24eccee7a3c53bdbfe91428b8c8885a888d7702a47",
+      "exportSha256": "d34fe7494865bc3aa46ceb24eccee7a3c53bdbfe91428b8c8885a888d7702a47",
+      "bytes": 8075,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/validate_mathsecr_docs.ps1",
+      "sourceSha256": "7ffa55d4d38d0a67e7c2eb9586e61c85d5650ba56ea5e3b7aef74ec748030dfa",
+      "exportSha256": "7ffa55d4d38d0a67e7c2eb9586e61c85d5650ba56ea5e3b7aef74ec748030dfa",
+      "bytes": 55847,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/validate_production_step.ps1",
+      "sourceSha256": "2ccb1a503bc103ac600cd28e86f220c39ada1127326fbb69d71a1e4b4e45d8d8",
+      "exportSha256": "2ccb1a503bc103ac600cd28e86f220c39ada1127326fbb69d71a1e4b4e45d8d8",
+      "bytes": 3556,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/validate_selection_snapshot.ps1",
+      "sourceSha256": "68eb64576b00845c3866624a421fb9ddfb995cecf923ba44375093b1a2382860",
+      "exportSha256": "68eb64576b00845c3866624a421fb9ddfb995cecf923ba44375093b1a2382860",
+      "bytes": 1212,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/verify_body_exact_benchmark.ps1",
+      "sourceSha256": "cef8ea0639e47bfc555246507615d58c89a3f70a0b3695dfb004493b2895990c",
+      "exportSha256": "cef8ea0639e47bfc555246507615d58c89a3f70a0b3695dfb004493b2895990c",
+      "bytes": 40085,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/year_range_serialization.ps1",
+      "sourceSha256": "1ce48a9f6bb6651f63f1a6627a7ae5e7a3c66a87295836fd01da40e012d3dd6d",
+      "exportSha256": "1ce48a9f6bb6651f63f1a6627a7ae5e7a3c66a87295836fd01da40e012d3dd6d",
+      "bytes": 2040,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/agents/openai.yaml",
+      "sourceSha256": "54ce5128e7702ca3746aac21f56db971564ff6cf0442becd592b5844c4907bdf",
+      "exportSha256": "54ce5128e7702ca3746aac21f56db971564ff6cf0442becd592b5844c4907bdf",
+      "bytes": 296,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/SKILL.md",
+      "sourceSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
+      "exportSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
+      "bytes": 43927,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/test-fixtures/iab-simulator/index.html",
+      "sourceSha256": "1d3f15a4bc4e7eeb7597817bcae25ec6fe19ea41e7c0a47ea53246d9298f1e6a",
+      "exportSha256": "1d3f15a4bc4e7eeb7597817bcae25ec6fe19ea41e7c0a47ea53246d9298f1e6a",
+      "bytes": 10661,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/test-fixtures/production-validation/source-roster.json",
+      "sourceSha256": "1808290654514ef83b5eb6aadd561165820b6cb0f5b3e9f3e5c4aa193644d6f3",
+      "exportSha256": "1808290654514ef83b5eb6aadd561165820b6cb0f5b3e9f3e5c4aa193644d6f3",
+      "bytes": 990,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/test-fixtures/search-observation/collector_dom_test.js",
+      "sourceSha256": "829ae8c850f5e701bfb4dd8f8ed8f5bf36092d725b4095c54f14f9edf4ce3213",
+      "exportSha256": "829ae8c850f5e701bfb4dd8f8ed8f5bf36092d725b4095c54f14f9edf4ce3213",
+      "bytes": 5168,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/test-fixtures/search-observation/simulator-adapter.json",
+      "sourceSha256": "d2265099153e6befcf75335fe77df0a37ee85b8243a7280bf6337950398afa90",
+      "exportSha256": "d2265099153e6befcf75335fe77df0a37ee85b8243a7280bf6337950398afa90",
+      "bytes": 828,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/test-fixtures/search-query-plan/source-order-input.json",
+      "sourceSha256": "adbc97f3bf7f29b14a0b27048610c682c4a62142bf4b4ac8275c1afac74556e2",
+      "exportSha256": "adbc97f3bf7f29b14a0b27048610c682c4a62142bf4b4ac8275c1afac74556e2",
+      "bytes": 1552,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/test-fixtures/selection-journal/cases.json",
+      "sourceSha256": "f76c006ad0df083ce3d799d9355a36a282e97dab0bf0fb11e3095954000c1964",
+      "exportSha256": "f76c006ad0df083ce3d799d9355a36a282e97dab0bf0fb11e3095954000c1964",
+      "bytes": 10382,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/test-fixtures/year-range-serialization/bundle-observation.json",
+      "sourceSha256": "7d7f6a195fe25d115af246b73fbcc6f5f40baa2b90772717cd3476ae76566837",
+      "exportSha256": "7d7f6a195fe25d115af246b73fbcc6f5f40baa2b90772717cd3476ae76566837",
+      "bytes": 1738,
+      "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/test-fixtures/year-range-serialization/cases.json",
+      "sourceSha256": "8ebab93f57fa576f979b7fc4c354fedbbe5f82481b79ed8a00ca0fe403a1084c",
+      "exportSha256": "8ebab93f57fa576f979b7fc4c354fedbbe5f82481b79ed8a00ca0fe403a1084c",
+      "bytes": 1499,
+      "transformation": null
+    }
+  ]
+}

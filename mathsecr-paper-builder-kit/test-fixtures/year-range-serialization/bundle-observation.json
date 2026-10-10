@@ -1,0 +1,34 @@
+{
+  "schema_version": 3,
+  "provenance": {
+    "kind": "pinned_serializer_guard_observation",
+    "sourceUrl": "https://www.mathsecr.com/_next/static/chunks/1104-e5c9945212ffaf9f.js",
+    "capturedAt": "2026-06-05T00:31:59.2552072+09:00",
+    "capturedBundleLocalObservation": "tmp/mathsecr_scripts_all/https___www.mathsecr.com__next_static_chunks_1104-e5c9945212ffaf9f.js",
+    "bundleLength": 79915,
+    "bundleSha256": "5CCF4E981E94D9B9DE12B0225DC591ED58C0C712417D0EE8DD130FF001B2B7E7",
+    "bundleIncludedInFixture": false,
+    "reproducibleLiveProof": false,
+    "scopeNote": "The source bundle is not distributed with the kit. This fixture pins only the serializer guard observed after an assumed upstream normalization step; it is not fresh live proof and does not prove raw-input parsing or rejection behavior."
+  },
+  "claimScope": {
+    "productContract": "pinned_serializer_guard_for_already_normalized_numeric_tuple_input",
+    "inputAssumption": "yearRange has already been normalized upstream to a two-element numeric tuple; that upstream normalization is not pinned by this fixture.",
+    "upstreamNormalizationPinned": false,
+    "proves": [
+      "the observed serializer guard requires two defined ordered tuple values before assigning sourceStartYear and sourceEndYear"
+    ],
+    "doesNotProve": [
+      "raw string, blank, null, partial, NaN, or Infinity rejection by MathSecr",
+      "the current live site's upstream year normalization",
+      "UI-level year filter semantics"
+    ]
+  },
+  "observedSerialization": {
+    "sourceFragment": "n&&2===n.length){let[e,r]=n;void 0!==e&&void 0!==r&&e<=r&&(t.sourceStartYear=e,t.sourceEndYear=r)",
+    "fields": [
+      "sourceStartYear",
+      "sourceEndYear"
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": 2,
+  "contract": {
+    "kind": "conservative_local_cli_adapter",
+    "product_behavior_evidence": false,
+    "scope": "Local parsing and payload policy for offline tools; raw string, blank, null, non-finite, and partial-input rejection is not attributed to MathSecr."
+  },
+  "cases": [
+    {
+      "name": "start-lt-end",
+      "input": { "start": 2014, "end": 2020 },
+      "expect": { "sourceStartYear": 2014, "sourceEndYear": 2020 }
+    },
+    {
+      "name": "start-equals-end",
+      "input": { "start": 2020, "end": 2020 },
+      "expect": { "sourceStartYear": 2020, "sourceEndYear": 2020 }
+    },
+    {
+      "name": "start-gt-end",
+      "input": { "start": 2021, "end": 2020 },
+      "expect": {}
+    },
+    {
+      "name": "blank-lower",
+      "input": { "start": "", "end": 2020 },
+      "expect": {}
+    },
+    {
+      "name": "blank-upper",
+      "input": { "start": 2020, "end": "" },
+      "expect": {}
+    },
+    {
+      "name": "nonnumeric-string",
+      "input": { "start": "2020", "end": 2021 },
+      "expect": {}
+    },
+    {
+      "name": "partial-null-lower",
+      "input": { "start": null, "end": 2021 },
+      "expect": {}
+    },
+    {
+      "name": "boundary-2002",
+      "input": { "start": 2002, "end": 2003 },
+      "expect": { "sourceStartYear": 2002, "sourceEndYear": 2003 }
+    },
+    {
+      "name": "boundary-2026",
+      "input": { "start": 2025, "end": 2026 },
+      "expect": { "sourceStartYear": 2025, "sourceEndYear": 2026 }
+    }
+  ]
+}

@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-10",
+  "truthScope": "sanitized-history-summary",
+  "independentGroundTruth": false,
+  "cases": [
+    {
+      "id": "C01",
+      "date": "2026-06-05",
+      "title": "임무와 부분 완성",
+      "references": [
+        {
+          "sourceKey": "C01:source-1",
+          "sha256": "2cc215b7aba4db9727a8e836d05f7fb7ab4c55818cdb74037ab415b308a0f2d6",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C02",
+      "date": "2026-06-05",
+      "title": "저장 상태 오염과 선택 유실",
+      "references": [
+        {
+          "sourceKey": "C02:source-1",
+          "sha256": "03a1b4e6b0df75af983d355cdd24fff4dda9ba9556baeace0b3409d0ecb061ad",
+          "access": "private-original"
+        },
+        {
+          "sourceKey": "C02:source-2",
+          "sha256": "cd1d2f3fc1a3eae3b4316e6fadd12503745baa093b669c62554b7f1803b5e236",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C03",
+      "date": "2026-06-07",
+      "title": "검색 누락 회복",
+      "references": [
+        {
+          "sourceKey": "C03:source-1",
+          "sha256": "65a8d22c26da9ec26ad81fe9c1aa844bd187570d278189d2b1ee2b39b002805f",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C04",
+      "date": "2026-06-07",
+      "title": "본문 기준 exact",
+      "references": [
+        {
+          "sourceKey": "C04:source-1",
+          "sha256": "54ab056aab8a39317a35a441643ca4f5261810da67b64a10362dabc59dfac386",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C05",
+      "date": "2026-07-29",
+      "title": "범위 추론과 검색 관측",
+      "references": [
+        {
+          "sourceKey": "C05:source-1",
+          "sha256": "833490f16e36ff52be0d0d5f485e8e99a3e591d9cf21a7523b7e2aa7eea47cbc",
+          "access": "private-original"
+        },
+        {
+          "sourceKey": "C05:source-2",
+          "sha256": "e2bcba7d6b256873cc2130276a5b9918c1f6c8289cec4abdbd4a8d8716879e4e",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C06",
+      "date": "2026-07-31 / 2026-09-05",
+      "title": "선택 저널과 PowerShell 호환성",
+      "references": [
+        {
+          "sourceKey": "C06:source-1",
+          "sha256": "5cade2664a6260435699cd66843ea1770e79f4f5e5bd02853c43df639e17b668",
+          "access": "private-original"
+        },
+        {
+          "sourceKey": "C06:source-2",
+          "sha256": "e20f2a849a1223ff9e75f28f67771bd411d6d13de37854920bc299ce86a72730",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C07",
+      "date": "2026-08-15",
+      "title": "메타데이터 회복과 지연 로딩",
+      "references": [
+        {
+          "sourceKey": "C07:source-1",
+          "sha256": "572611c48d57f57e50f2ac3ec0a0245cddfb345ab67fd17924ee72a3256a250d",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C08",
+      "date": "2026-08-21",
+      "title": "전체 문항 순서 복구",
+      "references": [
+        {
+          "sourceKey": "C08:source-1",
+          "sha256": "53e6516da35eb3ab1c09547e9a49082eaf58c042add28518359d064857dd7cd9",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C09",
+      "date": "2026-08-12 / 2026-08-22",
+      "title": "반복 원본과 DB ID 분리",
+      "references": [
+        {
+          "sourceKey": "C09:source-1",
+          "sha256": "1d38db3f4845a942ff427978a9e745928a8caaaa1eda428738fd1325c7826686",
+          "access": "private-original"
+        },
+        {
+          "sourceKey": "C09:source-2",
+          "sha256": "297a2bcea54e0e8ab82681e7167ca01fa42a1e406334801177915b24f6f13b84",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C10",
+      "date": "2026-08-26",
+      "title": "의미를 번역한 AND 검색의 누락",
+      "references": [
+        {
+          "sourceKey": "C10:source-1",
+          "sha256": "994f30d8191d83f36d6774231fd668b170afb03d5878adf89d521774f90e60f9",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C11",
+      "date": "2026-08-27",
+      "title": "반복 사고의 회귀 연결",
+      "references": [
+        {
+          "sourceKey": "C11:source-1",
+          "sha256": "bb40f56d4b0fddea97e35a24312b6f67747be4b54f9f59f810f556427b640778",
+          "access": "private-original"
+        },
+        {
+          "sourceKey": "C11:source-2",
+          "sha256": "6cec6dc44e3c719689b5f98cfa41b6e39e2ccb6a4850969f5d3f122b35432e9b",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C12",
+      "date": "2026-08-27",
+      "title": "독립 정답 근거 없는 평가",
+      "references": [
+        {
+          "sourceKey": "C12:source-1",
+          "sha256": "693bf4cdc09499884dc343df25a614cc6239f620bb0075b146b32860eae59a11",
+          "access": "private-original"
+        },
+        {
+          "sourceKey": "C12:source-2",
+          "sha256": "0a0d8239a4cf53933fae6ceef61448709b3c2e13c27c631fdf602b1a36b34a5a",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C13",
+      "date": "2026-08-26",
+      "title": "미발견 기록의 원본 결합",
+      "references": [
+        {
+          "sourceKey": "C13:source-1",
+          "sha256": "77867a71a7c545be358f861230bf7c5b2238a8ed84e78bf6b333cfd8d84c57ef",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C14",
+      "date": "2026-08-31",
+      "title": "문장형 검색어 회귀",
+      "references": [
+        {
+          "sourceKey": "C14:source-1",
+          "sha256": "df323d35377c9cafcfd117963b23d0a50dc90a41babd867b29ab56ee2f33f891",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C15",
+      "date": "2026-09-05",
+      "title": "Hub 구조 검토",
+      "references": [
+        {
+          "sourceKey": "C15:source-1",
+          "sha256": "1fff0dbeafe4bdf8730192b29cdfb44ddf70bedaa42c9ad66ca5cbc2ee7761ac",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C16",
+      "date": "2026-09-20 / 2026-09-27",
+      "title": "빠른 오선택과 검증된 재제작",
+      "references": [
+        {
+          "sourceKey": "C16:source-1",
+          "sha256": "b6448efb90360e539be53fcc76ee4b2dd91a884b20c05d51169f65893b55ac3f",
+          "access": "private-original"
+        },
+        {
+          "sourceKey": "C16:source-2",
+          "sha256": "8bb48981ef16faa45ab389f000e572284432bdd76e4815d30e08738bfc0decb7",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C17",
+      "date": "2026-10-07",
+      "title": "실제 제작과 검증기 연결",
+      "references": [
+        {
+          "sourceKey": "C17:source-1",
+          "sha256": "a336dbe7c23f8a7d39b7d0f801ef0fca8188b9abfe6234a9f0371065b2dc3a15",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C18",
+      "date": "2026-10-07 이후",
+      "title": "기존 저장 문항에 추가하기",
+      "references": [
+        {
+          "sourceKey": "C18:source-1",
+          "sha256": "f662134e201102d0f3074f0386b3da786ff96f5ece6d22899a6351a3f8d1f771",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C19",
+      "date": "2026-10-09",
+      "title": "로컬 경로와 질문 규칙 교정",
+      "references": [
+        {
+          "sourceKey": "C19:source-1",
+          "sha256": "0eb565a0a72a2d39e5d2f889f2a78ecb92852e9ba5ade05506655cebf8f564fd",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C20",
+      "date": "2026-10-10",
+      "title": "제작 지연과 루프 비교",
+      "references": [
+        {
+          "sourceKey": "C20:source-1",
+          "sha256": "8bb48981ef16faa45ab389f000e572284432bdd76e4815d30e08738bfc0decb7",
+          "access": "private-original"
+        },
+        {
+          "sourceKey": "C20:source-2",
+          "sha256": "bb5d82cb07ab0d3e02b6c99dda23fce5023fecab50f969b2139d7c0568f65417",
+          "access": "private-original"
+        }
+      ]
+    },
+    {
+      "id": "C21",
+      "date": "2026-10-10",
+      "title": "브라우저 재설치 후 남은 오류",
+      "references": [
+        {
+          "sourceKey": "C21:source-1",
+          "sha256": "fb7cb9e77731f97bdfb5cab937482a4fa746ca5a24ce5393959728cf8719c249",
+          "access": "private-original"
+        }
+      ]
+    }
+  ]
+}

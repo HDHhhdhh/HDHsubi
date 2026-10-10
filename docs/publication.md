@@ -1,0 +1,53 @@
+# 공개본의 범위와 실행
+
+## 포함한 내용
+
+- 2026-10-10 로컬 kit의 스크립트, SKILL, AGENTS, 프롬프트, 기술 문서.
+- 합성 선택 저널, 검색어 준비, 관측 어댑터, production roster, 로컬 simulator 자료.
+- 연도 직렬화의 지역 계약 fixture와 범위를 제한한 과거 관측. 원래 서비스 bundle은 미포함.
+- 새 공개용 목표·연표·사고·구조·후속 계획 문서.
+- 복사 원본과 공개 파일의 SHA-256을 기록한 SOURCE_SNAPSHOT.
+- 공개 파일 목록·문서 링크·민감 정보 검사와 제한된 합성 검사 도구.
+
+테스트 코드 한 곳의 기기 표시명은 합성 이름으로 바꿨다. SOURCE_SNAPSHOT의 transformation에 표시했다. production 실행 구현과 로컬 canonical 정책은 바꾸지 않았다.
+
+## 제외한 내용
+
+원본 PDF/HWPX, 문항 렌더와 크롭, 실제 문제 DB inventory, 개인 문제지 주소, 원시 세션 JSONL, 실제 브라우저 캡처·프로필·인증 자료를 제외했다. 임시 OCR/Python 환경과 개별 문제지용 one-off 스크립트도 제외했다.
+
+실제 시험지를 사용하는 body-exact·PDF 분할 자료와 그 자료에 의존하는 평가·lesson registry 원본도 공개하지 않았다. 개인 자료를 제거한 상태에서 전체 kit의 설치 가능성과 전체 회귀 통과를 주장하지 않는다.
+
+기존 비공개 Git 저장소를 공개로 전환하지 않았다. 로컬에 남은 `.git`을 수정하지 않았다. 공개본은 별도 초기 Git 이력으로 시작한다.
+
+## 원래 kit와 공개본의 차이
+
+원래 kit의 [README](../mathsecr-paper-builder-kit/README.md)는 full hub checkout과 인덱스의 `.omo/evidence`를 설치 계약으로 요구한다. 공개본에는 그 비공개 자료가 없다.
+
+따라서 `install.ps1`, `check.ps1`, `run_validations.ps1`의 전체 계약은 공개 clone만으로 통과한다고 안내하지 않는다. 해당 코드도 구조 검토를 위해 포함했다. 실제 지원 bundle을 갖춘 별도 환경에서 사용한다.
+
+기존 kit 문서의 과거 `.omo/evidence`·평가·렌더 참조는 원래 비공개 bundle을 가리킨다. 공개본에서 열 수 있는 링크로 위장하지 않는다. 새 공개 문서는 공개 파일에만 링크한다.
+
+## 실행할 수 있는 공개본 검사
+
+Python 3과 PowerShell 7을 준비한다. 서비스 로그인과 브라우저는 이 검사에 필요하지 않다.
+
+```powershell
+python ./scripts/validate_publication.py
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_public_checks.ps1
+```
+
+검사 범위는 다음과 같다.
+
+| 검사 | 확인 내용 |
+|---|---|
+| publication validator | 새 문서의 로컬 링크, JSON 형식, public allowlist, 복사 해시, 실제 개인 경로·키·토큰·금지 확장자 |
+| Selection Journal All | 요청·재시도·ACK·재개, 실파일 왕복, 중복과 손상 입력 거부 |
+| Search Query Plan | 원본 순서, literal 단서, 원본 위치, 입력 shape의 허용·거부 |
+
+이들은 공개 packaging과 독립 가능한 지역 계약의 검사다. 전체 production 회귀, 브라우저 연결, 저장, 수학적 정답을 증명하지 않는다. 기존 전체 검사 PASS 기록을 새로 실행한 것처럼 표시하지 않는다.
+
+## 실제 제작에 필요한 것
+
+사용자 소유의 원본과 허가된 수학비서 계정·DB 접근 권한이 필요하다. 최신 도구 문서와 실제 연결을 확인해야 한다. production 정책을 바꿀 때는 canonical 지침과 어댑터·validator를 함께 맞춰야 한다.
+
+공개는 재배포 라이선스를 새로 지정하는 행동과 다르다. 이 공개 작업에서는 별도 라이선스를 부여하지 않았다. 수학비서·Aside·Codex 등 외부 제품의 코드나 실행 파일을 배포하지 않는다.

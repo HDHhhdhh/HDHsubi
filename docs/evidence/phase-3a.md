@@ -16,7 +16,7 @@ flowchart LR
 
 지원하는 쌍은 Aside/aside-repl, Codex/codex-iab, Chrome/codex-chrome-ext, Playwright/offline-dom-test다. live surface 3종은 `https://www.mathsecr.com/mypaper/<digits>`만 허용한다. offline surface는 host가 없는 절대 file URI이고 LocalPath가 `/test-fixtures/iab-simulator/index.html`로 끝나야 한다.
 
-identity는 schemaVersion, surface, browserFamily, profileOrSessionId, tabId, url, observedAtUtc를 검증한다. ID는 공백 없는 비어 있지 않은 문자열이고 시각은 Z로 끝나는 UTC 값이다. 선택 probeArtifact는 기존 state artifact 안전 경로와 Context의 단일 읽기·해시 검사를 쓴다. 지정한 resolver의 이미지 확장자 허용 목록도 유지한다. probe가 없어도 Phase 3a에서는 통과한다.
+identity는 schemaVersion, surface, browserFamily, profileOrSessionId, tabId, url, observedAtUtc를 검증한다. ID는 비어 있지 않고 앞뒤 공백이 없는 문자열이며 시각은 Z로 끝나는 UTC 값이다. 선택 probeArtifact는 기존 state artifact 안전 경로와 Context의 단일 읽기·해시 검사를 쓴다. 지정한 resolver의 이미지 확장자 허용 목록도 유지한다. probe가 없어도 Phase 3a에서는 통과한다.
 
 Aside는 기존 asideRepl 블록을 쓴다. 다른 surface는 surfaceState 블록의 같은 boolean 조건을 쓴다. 두 블록의 혼입을 거부한다. state 이름 ASIDE_REPL_READY와 trace는 유지한다.
 

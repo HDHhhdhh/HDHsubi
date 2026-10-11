@@ -278,7 +278,7 @@ Phase 1·1b와 Phase 2는 서로 독립이다. 병렬로 진행할 수 있다.
 
 | 번호 | 결정 | 권고 |
 |---|---|---|
-| D1 | Phase 3 정책 변경(Aside 전용 → typed surface) 승인 여부 | 승인. 측정 없이는 브라우저 선택이 불가 |
+| D1 | Phase 3 정책 변경(Aside 전용 → typed surface) 승인 여부 | 승인. 측정 없이는 브라우저 선택이 불가. **2026-10-11 Issue #2에서 승인.** Phase 3는 3a(계약)·3b(probe·문서)로 나눈다 |
 | D2 | 새 어댑터 코드 언어 | 조립기는 PowerShell 유지. 브라우저 안에서 도는 수집기는 JS 유지 |
 | D3 | CI runner | `windows-latest`. 스크립트가 Windows 경로·폰트에 의존 |
 | D4 | 비공개 fixture 중 공개 가능한 합성 파일 제공 | 사용자가 로컬 bundle에서 목록을 확인해 Codex에 전달 |

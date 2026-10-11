@@ -2,7 +2,7 @@ READ AGENTS.md first.
 Use the mathsecr-paper-builder skill.
 
 Do not click `출제하기`.
-Use the surface declared by the session input for live MathSecr work. On aside-repl, Inspect existing tabs, attach the relevant MathSecr tab, and use `snapshot()` as the primary page-reading path.
+Use the surface declared by the session input for live MathSecr work. On aside-repl, inspect existing tabs, attach the relevant MathSecr tab, and use `snapshot()` as the primary page-reading path.
 Keep the main agent as the only live browser owner; subagents are read-only.
 SURFACE_HARD_STOP: Stay on the surface declared by the session input. If that surface is unavailable or cannot attach to and verify the live paper, report `차단`. Do not switch that session to any other browser surface.
 ASIDE_OFF_USER_RESPONSE: For a paper-production request, if the current probe confirms Aside is not running, output exactly `aside 키고 다시 오도록.` and nothing else. Generic timeout, missing CLI, or failed paper verification is not proof that Aside is off. This exception applies only to aside-repl sessions.

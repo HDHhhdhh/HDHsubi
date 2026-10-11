@@ -58,6 +58,19 @@ $root=Join-Path ([IO.Path]::GetTempPath()) ('mathsecr-surface-probe-'+[guid]::Ne
 $root=[IO.Path]::GetFullPath($root)
 $null=New-Item -ItemType Directory -Path $root
 try {
+  $builderPath=Join-Path $kitScripts 'check_browser_surface.ps1'
+  $wrapperPath=Join-Path $kitScripts 'check_aside_repl.ps1'
+  $tokens=$null;$parseErrors=$null
+  $builderAst=[Management.Automation.Language.Parser]::ParseFile($builderPath,[ref]$tokens,[ref]$parseErrors)
+  $definitions=@($builderAst.FindAll({
+    param($node)
+    $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -ceq 'Get-MathSecrAsideProbeCommands'
+  },$true))
+  $expectedCode="const t=await listBrowserTabs();console.log(JSON.stringify({kind:'mathsecr-aside-preflight-v1',tabCount:t.length,tabs:t.map(x=>({targetId:x.targetId,url:x.url,title:x.title}))}));"
+  Assert-SurfaceProbeCase ($parseErrors.Count -eq 0 -and $definitions.Count -eq 1 -and
+    [regex]::Matches($definitions[0].Body.Extent.Text,[regex]::Escape($expectedCode)).Count -eq 1 -and
+    [regex]::Matches([IO.File]::ReadAllText($wrapperPath),'Get-MathSecrAsideProbeCommands').Count -eq 0) aside-argv-single-definition source-contract
+
   $url='https://www.mathsecr.com/mypaper/123'
   $artifact=[pscustomobject]@{path='synthetic-tool.json';sha256=('a'*64)}
   foreach ($reason in @('repl-reachable','cli-unavailable','probe-timeout','probe-auth-or-transport-failed','browser-not-running','probe-failed-or-unrecognized','invalid-probe-receipt')) {

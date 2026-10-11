@@ -260,7 +260,11 @@ function Test-CoreRules {
     Assert-Contains $entry.Name $entry.Text "검색 완료/0선택"
     Assert-Contains $entry.Name $entry.Text "초기 성공 루프"
     Assert-Contains $entry.Name $entry.Text "치명 실패 4게이트"
-    Assert-Contains $entry.Name $entry.Text "Aside REPL 실패 차단"
+    Assert-ContainsOnce $entry.Name $entry.Text "<!-- SURFACE_HARD_STOP -->"
+    Assert-Contains $entry.Name $entry.Text "surface 실패 차단"
+    foreach ($legacyPolicy in @('ASIDE_REPL_HARD_STOP','Aside REPL 실패 차단','aside-repl-unavailable block')) {
+      Assert-NotContains $entry.Name $entry.Text $legacyPolicy
+    }
     Assert-ContainsOnce $entry.Name $entry.Text "<!-- ASIDE_OFF_USER_RESPONSE -->"
     Assert-Contains $entry.Name $entry.Text 'aside 키고 다시 오도록.'
     Assert-ContainsOnce $entry.Name $entry.Text "<!-- PRODUCTION_VALIDATION_REF -->"
@@ -413,7 +417,11 @@ function Test-CoreRules {
     Assert-ContainsOnce $entry.Name $entry.Text "append-only resume boundary"
     Assert-ContainsOnce $entry.Name $entry.Text "reference success loop"
     Assert-ContainsOnce $entry.Name $entry.Text "fatal-failure four-gate"
-    Assert-ContainsOnce $entry.Name $entry.Text "aside-repl-unavailable block"
+    Assert-ContainsOnce $entry.Name $entry.Text "<!-- SURFACE_HARD_STOP -->"
+    Assert-Contains $entry.Name $entry.Text "surface-unavailable block"
+    foreach ($legacyPolicy in @('ASIDE_REPL_HARD_STOP','Aside REPL 실패 차단','aside-repl-unavailable block')) {
+      Assert-NotContains $entry.Name $entry.Text $legacyPolicy
+    }
     Assert-ContainsOnce $entry.Name $entry.Text "<!-- ASIDE_OFF_USER_RESPONSE -->"
     Assert-ContainsOnce $entry.Name $entry.Text "<!-- PRODUCTION_VALIDATION_REF -->"
     Assert-Contains $entry.Name $entry.Text 'aside 키고 다시 오도록.'
@@ -450,6 +458,7 @@ function Test-CoreRules {
   Assert-Contains "Report contract canonical search call" $reportContractText "Test-MathSecrSearchAttemptContract"
   foreach ($relativePath in @(
     'scripts/aside_preflight.ps1', 'scripts/check_aside_repl.ps1', 'scripts/test_aside_preflight.ps1',
+    'scripts/surface_probe.ps1', 'scripts/check_browser_surface.ps1',
     'scripts/production_validation.ps1', 'scripts/validate_production_step.ps1', 'scripts/test_production_validation.ps1',
     'scripts/test_partial_save_phases.ps1', 'docs/production_validation.md',
     'test-fixtures/production-validation/source-roster.json'
@@ -786,14 +795,17 @@ function Assert-AsideReplPromptPolicy {
   )
 
   Assert-ContainsOnce $Name $Text $CanonicalHardStop
+  foreach ($legacyPolicy in @('ASIDE_REPL_HARD_STOP','Aside REPL 실패 차단','aside-repl-unavailable block')) {
+    Assert-NotContains $Name $Text $legacyPolicy
+  }
 
-  $policyBody = $Text.Replace($CanonicalHardStop, "")
+  $policyBody = [regex]::Replace($Text.Replace($CanonicalHardStop, ""), "(?m)^Surface:.*$", "")
   Assert-NotMatches $Name $policyBody "(?i)(?:\bin-app\s+Browser\b|\biab\b|\bChrome\b|\bComputer\s+Use\b|\bextension\b|크롬|컴퓨터\s*사용|확장\s*프로그램)" "mentions a forbidden non-Aside-REPL live-browser surface outside the canonical hard stop"
 }
 
 function Test-PromptDrift {
   param([string]$Root)
-  $canonicalAsideReplHardStop = 'ASIDE_REPL_HARD_STOP: If Aside REPL is unavailable or cannot attach to and verify the live paper, report `차단`. Do not switch that session to the Codex in-app Browser, Chrome, an extension, or Computer Use.'
+  $canonicalAsideReplHardStop = 'SURFACE_HARD_STOP: Stay on the surface declared by the session input. If that surface is unavailable or cannot attach to and verify the live paper, report `차단`. Do not switch that session to any other browser surface.'
   $kitReusablePrompt = Join-Path $Root "mathsecr-paper-builder-kit\prompts\mathsecr_new_paper_prompt.md"
   Assert-FileExists "versioned reusable MathSecr prompt" $kitReusablePrompt
   $kitReusablePromptText = Read-Doc $kitReusablePrompt
@@ -883,6 +895,18 @@ function Test-PromptDrift {
     Write-Host "PromptDrift observed expected browser-switch failure: $($_.Exception.Message)"
   }
   if (-not $browserSwitchDetected) {
+    throw "PromptDrift failed to detect an explicit non-Aside-REPL switch after Aside REPL failure"
+  }
+
+  $declaredSurfaceSwitchDetected = $false
+  try {
+    $oppositePrompt = "$canonicalAsideReplHardStop`nSurface: <aside-repl|codex-iab|codex-chrome-ext; blank = aside-repl>`nswitch to codex-iab"
+    Assert-AsideReplPromptPolicy "Synthetic prompt with off-surface switch" $oppositePrompt $canonicalAsideReplHardStop
+  } catch {
+    $declaredSurfaceSwitchDetected = $true
+    Write-Host "PromptDrift observed expected browser-switch failure: $($_.Exception.Message)"
+  }
+  if (-not $declaredSurfaceSwitchDetected) {
     throw "PromptDrift failed to detect an explicit non-Aside-REPL switch after Aside REPL failure"
   }
 

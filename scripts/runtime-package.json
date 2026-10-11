@@ -4,8 +4,12 @@
   "privateBundleRequired": false,
   "files": [
     {
+      "path": "docs/installation.md",
+      "sha256": "1f0777ee862880675eec13974fd6ccee7342fdd674bbc6aee2cb829515896302"
+    },
+    {
       "path": "mathsecr-paper-builder-kit/AGENTS.md",
-      "sha256": "a182f4557afb1e1b5433cfb4409fe446d74a533f593ecfac239b1921b713e663"
+      "sha256": "2c882758ccb662e0f45e9b88aada566820403bb88e635ba493dda93639f294c8"
     },
     {
       "path": "mathsecr-paper-builder-kit/docs/db_inference_contract.md",
@@ -17,7 +21,7 @@
     },
     {
       "path": "mathsecr-paper-builder-kit/docs/production_validation.md",
-      "sha256": "0486b11649795ae42af206e55364345dfee35581474759a418a5f5e973bb0cb8"
+      "sha256": "f2ca9b3300a3045850da698f19d5bc96d3521513234acc1f4dba8b3f0dc82c23"
     },
     {
       "path": "mathsecr-paper-builder-kit/docs/search_observation_contract.md",
@@ -37,15 +41,15 @@
     },
     {
       "path": "mathsecr-paper-builder-kit/prompts/mathsecr_new_paper_prompt.md",
-      "sha256": "bb60879ae2bb62bbb290ceec6abc5d154be0610e2699651f4c0a192685516810"
+      "sha256": "db45b6c033cdf258fde22f520e89c8d1355de78436526ba6d219d691ff1d2b63"
     },
     {
       "path": "mathsecr-paper-builder-kit/prompts/start-prompt.md",
-      "sha256": "2e13aa96a0e461b0abf119f9059b8e9daf86a0afa987ab591803eafccc984120"
+      "sha256": "28523088fcb72dd219a09ebfd2dbd5d0171a485eaa3b752438c1d287289caf3d"
     },
     {
       "path": "mathsecr-paper-builder-kit/README.md",
-      "sha256": "0bb028d734d23413d203009a411e6f0f9830ecd140c1adee3e7ac37f04cbdc28"
+      "sha256": "43d226f3de830cad89a1dbcdef0131b2db3a5e61d76d184ad544d12751c2d399"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/aside_preflight.ps1",
@@ -60,12 +64,16 @@
       "sha256": "509332fa74ea3919a0bbac92e43f7f3f5e23e79f49b687f29e5737699bf5db41"
     },
     {
-      "path": "mathsecr-paper-builder-kit/scripts/check.ps1",
-      "sha256": "6bb508e2be96b36411a494dcff7a330baa15396db9e65a1b61d0de0e17c99507"
+      "path": "mathsecr-paper-builder-kit/scripts/check_aside_repl.ps1",
+      "sha256": "9e879581c6c9911ab6a49f8b0cc5c5a14c34f98d1db1c66c15263f80784b8fb1"
     },
     {
-      "path": "mathsecr-paper-builder-kit/scripts/check_aside_repl.ps1",
-      "sha256": "9b5aebf4289f4fb0c37a8fb0b5dbfa9487ce2d48360230052fe7d7bc542a55e5"
+      "path": "mathsecr-paper-builder-kit/scripts/check_browser_surface.ps1",
+      "sha256": "1734cc5a95f50d3fde747ed7731368bca8fe5c11aa4a459c33df2f29b0cf9cdc"
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/check.ps1",
+      "sha256": "6bb508e2be96b36411a494dcff7a330baa15396db9e65a1b61d0de0e17c99507"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/create_failed_problem_report.py",
@@ -124,12 +132,12 @@
       "sha256": "7fc80ecd443940cee1c598bb1330b3dd0a355b16e6bad63568050af1a21e2dbb"
     },
     {
-      "path": "mathsecr-paper-builder-kit/scripts/search_observation.js",
-      "sha256": "a8a84101e428de995ca9c99dd652c58202e3c17c201436823906be321f1b107d"
-    },
-    {
       "path": "mathsecr-paper-builder-kit/scripts/search_observation_contract.ps1",
       "sha256": "b521e67704a41879e66536f8f0910977d8e384f004dce6a36434317c6f736fb1"
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/search_observation.js",
+      "sha256": "a8a84101e428de995ca9c99dd652c58202e3c17c201436823906be321f1b107d"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/search_query_plan.ps1",
@@ -145,11 +153,15 @@
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/state_machine.ps1",
-      "sha256": "faa1ca0b9f03ce57eca45383b8100fa4bc61a9eda7218da0c7695453d99b9b29"
+      "sha256": "6bae40eb74c85ca9444250c8ba647388a7abe3fb2c10e10120d3063098390965"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/surface_contract.ps1",
-      "sha256": "81916f836b9a7adeee6765b27071cca6900447cd0646983aed1b59d93269fcda"
+      "sha256": "5f8add0cd1b393a3c00b17d6802e5eb2a26ec7c505ad97c7d583fa723bbcd501"
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/surface_probe.ps1",
+      "sha256": "f8025ab53b6593d91a395ead1751ff96a160128f2ba222c06e7a997ebfe91c77"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_aside_preflight.ps1",
@@ -193,7 +205,7 @@
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_install_contract.ps1",
-      "sha256": "e80d6b96135e7a3ec61daf0c01826c4a35c52f11f2010841c169a0d96e913e15"
+      "sha256": "0ab434556d5a923ba760ab83acadb1fba44c36a1dabc5484a67535ded1720909"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_partial_save_phases.ps1",
@@ -257,7 +269,7 @@
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/validate_mathsecr_docs.ps1",
-      "sha256": "7ffa55d4d38d0a67e7c2eb9586e61c85d5650ba56ea5e3b7aef74ec748030dfa"
+      "sha256": "b71219981cc709c80f113d6918403365f085e6560d6468439d24663487af93fd"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/validate_production_session.ps1",
@@ -289,7 +301,7 @@
     },
     {
       "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/SKILL.md",
-      "sha256": "4e90b8835298d5c16d0a25de63718cf54e3aebecf7c72335f6fed1e19788695c"
+      "sha256": "0ea685069291f77f40205be38ecba10ec3ffd9ac9106f64fdfec24842bd3d540"
     },
     {
       "path": "mathsecr-paper-builder-kit/test-fixtures/body-judgment/schema.json",
@@ -348,6 +360,18 @@
       "sha256": "8ebab93f57fa576f979b7fc4c354fedbbe5f82481b79ed8a00ca0fe403a1084c"
     },
     {
+      "path": "scripts/bootstrap.ps1",
+      "sha256": "398fe60dcac3443ffbb73a9c2e1fbe87dc7043e297b8f68c9e60ef4896936599"
+    },
+    {
+      "path": "scripts/check_runtime.ps1",
+      "sha256": "48901df415506dd1bc652936a3660b9c16530760b0313ce1326002edd138ff06"
+    },
+    {
+      "path": "scripts/install_aside.ps1",
+      "sha256": "ad33074c7f456edebaccdf18d7ad1f60b2aea7b6ff224cbe792d80352e3d3dc1"
+    },
+    {
       "path": "scripts/install.py",
       "sha256": "9a29000d114c0de0545fcea43a9bd63c927fd08416e5cf7fff1bb81fb9a1d4de"
     },
@@ -356,24 +380,8 @@
       "sha256": "26398864976053e9b95a8c748e743cec15ffcdfd6b4dd1782b746b80b7f881cb"
     },
     {
-      "path": "scripts/bootstrap.ps1",
-      "sha256": "398fe60dcac3443ffbb73a9c2e1fbe87dc7043e297b8f68c9e60ef4896936599"
-    },
-    {
-      "path": "scripts/install_aside.ps1",
-      "sha256": "ad33074c7f456edebaccdf18d7ad1f60b2aea7b6ff224cbe792d80352e3d3dc1"
-    },
-    {
-      "path": "scripts/check_runtime.ps1",
-      "sha256": "48901df415506dd1bc652936a3660b9c16530760b0313ce1326002edd138ff06"
-    },
-    {
       "path": "scripts/runtime-dependencies.json",
       "sha256": "f08aacef83a121daa17cdca344cb19c6622f346012f4174f3341997038dd775b"
-    },
-    {
-      "path": "docs/installation.md",
-      "sha256": "1f0777ee862880675eec13974fd6ccee7342fdd674bbc6aee2cb829515896302"
     }
   ]
 }

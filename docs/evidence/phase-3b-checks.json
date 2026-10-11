@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "phase": "3b",
+  "checkedOn": "2026-10-11",
+  "branchBase": "0da38ce4c04c4dd5a3aaba3b5cb7cc65c82442cf",
+  "specificationPr": 13,
+  "specificationHead": "8599d548f0a524d5bc6da91a1a9c8dc7d02b200c",
+  "truthScope": "offline-contract",
+  "liveProductBehavior": false,
+  "publication": "PASS",
+  "publicChecks": "PASS",
+  "offlineRegression": {
+    "kind": "summary",
+    "status": "PASS",
+    "passed": 15,
+    "failed": 0,
+    "skipped": 20,
+    "fullPrivateRegressionRun": false,
+    "liveProductBehavior": false
+  },
+  "surfaceContract": {
+    "positive": 12,
+    "negative": 19,
+    "status": "PASS",
+    "originalNegatives": 9,
+    "specifiedNewNegatives": 7,
+    "additionalBindingAndShapeNegatives": 3
+  },
+  "surfaceProbe": {
+    "cases": {
+      "classification": 41,
+      "format-positive": 6,
+      "format-negative": 22,
+      "cli-negative": 7,
+      "cli-positive": 2
+    },
+    "total": 78,
+    "status": "PASS"
+  },
+  "afterReloadIdentity": {
+    "baseline": "961c41105e96f368c48f6a39303e15520e0b3213",
+    "cases": 24,
+    "status": "PASS",
+    "comparison": "JSON serialization, CLR scalar types, negative exception messages"
+  },
+  "newRejectionTokens": [
+    "surface-probe-required",
+    "surface-probe-failed:<class>",
+    "surface-probe-identity-mismatch"
+  ],
+  "changedExports": [
+    "mathsecr-paper-builder-kit/AGENTS.md",
+    "mathsecr-paper-builder-kit/docs/production_validation.md",
+    "mathsecr-paper-builder-kit/prompts/mathsecr_new_paper_prompt.md",
+    "mathsecr-paper-builder-kit/prompts/start-prompt.md",
+    "mathsecr-paper-builder-kit/README.md",
+    "mathsecr-paper-builder-kit/scripts/check_aside_repl.ps1",
+    "mathsecr-paper-builder-kit/scripts/state_machine.ps1",
+    "mathsecr-paper-builder-kit/scripts/test_install_contract.ps1",
+    "mathsecr-paper-builder-kit/scripts/validate_mathsecr_docs.ps1",
+    "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/SKILL.md"
+  ],
+  "preservedSourceHashes": 72,
+  "skippedPrivateGates": [
+    "AsidePreflight",
+    "BodyComparison",
+    "BodyExactBenchmark",
+    "DbInference",
+    "GroundTruth",
+    "IdleSearchCharacterization",
+    "InstallContract",
+    "PartialSavePhases",
+    "PdfSegmentation",
+    "PrepareSelectionEvidence",
+    "ProductionValidation",
+    "Re0Memo",
+    "ReportLint",
+    "SearchAttempt",
+    "SearchCharacterization",
+    "StateMachine",
+    "FullDocumentValidator",
+    "FullKitCheck",
+    "OriginalFixtureGeneration",
+    "BodyExactCorpusVerifier"
+  ],
+  "userLocalChecks": [
+    "test_aside_preflight.ps1",
+    "validate_mathsecr_docs.ps1 -Scenario All",
+    "test_install_contract.ps1"
+  ],
+  "privateFullRegressionExecuted": false,
+  "installedPolicyMirrorsSynchronized": false,
+  "liveAsideProbeExecuted": false,
+  "phase4": [
+    "Internal report non-Aside REPL fields",
+    "ASIDE_REPL_READY state name",
+    "asideRepl.nonAsideReplLiveManipulation"
+  ],
+  "compatibilityNotes": [
+    "The legacy wrapper retains its original two pure argv definitions for unchanged AST consumers; live execution delegates to check_browser_surface.ps1.",
+    "The public fixture builder has an optional PrepareSession hook, default null, to attach synthetic probes before immutable history artifacts are written.",
+    "Raw JSON object checks use cached artifact bytes, preserving one read and hash per path."
+  ]
+}

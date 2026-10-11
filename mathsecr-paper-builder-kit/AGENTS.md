@@ -59,12 +59,12 @@
 
 ## 브라우저 소유권
 
-- live MathSecr 조작은 primary agent만 Aside REPL로 한다. subagent는 read-only unless explicitly assigned a separate live session.
+- live MathSecr 조작은 primary agent만 세션 입력의 surface로 한다. subagent는 read-only unless explicitly assigned a separate live session.
 - 원격 작업을 명시 요청받지 않았으면 모든 Aside 호출에 `--host local`을 지정한다. CLI에 저장된 기본 host를 상속하지 않는다. 기기 이름을 해석하기 전에 `[Environment]::MachineName`으로 현재 실행 PC를 확인한다. host 목록의 이름이나 `remote:` 표기는 다른 PC라는 증거가 아니다. local 연결 실패 후 원격 전환이나 기본 host 변경을 자동으로 하지 않는다. 원격 probe는 실제 사용자 지시를 기록하고 `-RemoteRequested`와 `-RemoteRequestEvidence`를 함께 전달한 경우만 허용한다.
 - 탭·URL·제목·로그인·프로필·화면 상태는 현재 도구와 실제 관측으로 직접 확인한다. 도구로 확인할 수 있는 정보에 대해 사용자에게 무엇이 보이는지, 탭이 보이는지, 어느 PC인지 반복해서 묻지 않는다. 지원되는 진단을 마친 뒤에도 사용자만 제공할 수 있는 정보나 행동이 진행에 꼭 필요한 경우에만 이유와 필요한 항목을 한 번에 질문한다.
-- Aside REPL 우선: `aside-browser` 지침에 따라 `aside --update`, `aside guide`, `aside guide repl`을 확인한 뒤 열린 탭을 먼저 조회하고 관련 탭에 attach한다. 페이지 판독은 `snapshot()`을 기본으로 하며, 새 탭은 관련 기존 탭이 없거나 사용자가 명시 요청한 경우에만 연다.
-- Aside REPL 실패 차단: Aside REPL이 unavailable/crash 상태이거나 live paper에 attach하여 URL/title/login을 확인하지 못하면 그 세션은 `차단`으로 보고한다. Codex in-app Browser(`iab`), Chrome, extension, Computer Use로 자동 전환하지 않는다.
-- <!-- ASIDE_OFF_USER_RESPONSE --> 제작 요청에서 현재 Aside probe가 브라우저 종료를 확인하면 사용자 응답 전체는 `aside 키고 다시 오도록.` 한 줄이다. 따옴표·설명·0–4 요약을 붙이지 않는다. 내부 차단 기록은 유지한다. 일반 timeout, CLI 부재, 로그인·paper 검증 실패는 종료로 단정하지 않는다. 코드 검토·구현 작업에는 이 제작 응답 예외를 적용하지 않는다.
+- surface가 `aside-repl`이면 Aside REPL 우선: `aside-browser` 지침에 따라 `aside --update`, `aside guide`, `aside guide repl`을 확인한 뒤 열린 탭을 먼저 조회하고 관련 탭에 attach한다. 페이지 판독은 `snapshot()`을 기본으로 하며, 새 탭은 관련 기존 탭이 없거나 사용자가 명시 요청한 경우에만 연다.
+- <!-- SURFACE_HARD_STOP --> surface 실패 차단: 세션 입력의 surface 밖으로 자동 전환하지 않는다. 그 surface가 unavailable/crash 상태이거나 live paper에 attach하여 URL/title/login을 확인하지 못하면 그 세션은 `차단`으로 보고한다.
+- <!-- ASIDE_OFF_USER_RESPONSE --> 제작 요청에서 현재 Aside probe가 브라우저 종료를 확인하면 사용자 응답 전체는 `aside 키고 다시 오도록.` 한 줄이다. 따옴표·설명·0–4 요약을 붙이지 않는다. 내부 차단 기록은 유지한다. 일반 timeout, CLI 부재, 로그인·paper 검증 실패는 종료로 단정하지 않는다. 코드 검토·구현 작업에는 이 제작 응답 예외를 적용하지 않는다. 이 예외는 surface가 aside-repl인 세션에만 적용한다.
 - idle-tab recovery ownership: 미리 준비된 live tab은 경과 시간만으로 reload/reopen하지 않는다. primary agent가 URL/title/login과 source/query removal receipt를 다시 확인하고 SKILL의 ordinary freshness gate를 적용한다. receipt/login/freshness가 깨진 경우에만 recovery한다. 2026-07-31의 15/30/60분 관찰과 frozen offline fixture는 이 recovery 기준의 dated 근거일 뿐 availability/latency/result-count, standard fresh receipt, exact/miss 계약이 아니다.
 - 절대 `출제하기`를 클릭하지 않는다. 사용자가 명시 요청한 경우만 예외다.
 - live paper tab에서 API route, raw backend URL, verification URL, MathSecr help/docs를 열지 않는다. 사고가 나면 paper URL을 다시 열고 persisted state를 확인한다.
@@ -112,7 +112,7 @@
 
 - 검증 패킷 없이 완료 보고하지 않는다.
 - 검증 패킷은 `다음 단계` 전, edit-screen 변경 후, reload/fresh-tab 후 갱신한다.
-- <!-- PRODUCTION_VALIDATION_REF --> 실제 제작은 `scripts/check_aside_repl.ps1`의 현재 probe, `scripts/validate_production_step.ps1`의 Select·BeforeNext·AfterReload 검사를 사용한다. 선택 판단·시각·동작을 자동으로 채우지 않는다. 보고는 동일한 버전 있는 세션 결과의 원본 roster·persisted 카드·raw visible DB명에 결합한다. 세부 입력은 `docs/production_validation.md`를 따른다.
+- <!-- PRODUCTION_VALIDATION_REF --> 실제 제작은 `scripts/check_browser_surface.ps1 -Surface <surface>`의 현재 probe, `scripts/validate_production_step.ps1`의 Select·BeforeNext·AfterReload 검사를 사용한다. 선택 판단·시각·동작을 자동으로 채우지 않는다. 보고는 동일한 버전 있는 세션 결과의 원본 roster·persisted 카드·raw visible DB명에 결합한다. 세부 입력은 `docs/production_validation.md`를 따른다.
 - 최소 필드: original source count, selected count, draft/local count before save, persisted/reloaded count and order after save, `확인` clicked/absent, fresh reload/fresh tab, missed/out-of-scope/replacement lists, live tab route/help/docs accident, `출제하기` not clicked, and the final persisted-card source aggregation receipt (`raw visible DB명` → normalized source family/root → count/top3).
 - 미발견 또는 미해결 검색 행은 내부 도구 메모의 단일 `검색 시도 계약 receipt:` 라벨에 미발견 원본 번호 순서대로 receipt를 하나씩 기록해야 하며, 여러 항목은 ` || `로 구분한다. 각 receipt는 `artifact=<ProjectRoot-relative-json>; sha256=<64 hex>; case=<case>; expected=<candidate-recovery-pending|miss-closure-ready>` 형식이어야 하고, validator가 파일 경로·해시·case와 fixture packet의 `targetBinding.sourceProblemNumber`/`occurrenceKey`를 해당 미발견 번호와 Ordinal 1:1 대조한다. 미발견 번호가 N개면 receipt도 정확히 N개여야 하며 missing/extra/duplicate/wrong-target/reused-case는 거부한다. `완료`에 미발견이 없으면 `없음`을 쓴다. `candidate-recovery-pending`은 명시적 미해결 진단일 뿐 닫힌 miss 증거가 아니며, `miss-closure-ready`일 때만 miss 폐쇄를 허용한다. `검색 완료/0선택`은 모든 receipt가 `miss-closure-ready`인 경우에만 허용한다.
 - 미실행·미해결 분리: 아직 검색하지 않은 원본 row에는 검색 receipt를 만들지 않는다. typed 세션 결과에 `not-started`와 실제 원본 identity를 남긴다. 검색한 row의 raw receipt는 보존한다. 내부 `ClosedMissedSourceNumbers`와 `UnresolvedSourceNumbers`를 구분한다. 공개 실패 수는 계속 원본 수에서 재로드 검증된 성공 수를 뺀 값이다.

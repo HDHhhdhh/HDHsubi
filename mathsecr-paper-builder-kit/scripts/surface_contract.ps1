@@ -4,6 +4,7 @@ $MathSecrSupportedSurfaces = @('aside-repl','codex-iab','codex-chrome-ext','offl
 $MathSecrSurfaceBrowserFamilies = @{
   'aside-repl'='aside'; 'codex-iab'='codex'; 'codex-chrome-ext'='chrome'; 'offline-dom-test'='playwright'
 }
+. (Join-Path $PSScriptRoot 'surface_probe.ps1')
 
 function Test-MathSecrSupportedSurface {
   param($Surface)
@@ -61,17 +62,43 @@ function Test-MathSecrSurfaceIdentityReceipt {
       -not [DateTimeOffset]::TryParse($Receipt.observedAtUtc,[cultureinfo]::InvariantCulture,[Globalization.DateTimeStyles]::None,[ref]$observedAt) -or
       $observedAt.Offset -ne [TimeSpan]::Zero) { $errors.Add('surface-identity-invalid') }
   $probeProperty = $Receipt.PSObject.Properties['probeArtifact']
+  if ($null -eq $probeProperty -and $surface -cne 'offline-dom-test') { $errors.Add('surface-probe-required') }
   if ($null -ne $probeProperty) {
+    $probeContext=$Context;$ownedProbeContext=$false
     try {
       $probe = $probeProperty.Value
       if ($probe -isnot [pscustomobject] -or $probe.PSObject.Properties['path'] -eq $null -or
           $probe.PSObject.Properties['sha256'] -eq $null -or $probe.sha256 -isnot [string] -or
           $probe.sha256 -cnotmatch '\A[0-9a-fA-F]{64}\z') { throw 'Invalid probe artifact shape.' }
-      $path = Resolve-MathSecrStateArtifactPath $ProjectRoot $probe.path
+      $path = Resolve-MathSecrStateArtifactPath $ProjectRoot $probe.path -AllowedExtensions @('.json')
       if ($null -eq $path) { throw 'Invalid probe artifact path.' }
-      $null = Get-MathSecrValidationArtifact -Path $path -ExpectedSha256 $probe.sha256 -Context $Context
+      if ($null -eq $probeContext) {
+        $probeContext=Enter-MathSecrValidationContext -ProjectRoot $ProjectRoot
+        $ownedProbeContext=$true
+      }
+      $artifact = Get-MathSecrValidationArtifact -Path $path -ExpectedSha256 $probe.sha256 -Context $probeContext -Parse
+      # The contract reader unwraps singleton arrays. Check the root JSON kind
+      # from its cached bytes, without another read or hash of the artifact.
+      $artifactKey=[IO.Path]::GetFullPath($path)+'|'+$probe.sha256.ToLowerInvariant()
+      if (-not (Test-MathSecrSurfaceProbeJsonObject $probeContext.ArtifactCache[$artifactKey].Bytes)) { throw 'Invalid probe artifact shape.' }
+      $probeReceipt = $artifact.Value
+      if (-not (Test-MathSecrSurfaceProbeReceipt $probeReceipt).Valid) { throw 'Invalid probe artifact shape.' }
+      if ($probeReceipt.surface -cne $surface -or $probeReceipt.browserFamily -cne $Receipt.browserFamily) {
+        $errors.Add('surface-mismatch')
+      } elseif ($probeReceipt.failureClass -cne 'none') {
+        $errors.Add('surface-probe-failed:' + $probeReceipt.failureClass)
+      } else {
+        $sameIdentity=[string]::Equals($probeReceipt.identity.tabId,$Receipt.tabId,[StringComparison]::Ordinal) -and
+          [string]::Equals($probeReceipt.identity.url,$Receipt.url,[StringComparison]::Ordinal)
+        if ($null -ne $probeReceipt.identity.profileOrSessionId) {
+          $sameIdentity=$sameIdentity -and [string]::Equals($probeReceipt.identity.profileOrSessionId,$Receipt.profileOrSessionId,[StringComparison]::Ordinal)
+        }
+        if (-not $sameIdentity) { $errors.Add('surface-probe-identity-mismatch') }
+      }
     } catch {
       if (-not $errors.Contains('surface-identity-invalid')) { $errors.Add('surface-identity-invalid') }
+    } finally {
+      if ($ownedProbeContext) { Exit-MathSecrValidationContext -Context $probeContext }
     }
   }
   return [pscustomobject]@{Valid=($errors.Count -eq 0);Surface=$surface;Errors=$errors.ToArray()}

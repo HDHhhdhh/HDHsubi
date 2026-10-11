@@ -20,10 +20,10 @@ TASK: 새 MathSecr/수학비서 문제지를 원본 PDF/HWPX 기준으로 생성
 - 참고 근거: .omo/evidence/mathsecr_new_paper_adaptive_search_policy_2026-06-05.md
 
 브라우저/안전:
-- live MathSecr 조작은 Aside REPL을 우선 사용한다. 열린 탭을 먼저 조회하고 관련 MathSecr 탭에 attach한 뒤 `snapshot()`을 기본 판독 경로로 사용한다.
-- ASIDE_REPL_HARD_STOP: If Aside REPL is unavailable or cannot attach to and verify the live paper, report `차단`. Do not switch that session to the Codex in-app Browser, Chrome, an extension, or Computer Use.
-- ASIDE_OFF_USER_RESPONSE: 제작 요청에서 현재 probe가 Aside 종료를 확인하면 `aside 키고 다시 오도록.` 한 줄만 출력한다. 일반 timeout·CLI 부재·paper 검증 실패는 종료로 단정하지 않는다.
-- PRODUCTION_VALIDATION_REF: kit SKILL과 `docs/production_validation.md`의 절차에 따라 `check_aside_repl.ps1`, `validate_production_step.ps1`의 Select·BeforeNext·AfterReload를 호출한다. 실제 관측·판단·시각·동작을 만들어 채우지 않는다.
+- live MathSecr 조작은 세션 입력의 surface로 한다. surface가 aside-repl이면 열린 탭을 먼저 조회하고 관련 MathSecr 탭에 attach한 뒤 `snapshot()`을 기본 판독 경로로 사용한다.
+- SURFACE_HARD_STOP: Stay on the surface declared by the session input. If that surface is unavailable or cannot attach to and verify the live paper, report `차단`. Do not switch that session to any other browser surface.
+- ASIDE_OFF_USER_RESPONSE: 제작 요청에서 현재 probe가 Aside 종료를 확인하면 `aside 키고 다시 오도록.` 한 줄만 출력한다. 일반 timeout·CLI 부재·paper 검증 실패는 종료로 단정하지 않는다. 이 예외는 surface가 aside-repl인 세션에만 적용한다.
+- PRODUCTION_VALIDATION_REF: kit SKILL과 `docs/production_validation.md`의 절차에 따라 `check_browser_surface.ps1 -Surface <surface>`, `validate_production_step.ps1`의 Select·BeforeNext·AfterReload를 호출한다. 실제 관측·판단·시각·동작을 만들어 채우지 않는다.
 - 절대 `출제하기`를 클릭하지 않는다.
 - API/raw route/help/docs를 live paper tab에서 열지 않는다.
 - 시작 시 /mypaper/<id> URL, 로그인 상태, visible paper title을 확인한다.

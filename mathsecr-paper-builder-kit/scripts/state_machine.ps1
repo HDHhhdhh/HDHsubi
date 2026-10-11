@@ -365,7 +365,8 @@ function Test-IsStrictInteger {
 function Resolve-MathSecrStateArtifactPath {
   param(
     [string]$ProjectRoot,
-    $RelativePath
+    $RelativePath,
+    [string[]]$AllowedExtensions = @('.png', '.jpg', '.jpeg', '.webp')
   )
 
   if ($RelativePath -isnot [string] -or [string]::IsNullOrWhiteSpace([string]$RelativePath)) {
@@ -407,7 +408,7 @@ function Resolve-MathSecrStateArtifactPath {
   if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
     return $null
   }
-  if (@('.png', '.jpg', '.jpeg', '.webp') -cnotcontains [System.IO.Path]::GetExtension($fullPath).ToLowerInvariant()) {
+  if ($AllowedExtensions -cnotcontains [System.IO.Path]::GetExtension($fullPath).ToLowerInvariant()) {
     return $null
   }
   return $fullPath

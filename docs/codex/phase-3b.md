@@ -57,9 +57,9 @@ flowchart LR
 | `Get-MathSecrOfflineSurfaceProbe` | `-PlaywrightModule -BrowserPath` | offline-dom-test probe receipt |
 | `Test-MathSecrSurfaceProbeReceipt` | `-Receipt` | `{Valid, Errors}` 형식 검사 |
 
-새 스크립트 `mathsecr-paper-builder-kit/scripts/check_browser_surface.ps1 -Surface <name> -ProbeReceiptPath <json>`. `-ProbeReceiptPath`는 `CreateNew`로 쓴다. 덮어쓰지 않는다.
+새 스크립트 `mathsecr-paper-builder-kit/scripts/check_browser_surface.ps1 -Surface <name> [-ProbeReceiptPath <json>]`. `-ProbeReceiptPath`는 선택이다. 주면 모든 분기(`off` 포함)에서 작업 2의 probe receipt를 `CreateNew`로 쓴다. 덮어쓰지 않는다. stdout은 surface마다 다르다. `aside-repl`은 지금 stdout을 유지한다. `codex-iab`·`codex-chrome-ext`·`offline-dom-test`는 probe receipt JSON을 stdout에 쓴다.
 
-- `aside-repl`: 인자 `-TimeoutSeconds -HostId -AccountId -RemoteRequested -RemoteRequestEvidence -OutPath -PaperUrl`. `check_aside_repl.ps1:13-84`의 코드를 그대로 옮긴다. 바꾸는 것은 두 가지다. (a) `:33`의 REPL JSON에 `tabs:(await listBrowserTabs()).map(t=>({targetId:t.targetId,url:t.url,title:t.title}))`를 더한다. `kind`·`tabCount`는 그대로다. (b) availability가 `ready`일 때만 `aside --host <HostId> --version`을 한 번 더 실행하고 stdout을 `identity.version`에 적는다. 실패하면 `version=null`이다. 분류는 바뀌지 않는다. `-PaperUrl`을 주면 `tabs`에서 `url`이 Ordinal로 같은 row를 찾는다. 없으면 `failureClass='read'`, `diagnostic='paper-tab-not-listed'`다. `-PaperUrl`이 없으면 `identity.tabId`·`url`은 `null`이다. stdout·`-OutPath` 구조·종료 코드(`ready` 0, `unavailable` 1, `off` 2와 고정 한 줄)는 지금과 같다. `aside_preflight.ps1`은 바꾸지 않는다.
+- `aside-repl`: 인자 `-TimeoutSeconds -HostId -AccountId -RemoteRequested -RemoteRequestEvidence -OutPath -PaperUrl`. `check_aside_repl.ps1:13-84`의 코드를 그대로 옮긴다. 바꾸는 것은 두 가지다. (a) `:33`의 REPL JSON에 `tabs:(await listBrowserTabs()).map(t=>({targetId:t.targetId,url:t.url,title:t.title}))`를 더한다. `kind`·`tabCount`는 그대로다. (b) availability가 `ready`일 때만 `aside --host <HostId> --version`을 한 번 더 실행하고 stdout을 `identity.version`에 적는다. 실패하면 `version=null`이다. 분류는 바뀌지 않는다. `-PaperUrl`을 주면 `tabs`에서 `url`이 Ordinal로 같은 row를 찾는다. 없으면 `failureClass='read'`, `diagnostic='paper-tab-not-listed'`다. `-PaperUrl`이 없으면 `identity.tabId`·`url`은 `null`이다. stdout(`{ProbeReceipt, Availability}`, `check_aside_repl.ps1:87-101`)·`-OutPath` 구조·종료 코드(`ready` 0, `unavailable` 1, `off` 2와 고정 한 줄)는 지금과 같다. 작업 2의 probe receipt는 `-ProbeReceiptPath`에만 쓴다. stdout에는 쓰지 않는다. `aside_preflight.ps1`은 바꾸지 않는다.
 - `check_aside_repl.ps1`은 `-Surface aside-repl`을 부르는 래퍼로 남긴다. 인자·종료 코드를 그대로 전달한다. `-ProbeReceiptPath`는 선택이다.
 - `codex-iab`·`codex-chrome-ext`: 인자 `-ToolReceiptPath -PaperUrl`(둘 다 필수). 명령을 실행하지 않는다. `-ToolReceiptPath`가 없거나 파일이 없으면 `failureClass='install'`, `diagnostic='standalone-probe-command-unverified; tool receipt required (R3 §3)'`로 끝낸다. 파일은 작업 2의 tool receipt다. 종료 코드는 `none` 0, 그 밖 1이다. 2는 쓰지 않는다. stdout은 probe receipt JSON이다.
 - `offline-dom-test`: 인자 `-PlaywrightModule -BrowserPath`. 두 경로가 파일·폴더로 존재하면 `none`이다. 하나라도 없으면 `install`이다. 브라우저를 실행하지 않는다.
@@ -67,7 +67,7 @@ flowchart LR
 
 ### 2. receipt 형식
 
-probe receipt(`-ProbeReceiptPath`와 stdout):
+probe receipt(`-ProbeReceiptPath` 파일. codex·offline은 stdout에도 같은 JSON을 쓴다. aside-repl은 파일에만 쓴다):
 
 ```json
 {
@@ -116,7 +116,7 @@ codex tool receipt(에이전트가 세션 안에서 받은 tool 결과를 그대
 
 `browser`는 `cua.getState().browsers[]`의 해당 항목을 복사한다. `tab.id`는 `cua.listTabs()` 또는 `getState().browsers[].tabs[]`의 `id`다. `tab.url`·`tab.title`은 `tab.url()`·`tab.title()`의 값이다(R3 §3·§5). R3가 확인하지 않은 필드(`profileName`, version, 기본 timeout)는 요구하지 않는다.
 
-codex 분류:
+codex 분류(위에서 아래로 검사한다. 처음 맞는 행이 결과다):
 
 | 조건 | failureClass |
 |---|---|
@@ -131,7 +131,7 @@ codex 분류:
 
 ### 3. session 검증
 
-- `Resolve-MathSecrStateArtifactPath`(`state_machine.ps1:365`)에 선택 인자 `[string[]]$AllowedExtensions`를 더한다. 기본값은 지금 목록이다. 기존 호출은 바꾸지 않는다. 함수 이름·반환은 그대로다. SOURCE_SNAPSHOT의 `state_machine.ps1` export를 갱신한다. 원본 `sourceSha256`은 유지한다.
+- `Resolve-MathSecrStateArtifactPath`(`state_machine.ps1:365`)에 선택 인자 `[string[]]$AllowedExtensions`를 더한다. 기본값은 지금 목록이다. 기존 호출은 바꾸지 않는다. 함수 이름·반환은 그대로다. SOURCE_SNAPSHOT 갱신 규칙은 완료 조건의 `export 목록`을 따른다.
 - `Test-MathSecrSurfaceIdentityReceipt`(`surface_contract.ps1:63-76`)를 바꾼다. 반환 `{Valid, Surface, Errors}`는 그대로다.
   - `surface`가 `offline-dom-test`가 아니면 `probeArtifact{path,sha256}`가 필수다. 없으면 `surface-probe-required`.
   - 경로는 `Resolve-MathSecrStateArtifactPath $ProjectRoot $path -AllowedExtensions @('.json')`로 푼다. 내용은 `Get-MathSecrValidationArtifact -Path -ExpectedSha256 -Context -Parse`로 읽는다. 풀리지 않거나 해시가 다르면 지금처럼 `surface-identity-invalid`.
@@ -174,7 +174,7 @@ codex 분류:
 
 1. 새 파일 `scripts/test_browser_surface_probe.ps1`. 공개 gate다. OS 임시 폴더의 합성 파일만 쓴다. `aside` CLI·브라우저·네트워크를 쓰지 않는다. 마지막 줄 `SurfaceProbe PASS`. `scripts/offline-regression-gates.json`에 `SurfaceProbe` gate(`grade='public'`, `passPattern='SurfaceProbe PASS'`)를 더한다. 사례:
    - aside: 작업 2 표의 Reason 7종 각각 → 기대 `failureClass`·`browserOff`. `tabs`에 paper URL row가 있음 → `none`과 `identity.tabId=targetId`. 없음 → `read`. `-PaperUrl` 없음 → `identity.tabId=null`. `test_aside_preflight.ps1`의 합성 receipt 생성 방식을 따른다. 비공개 fixture는 읽지 않는다.
-   - codex: 작업 2 표의 조건 6종. iab receipt를 `codex-chrome-ext`로 검사 → `connect`. `identityBasis`·`profileOrSessionId`가 surface별 값과 같은지 확인한다.
+   - codex: 작업 2 표의 조건 6종. 표 순서대로 판정한다. 교차 사례 2건을 둔다. (a) `surface='codex-iab'`인 receipt를 `-Surface codex-chrome-ext`로 검사 → `read`(표 2행). (b) `surface='codex-chrome-ext'`이고 `browser.type='iab'`인 receipt를 `-Surface codex-chrome-ext`로 검사 → `connect`(표 3행). `identityBasis`·`profileOrSessionId`가 surface별 값과 같은지 확인한다.
    - offline: 두 경로 존재 → `none`. 모듈 없음 → `install`. 브라우저 없음 → `install`.
    - `Test-MathSecrSurfaceProbeReceipt`: `failureClass` 5종 허용. `off`·빈 문자열·`null` 거부. 미지원 surface 거부. `browserFamily` 쌍 불일치 거부. aside가 아닌 surface의 `browserOff=true` 거부. `version=null` 허용. `probedAtUtc` 형식은 3a identity의 `observedAtUtc` 규칙과 같다.
    - 스크립트 smoke: `check_browser_surface.ps1 -Surface aside-repl -ProbeReceiptPath <temp>`를 `aside`가 PATH에 없는 상태로 실행한다. 종료 코드 1, receipt `failureClass='install'`. 같은 경로로 두 번째 실행 → `CreateNew` 거부. `-Surface codex-iab`를 `-ToolReceiptPath` 없이 실행 → 종료 코드 1, `install`.
@@ -203,7 +203,21 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/test_browser_surface_pro
 ```
 
 - 공개 gate 15개 PASS(`SurfaceProbe` 추가). 동일성 24개 PASS. CI 녹색.
-- `validate_publication.py` PASS. SOURCE_SNAPSHOT의 바뀐 export는 `state_machine.ps1` 하나다.
+- `validate_publication.py` PASS. `scripts/validate_publication.py:59-65`가 SOURCE_SNAPSHOT의 `exportSha256`과 `transformation`을 검사한다.
+- export 목록. 작업 1~4가 바꾸는 기존 파일은 아래 10개다. 모두 SOURCE_SNAPSHOT에 있다. 10개 모두 `exportSha256`을 새 해시로 바꾼다. `sourceSha256`은 유지한다. `transformation`에 `Phase 3b: <한 줄 요약>`을 더한다. 이미 문구가 있으면 뒤에 잇는다. 없으면 새로 쓴다. 비어 있으면 `undeclared transformation`으로 FAIL한다. SOURCE_SNAPSHOT에 있는 기존 파일 중 바뀌는 것은 이 10개뿐이다. SOURCE_SNAPSHOT에 없는 파일은 해시 검사 대상이 아니다: `surface_contract.ps1`(작업 3), `scripts/test_surface_contract.ps1`·`scripts/offline-regression-gates.json`(작업 5), 새 파일 3개(`surface_probe.ps1`, `check_browser_surface.ps1`, `scripts/test_browser_surface_probe.ps1`). 새 파일은 SOURCE_SNAPSHOT에 넣지 않는다.
+
+| # | 파일(`mathsecr-paper-builder-kit/` 아래) | 작업 |
+|---|---|---|
+| 1 | `scripts/state_machine.ps1` | 3 |
+| 2 | `scripts/check_aside_repl.ps1` | 1 |
+| 3 | `prompts/start-prompt.md` | 4-1·2·3·4·6 |
+| 4 | `prompts/mathsecr_new_paper_prompt.md` | 4-1·3·4·6 |
+| 5 | `AGENTS.md` | 4-4·6 |
+| 6 | `skills/mathsecr-paper-builder/SKILL.md` | 4-4·5·6 |
+| 7 | `docs/production_validation.md` | 4-7 |
+| 8 | `scripts/validate_mathsecr_docs.ps1` | 4-8 |
+| 9 | `scripts/test_install_contract.ps1` | 4-9 |
+| 10 | `README.md` | 4-9 |
 
 비공개(사용자가 로컬에서 실행하고 결과를 Issue #2에 남긴다. PR 본문에 이 사실을 쓴다):
 
@@ -236,3 +250,11 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./mathsecr-paper-builder-kit/scrip
 | validator 정규식 | marker 이름만 | `Surface:` 줄 제외. 사본 2곳(`test_install_contract.ps1`, `README.md`) 추가 | `validate_mathsecr_docs.ps1:789-791` |
 | 완료 조건 | `test_aside_preflight.ps1` 공개 실행 | 비공개 fixture. 사용자 로컬 실행 | `offline-regression-gates.json` AsidePreflight |
 | 시험 파일 | 미지정 | `test_browser_surface_probe.ps1` 공개 gate 추가 | 공통 제약 |
+
+## 검토 반영(Issue #2 질문 1~3, 2026-10-11)
+
+| 질문 | 판정 | 바뀐 곳 |
+|---|---|---|
+| 1. 바뀐 export 수 | 10개. `state_machine.ps1` 하나가 아니다 | 완료 조건 `export 목록` 표. 작업 3의 export 문장 |
+| 2. iab receipt를 chrome-ext로 검사 | 표는 순서대로 판정한다. `surface` 불일치는 `read`, `browser.type` 불일치는 `connect`. 시험은 두 사례로 나눈다 | 작업 2 codex 분류 표 머리말. 작업 5-1 codex 사례 |
+| 3. aside stdout | 기존 stdout 유지. probe receipt는 `-ProbeReceiptPath` 파일에만 쓴다. codex·offline만 stdout에도 쓴다 | 작업 1 스크립트 문단·aside 항목. 작업 2 머리말 |

@@ -180,8 +180,8 @@ Phase 1·1b와 Phase 2는 서로 독립이다. 병렬로 진행할 수 있다.
 
 작업:
 
-1. `Assert-FailedProblemReportPdf`의 Python(pypdf) 검증을 최상위 호출당 1개 프로세스로 묶는다. 프로세스는 검증 Context의 자원이다. 표준 입출력 JSON 한 줄로 요청과 응답을 주고받는다. 호출이 끝나면 프로세스를 끝낸다. Context가 없는 독립 호출은 지금처럼 한 번 실행 방식이다. Python 검증 함수와 오류 문장은 바꾸지 않는다.
-2. `Test-MathSecrEditAppendReceipt`의 결과를 같은 Context 안에서 공유한다. key는 snapshot 객체 참조, 기대 ID·키, 깊이다. `Valid`인 결과만 저장한다. state machine이 검증한 뒤 production 최종 재검사는 같은 결과를 쓴다.
+1. `Assert-FailedProblemReportPdf`의 Python(pypdf) 검증을 최상위 호출당 1개 프로세스로 묶는다. 프로세스는 검증 Context의 자원이다. 표준 입출력 JSON 한 줄로 요청과 응답을 주고받는다. 응답 메시지는 경고를 포함한 요청별 전체 진단이다. 조기 종료 시 stderr가 종료 코드보다 먼저다. 호출이 끝나면 프로세스를 끝낸다. Context가 없는 독립 호출은 지금처럼 한 번 실행 방식이다. Python 검증 함수와 오류 문장은 바꾸지 않는다.
+2. `Test-MathSecrEditAppendReceipt`의 결과를 같은 Context 안에서 공유한다. key는 snapshot 객체 참조, 내용 digest, 기대 ID·키의 복사본, 깊이다. 내용이 바뀌면 다시 검증한다. `Valid`인 결과만 저장한다. state machine이 검증한 뒤 production 최종 재검사는 같은 결과를 쓴다.
 3. 계측에 `pdfValidatorStarts`, `pdfChecks`, `appendReceiptValidations`를 더한다. 동일성 비교에 실패 PDF 변조 2종을 더한다.
 
 완료 기준:

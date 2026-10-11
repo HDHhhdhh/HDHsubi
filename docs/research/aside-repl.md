@@ -63,8 +63,8 @@ await page.evaluate(
 문자열 함수와 인자도 통과했다. 살아 있는 REPL의 `pwd`를 먼저 읽었다. 그 `pwd/artifacts/` 아래에 공개 수집기와 simulator control map을 복사하고 파일 수·크기·SHA-256을 대조했다. 이전 세션 경로를 재사용하지 않았다. 다음은 이번 검증에서 사용한 방식이다.
 
 ```javascript
-const source = await fs.readFile('./artifacts/r1/search_observation.js', 'utf8');
-const map = JSON.parse(await fs.readFile('./artifacts/r1/simulator.json', 'utf8'));
+const source = await fs.readFile('./artifacts/mathsecr-research-r1/search_observation.js', 'utf8');
+const map = JSON.parse(await fs.readFile('./artifacts/mathsecr-research-r1/simulator.json', 'utf8'));
 const functionText = source.substring(
   source.indexOf('function collectMathSecrSearchObservation'),
   source.indexOf('\nif (typeof module')
@@ -131,7 +131,7 @@ Phase 3b는 확인된 local/계정 선택·탭 목록·현재 session ID·실제
 
 종료 코드 0. 원문 SHA-256: e1969192b6d86d313854dbc63e03e9a2f46f2e03a4db00d848f6a593f528416d
 
-```text
+````text
 Aside CLI 1.26.916.1741 · Skill version 3
 
 # Aside
@@ -218,14 +218,14 @@ On the remote host, remote control needs to be enabled on Settings > Developers 
 > Use `aside host use` to remember the host as the default for future commands.
 
 Aside CLI 1.26.1010.1739 is available (current 1.26.916.1741). Run: aside update
-```
+````
 
 
 ### aside --host local guide repl
 
 종료 코드 0. 원문 SHA-256: 9619175669bb2a3ccc6af63844af05f7f077b2533f7ac062680ade1a7ce46e0b
 
-```text
+````text
 Aside CLI 1.26.916.1741 · Skill version 3
 
 # Before using REPL, read Aside built-in skills first
@@ -379,4 +379,4 @@ console.log({
 After downloading a PDF or document, extract requested facts using available local document/PDF tools. Report only facts found in the file or confirmed on the page.
 
 Aside CLI 1.26.1010.1739 is available (current 1.26.916.1741). Run: aside update
-```
+````

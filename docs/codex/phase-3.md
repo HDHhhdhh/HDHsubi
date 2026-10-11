@@ -27,7 +27,7 @@ flowchart LR
 - `docs/incidents.md` 사고 16~21(`:107-142`). surface 오분류의 이력이다. 19번이 Aside의 Codex 확장 표면을 Chrome로 분류한 사고다.
 - surface가 결합된 지점. 현재 `main` 줄 번호다.
   - `mathsecr-paper-builder-kit/scripts/search_observation_contract.ps1:131`. `submission.surface` 허용값이 `@('aside-repl','offline-dom-test')`다.
-  - `mathsecr-paper-builder-kit/scripts/body_comparison_contract.ps1:57-64`. 선택 receipt는 `submission.surface -ceq 'aside-repl'`이고 URL이 `https` + `mathsecr.com` host + `/mypaper/<id>`여야 한다. 주석이 offline DOM 시험은 선택 receipt가 아니라고 적는다. 이 PR이 그 주석과 규칙을 바꾼다.
+  - `mathsecr-paper-builder-kit/scripts/body_comparison_contract.ps1:57-64`. 선택 receipt는 `submission.surface -ceq 'aside-repl'`이고 URL이 절대 `https` URI, host가 `www.mathsecr.com` 또는 `mathsecr.com`, 경로가 `^/mypaper/[^/]+/?$`여야 한다. 현재 선택 검사는 숫자 ID에 한정하지 않는다. 주석이 offline DOM 시험은 선택 receipt가 아니라고 적는다. 이 PR이 그 주석과 규칙을 작업 1의 공통 URL 규칙으로 바꾼다.
   - `mathsecr-paper-builder-kit/scripts/production_validation.ps1:41`. `session.paper.url`이 `^https://www\.mathsecr\.com/mypaper/[0-9]+$`여야 한다. `:132` persisted capture의 `surface -ceq 'aside-repl'`. `:133` capture URL이 `paper.url`과 같아야 한다.
   - `mathsecr-paper-builder-kit/scripts/state_machine.ps1:1329` `editAppendReceipt.surface`. `:1416` `추가`·`확인` action의 `surface`. `:1450` `addAfter.surface`. `:1464` `confirmBefore`·`confirmAfter`의 `surface`. 네 곳이 `-cne 'aside-repl'`이다. `:1549` snapshot 필수 필드에 `asideRepl`이 있다. `:1566-1575` `asideRepl{available, paperVerified, nonAsideReplLiveManipulation}` 세 boolean 검사. state 이름은 `ASIDE_REPL_READY`다.
   - `mathsecr-paper-builder-kit/scripts/report_contract.ps1:798`. 사용자 요약 0번 줄의 paper 링크가 `https://www.mathsecr.com/mypaper/<digits>`여야 한다.

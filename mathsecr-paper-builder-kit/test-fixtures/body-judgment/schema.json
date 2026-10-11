@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Explicit body comparison judgment",
+  "type": "object",
+  "required": [
+    "comparator",
+    "comparedAtUtc",
+    "policy",
+    "verdict",
+    "candidateId",
+    "searchAttemptId",
+    "comparison",
+    "sourceRenderScale",
+    "candidateRenderScale",
+    "unresolvedGlyphs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "comparator": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^\\S(?:[^\\r\\n]*\\S)?$"
+    },
+    "comparedAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "policy": {
+      "const": "body-only-v1"
+    },
+    "verdict": {
+      "enum": [
+        "exact",
+        "mismatch"
+      ]
+    },
+    "candidateId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!없음$)(?!\\s)(?!.*\\s$)[^,\\r\\n]+$"
+    },
+    "searchAttemptId": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!없음$)(?!\\s)(?!.*\\s$)[^,\\r\\n]+$"
+    },
+    "comparison": {
+      "type": "object",
+      "required": [
+        "bodyText",
+        "conditions",
+        "formulas",
+        "figures",
+        "pointLabels",
+        "requiredValue",
+        "internalStatements"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "bodyText": {
+          "enum": [
+            "match",
+            "not-present",
+            "mismatch"
+          ]
+        },
+        "conditions": {
+          "enum": [
+            "match",
+            "not-present",
+            "mismatch"
+          ]
+        },
+        "formulas": {
+          "enum": [
+            "match",
+            "not-present",
+            "mismatch"
+          ]
+        },
+        "figures": {
+          "enum": [
+            "match",
+            "not-present",
+            "mismatch"
+          ]
+        },
+        "pointLabels": {
+          "enum": [
+            "match",
+            "not-present",
+            "mismatch"
+          ]
+        },
+        "requiredValue": {
+          "enum": [
+            "match",
+            "not-present",
+            "mismatch"
+          ]
+        },
+        "internalStatements": {
+          "enum": [
+            "match",
+            "not-present",
+            "mismatch"
+          ]
+        }
+      }
+    },
+    "sourceRenderScale": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "candidateRenderScale": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "unresolvedGlyphs": {
+      "type": "boolean"
+    }
+  }
+}

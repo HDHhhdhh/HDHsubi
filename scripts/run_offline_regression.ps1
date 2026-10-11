@@ -69,7 +69,8 @@ foreach ($gate in $manifest.gates) {
         if ($value -ceq '{projectRoot}') { $value = $project }
         $arguments += @("-$key", [string]$value)
       }
-      if ($gate.script -ceq 'mathsecr-paper-builder-kit/scripts/test_search_observation.ps1') {
+      if ($gate.script -cin @('mathsecr-paper-builder-kit/scripts/test_search_observation.ps1',
+          'mathsecr-paper-builder-kit/scripts/test_assemble_pipeline.ps1')) {
         $arguments += @('-NodePath',$NodePath)
         if ($PlaywrightModule) { $arguments += @('-PlaywrightModule',$PlaywrightModule) }
         if ($BrowserPath) { $arguments += @('-BrowserPath',$BrowserPath) }

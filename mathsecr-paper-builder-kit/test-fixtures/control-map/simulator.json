@@ -1,0 +1,46 @@
+{
+  "controlMapVersion": "control-map-v1",
+  "observedAtUtc": "2026-10-11T00:00:00Z",
+  "surface": "offline-dom-test",
+  "pageKind": "simulator-search",
+  "id": "offline-iab-simulator-v1",
+  "evidenceId": "test-fixtures/iab-simulator/index.html",
+  "scopeMode": {
+    "selector": "#modeChip",
+    "read": "text"
+  },
+  "sourceChips": {
+    "selector": "#selectedChip",
+    "read": "text"
+  },
+  "filterChips": null,
+  "selectedScopeChecks": [
+    {
+      "selector": "#educationSourceLabel",
+      "read": "attribute",
+      "attribute": "data-selected",
+      "equals": "true"
+    }
+  ],
+  "queryChips": [
+    {
+      "selector": "#chips [data-testid='query-chip']",
+      "read": "text",
+      "kind": "text"
+    }
+  ],
+  "resultCount": {
+    "selector": "#resultCount",
+    "read": "text",
+    "pattern": "^검색결과 : ([0-9,]+)개$"
+  },
+  "resultIds": {
+    "selector": "#cards label.card[data-selectable-id]",
+    "read": "attribute",
+    "attribute": "data-selectable-id",
+    "trim": false
+  },
+  "loading": null,
+  "resultSubmitId": null,
+  "resultCriteriaKey": null
+}

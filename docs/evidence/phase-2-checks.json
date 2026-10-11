@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-11T05:19:48.407953+00:00",
+  "scope": "Phase 2 local public regression and selection-mode measurement",
+  "liveProductBehavior": false,
+  "publicChecks": {
+    "status": "PASS"
+  },
+  "publication": {
+    "status": "PASS",
+    "archivedSnapshotFiles": 72,
+    "hashDrift": 0
+  },
+  "offlineRegression": {
+    "status": "PASS",
+    "passed": 13,
+    "failed": 0,
+    "skipped": 20,
+    "privateBundleTestsExecuted": false
+  },
+  "assemblePipeline": {
+    "status": "PASS",
+    "simulatorObservationAndAttemptContract": "PASS",
+    "simulatorSelectionReason": "selected-search-receipt-invalid",
+    "syntheticSelectBeforeNext": "PASS",
+    "specifiedRejectionCases": 4,
+    "additionalRejectionCases": [
+      "judgment-time-missing",
+      "boolean-render-scale",
+      "roster-hash",
+      "duplicate-roster"
+    ],
+    "preparationHelperIdentity": "PASS",
+    "cliResidentIdentity": "PASS",
+    "chipEvidenceRetained": true,
+    "preparationLfDigestVerified": true
+  },
+  "residentProtocol": {
+    "status": "PASS",
+    "malformedAndNonObjectCommandRecovery": true,
+    "missingStepRecovery": true,
+    "fileMutationAndRestoration": true,
+    "exitAndEofWithinFiveSeconds": true
+  },
+  "performance": {
+    "status": "PASS",
+    "evidence": "perf-phase2.json",
+    "problemCount": 47,
+    "repeats": 3,
+    "passesPerModePerRepeat": 47,
+    "cliTotalMedianMs": 47681.6577,
+    "residentTotalMedianMs": 7082.9082,
+    "cliPerCommandMedianMs": 1009.3002,
+    "residentPerCommandMedianMs": 134.415,
+    "residentFaster": true,
+    "cliProcessStartsPerRepeat": 47,
+    "residentProcessStartsPerRepeat": 1
+  },
+  "syntax": {
+    "status": "PASS"
+  },
+  "preservation": {
+    "frozenExportFiles": 8,
+    "frozenExportDiffEmpty": true,
+    "sourceSnapshotUnchanged": true,
+    "originalSourceHashes": 72,
+    "phase1bPerformanceEvidenceUnchanged": true,
+    "agentsAndSkillUnchanged": true
+  },
+  "afterReloadIdentity": {
+    "verificationLocation": "CI for this PR commit",
+    "baselineCommit": "961c41105e96f368c48f6a39303e15520e0b3213",
+    "cases": 24,
+    "comparisonAndContractFilesUnchanged": true
+  },
+  "ciEvidence": "Use the GitHub Actions run linked in the PR body for the implementation commit; local checks do not establish CI success.",
+  "processCleanup": {
+    "status": "PASS",
+    "remainingPdfWorkers": 0,
+    "remainingResidentProcesses": 0
+  },
+  "scopeLimits": [
+    "initial-scope winning attempt only",
+    "simulator selection remains rejected until Phase 3",
+    "private-bundle fixtures unavailable",
+    "no live product or mathematical/visual ground truth"
+  ]
+}

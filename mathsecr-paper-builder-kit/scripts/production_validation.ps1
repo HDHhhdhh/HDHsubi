@@ -10,7 +10,7 @@ function Assert-MathSecrProduction {
 }
 
 function Get-MathSecrProductionArtifact {
-  param($Receipt, [string]$ProjectRoot, [string]$Extension = '.json')
+  param($Receipt, [string]$ProjectRoot, [string]$Extension = '.json', $Context)
   Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $Receipt @('path','sha256')) 'An artifact path and SHA-256 are required.'
   Assert-MathSecrProduction ($Receipt.sha256 -is [string] -and $Receipt.sha256 -match '^[a-fA-F0-9]{64}$') 'Artifact SHA-256 is invalid.'
   Assert-MathSecrProduction ($Receipt.path -is [string] -and -not [string]::IsNullOrWhiteSpace($Receipt.path) -and $Receipt.path -ceq $Receipt.path.Trim() -and -not [IO.Path]::IsPathRooted($Receipt.path) -and -not $Receipt.path.Contains(':')) 'Artifact path must be canonical and project-relative.'
@@ -21,13 +21,18 @@ function Get-MathSecrProductionArtifact {
   Assert-MathSecrProduction ($full.StartsWith($root+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $full -PathType Leaf) -and [IO.Path]::GetExtension($full).ToLowerInvariant() -ceq $Extension) 'Artifact must be an existing, safe project-relative file of the required type.'
   $cursor=$root
   foreach($segment in $segments){$cursor=Join-Path $cursor $segment;Assert-MathSecrProduction (((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0) 'Artifact path traverses a reparse point.'}
-  $hash = (Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash
-  Assert-MathSecrProduction ([string]::Equals($hash, $Receipt.sha256, [StringComparison]::OrdinalIgnoreCase)) 'Artifact hash does not match its bytes.'
+  $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+  try {
+  try { $null = Get-MathSecrValidationArtifact -Path $full -ExpectedSha256 $Receipt.sha256 -Context $Context } catch {
+    if ($_.Exception.Data['MathSecrArtifactError'] -ceq 'hash') { Assert-MathSecrProduction $false 'Artifact hash does not match its bytes.' }
+    throw
+  }
   return $full
+  } finally { Exit-MathSecrValidationContext -Context $Context }
 }
 
 function Assert-MathSecrProductionRoster {
-  param($Session, [string]$ProjectRoot)
+  param($Session, [string]$ProjectRoot, $Context)
   Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $Session @('schemaVersion','sessionId','paper','sourceTargets','sourceRosterArtifact','snapshot')) 'A versioned session, source roster and current snapshot are required.'
   Assert-MathSecrProduction ((Test-IsStrictInteger $Session.schemaVersion) -and $Session.schemaVersion -eq 1) 'Unsupported session schemaVersion.'
   Assert-MathSecrProduction (Test-IsCanonicalId $Session.sessionId) 'sessionId must be canonical.'
@@ -35,9 +40,14 @@ function Assert-MathSecrProductionRoster {
   Assert-MathSecrProduction ($Session.paper.name -is [string] -and -not [string]::IsNullOrWhiteSpace($Session.paper.name) -and $Session.paper.name -notmatch '[\r\n\[\]#@]') 'Paper name is not safe for the public summary.'
   Assert-MathSecrProduction ($Session.paper.url -is [string] -and $Session.paper.url -match '^https://www\.mathsecr\.com/mypaper/[0-9]+$') 'A verified MathSecr paper URL is required.'
   Assert-MathSecrProduction ($Session.sourceTargets -is [array] -and $Session.sourceTargets.Count -gt 0 -and $Session.snapshot -is [pscustomobject] -and $Session.snapshot.targets -is [array]) 'Source and snapshot targets must be arrays.'
-  $rosterPath = Get-MathSecrProductionArtifact $Session.sourceRosterArtifact $ProjectRoot
-  $roster = ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $rosterPath -Raw -Encoding UTF8)
-  $null = Get-MathSecrProductionArtifact $Session.sourceRosterArtifact $ProjectRoot
+  $contextEntered = $false
+  if (-not [string]::IsNullOrEmpty($ProjectRoot)) {
+    $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+    $contextEntered = $true
+  }
+  try {
+  $rosterPath = Get-MathSecrProductionArtifact $Session.sourceRosterArtifact $ProjectRoot -Context $Context
+  $roster = (Get-MathSecrValidationArtifact -Path $rosterPath -ExpectedSha256 $Session.sourceRosterArtifact.sha256 -Context $Context -Parse).Value
   Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $roster @('schemaVersion','targets')) 'The fixed source roster is invalid.'
   Assert-MathSecrProduction ((Test-IsStrictInteger $roster.schemaVersion) -and $roster.schemaVersion -eq 1 -and $roster.targets -is [array]) 'Unsupported source roster schema.'
   Assert-MathSecrProduction ($roster.targets.Count -eq $Session.sourceTargets.Count -and $roster.targets.Count -eq $Session.snapshot.targets.Count) 'Original source rows are missing or extra.'
@@ -51,18 +61,30 @@ function Assert-MathSecrProductionRoster {
     $artifact=$original.sourceBodyArtifact
     Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $artifact @('path','sha256')) 'The fixed source crop binding is missing.'
     $sourcePath=Resolve-MathSecrStateArtifactPath $ProjectRoot $artifact.path
-    Assert-MathSecrProduction ($null -ne $sourcePath -and $artifact.sha256 -is [string] -and $artifact.sha256 -match '^[a-fA-F0-9]{64}$' -and [string]::Equals((Get-FileHash -LiteralPath $sourcePath -Algorithm SHA256).Hash,$artifact.sha256,[StringComparison]::OrdinalIgnoreCase)) 'The fixed source crop is missing or its hash differs.'
+    Assert-MathSecrProduction ($null -ne $sourcePath -and $artifact.sha256 -is [string] -and $artifact.sha256 -match '^[a-fA-F0-9]{64}$') 'The fixed source crop is missing or its hash differs.'
+    try { $null = Get-MathSecrValidationArtifact -Path $sourcePath -ExpectedSha256 $artifact.sha256 -Context $Context } catch {
+      if ($_.Exception.Data['MathSecrArtifactError'] -ceq 'hash') { Assert-MathSecrProduction $false 'The fixed source crop is missing or its hash differs.' }
+      throw
+    }
     foreach ($actual in @($Session.sourceTargets[$i], $Session.snapshot.targets[$i])) {
       Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $actual @('number','occurrenceKey','sourceBodyArtifact')) 'A source row is missing its identity or crop.'
       Assert-MathSecrProduction ($actual.number -is [string] -and $actual.occurrenceKey -is [string] -and $actual.number -ceq $original.number -and $actual.occurrenceKey -ceq $original.occurrenceKey) 'Original source order or occurrence binding changed.'
       Assert-MathSecrProduction ((Test-MathSecrSearchRequiredProperties $actual.sourceBodyArtifact @('path','sha256')) -and $actual.sourceBodyArtifact.path -is [string] -and $actual.sourceBodyArtifact.path -ceq $artifact.path -and $actual.sourceBodyArtifact.sha256 -is [string] -and [string]::Equals($actual.sourceBodyArtifact.sha256,$artifact.sha256,[StringComparison]::OrdinalIgnoreCase)) 'A source crop binding differs from the fixed original roster.'
     }
   }
+  } finally { if ($contextEntered) { Exit-MathSecrValidationContext -Context $Context } }
 }
 
 function Test-MathSecrProductionSelection {
-  param([pscustomobject]$Session, [string]$TargetOccurrenceKey, [string]$ProjectRoot)
-  Assert-MathSecrProductionRoster $Session $ProjectRoot
+  param([pscustomobject]$Session, [string]$TargetOccurrenceKey, [string]$ProjectRoot, $Context)
+  # With no root, retain the roster's original guard/error precedence.
+  $contextEntered = $false
+  if (-not [string]::IsNullOrEmpty($ProjectRoot)) {
+    $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+    $contextEntered = $true
+  }
+  try {
+  Assert-MathSecrProductionRoster $Session $ProjectRoot -Context $Context
   Assert-MathSecrProduction (Test-IsCanonicalOccurrenceKey $TargetOccurrenceKey) 'Select requires an explicit canonical target occurrenceKey.'
   $matching=@($Session.snapshot.targets | Where-Object {$_.occurrenceKey -ceq $TargetOccurrenceKey})
   Assert-MathSecrProduction ($matching.Count -eq 1) 'Select target must occur exactly once in the fixed session roster.'
@@ -75,14 +97,14 @@ function Test-MathSecrProductionSelection {
   Assert-MathSecrProduction ($null -eq $property -or ($property.Value -is [string] -and $property.Value -ceq $resolution)) 'Caller resolution differs from the derived target route.'
   Assert-MathSecrProduction ($resolution -cin @('initial_selected','candidate_selected','whole_selected','metadata_selected')) 'Select requires an exact-producing resolution.'
   if ($resolution -ceq 'metadata_selected') {
-    $metadata=Test-MathSecrMetadataRescueReceipt $Target $false $ProjectRoot
+    $metadata=Test-MathSecrMetadataRescueReceipt $Target $false $ProjectRoot -Context $Context
     Assert-MathSecrProduction ([bool]$metadata.Valid) 'The metadata-rescue receipt was rejected.'
   } else {
     Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $Target @('searchAttemptReceipt')) 'Select requires the actual search-attempt receipt.'
   }
   $search = Test-MathSecrSelectedSearchReceipt -Target $Target -Resolution $resolution
   Assert-MathSecrProduction ([bool]$search.Valid) 'Selected search target/candidate/attempt binding was rejected.'
-  $body = Test-MathSecrBodyComparisonReceipt -Receipt $Target.bodyComparisonReceipt -Target $Target -ProjectRoot $ProjectRoot -InspectedIds $search.InspectedIds -AttemptId $search.AttemptId
+  $body = Test-MathSecrBodyComparisonReceipt -Receipt $Target.bodyComparisonReceipt -Target $Target -ProjectRoot $ProjectRoot -InspectedIds $search.InspectedIds -AttemptId $search.AttemptId -Context $Context
   Assert-MathSecrProduction ([bool]$body.Valid) "Body comparison was rejected: $($body.Errors -join '; ')."
   Assert-MathSecrProduction ($search.Projection.Url -ceq $Session.paper.url) 'Select evidence belongs to another paper URL.'
   return [pscustomobject]@{
@@ -92,14 +114,20 @@ function Test-MathSecrProductionSelection {
     CandidateRenderSha256=$Target.bodyComparisonReceipt.candidateRenderSha256
     TruthScope='receipt-structure-and-artifact-identity-only'
   }
+  } finally { if ($contextEntered) { Exit-MathSecrValidationContext -Context $Context } }
 }
 
 function Get-MathSecrProductionPersistedCapture {
-  param([pscustomobject]$Session, [string]$ProjectRoot)
+  param([pscustomobject]$Session, [string]$ProjectRoot, $Context)
   Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $Session @('persistedCardObservationArtifact','persistedCards')) 'AfterReload requires the final persisted-card observation artifact.'
-  $full=Get-MathSecrProductionArtifact $Session.persistedCardObservationArtifact $ProjectRoot
-  $capture=ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $full -Raw -Encoding UTF8)
-  $null=Get-MathSecrProductionArtifact $Session.persistedCardObservationArtifact $ProjectRoot
+  $contextEntered = $false
+  if (-not [string]::IsNullOrEmpty($ProjectRoot)) {
+    $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+    $contextEntered = $true
+  }
+  try {
+  $full=Get-MathSecrProductionArtifact $Session.persistedCardObservationArtifact $ProjectRoot -Context $Context
+  $capture=(Get-MathSecrValidationArtifact -Path $full -ExpectedSha256 $Session.persistedCardObservationArtifact.sha256 -Context $Context -Parse).Value
   Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $capture @('schemaVersion','captureId','collectorVersion','surface','capturedAtUtc','url','title','readEvidenceId','cards')) 'Persisted-card capture provenance or ordered cards are missing.'
   Assert-MathSecrProduction ((Test-IsStrictInteger $capture.schemaVersion) -and $capture.schemaVersion -eq 1 -and $capture.surface -is [string] -and $capture.surface -ceq 'aside-repl') 'Persisted-card capture schema or surface is invalid.'
   Assert-MathSecrProduction ((Test-MathSecrObservationToken $capture.captureId) -and (Test-MathSecrObservationToken $capture.collectorVersion) -and (Test-MathSecrObservationToken $capture.readEvidenceId) -and (Test-MathSecrObservationTimestamp $capture.capturedAtUtc) -and (Test-MathSecrObservationText $capture.title)) 'Persisted-card capture provenance has invalid field types or values.'
@@ -112,6 +140,7 @@ function Get-MathSecrProductionPersistedCapture {
     Assert-MathSecrProduction ($local.problemId -is [string] -and $local.problemId -ceq $observed.problemId -and $local.rawVisibleDbName -is [string] -and $local.rawVisibleDbName -ceq $observed.rawVisibleDbName) 'Persisted card ID, order or raw visible DB name differs from the final capture.'
   }
   return $capture
+  } finally { if ($contextEntered) { Exit-MathSecrValidationContext -Context $Context } }
 }
 
 function ConvertTo-MathSecrProductionSourceRoot {
@@ -127,14 +156,22 @@ function ConvertTo-MathSecrProductionSourceRoot {
 }
 
 function Get-MathSecrProductionReportProjection {
-  param([pscustomobject]$Session, [pscustomobject]$StateResult, [string]$ProjectRoot)
+  param([pscustomobject]$Session, [pscustomobject]$StateResult, [string]$ProjectRoot, $Context)
   Assert-MathSecrProduction (Test-MathSecrSearchRequiredProperties $Session @('persistedCards','failureReportPdf')) 'AfterReload requires actual persisted cards and the failure PDF field.'
   Assert-MathSecrProduction ($Session.persistedCards -is [array]) 'Persisted cards must be an ordered array.'
   Assert-MathSecrProduction ($StateResult.State -ceq 'REPORT' -and $StateResult.Status -cin @('완료','부분 완료','검색 완료/0선택')) "AfterReload state is not reportable: $($StateResult.State)/$($StateResult.Status). $($StateResult.EvidenceErrors -join '; ')"
-  $capture=Get-MathSecrProductionPersistedCapture $Session $ProjectRoot
+  $contextEntered = $false
+  if (-not [string]::IsNullOrEmpty($ProjectRoot)) {
+    $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+    $contextEntered = $true
+  }
+  try {
+  $capture=Get-MathSecrProductionPersistedCapture $Session $ProjectRoot -Context $Context
   $selectedNumbers = @($StateResult.SelectedSourceNumbers)
   Assert-MathSecrProduction ($selectedNumbers.Count -eq $StateResult.PersistedCount -and $Session.persistedCards.Count -eq $StateResult.PersistedCount) 'Persisted card count differs from validated selected occurrences.'
-  $successful = @($Session.snapshot.targets | Where-Object { $number=$_.number; @($selectedNumbers | Where-Object { $_ -ceq $number }).Count -eq 1 })
+  $selectedCounts = [Collections.Generic.Dictionary[string,int]]::new([StringComparer]::Ordinal)
+  foreach ($number in $selectedNumbers) { if ($selectedCounts.ContainsKey($number)) { $selectedCounts[$number]++ } else { $selectedCounts[$number]=1 } }
+  $successful = @($Session.snapshot.targets | Where-Object { $selectedCounts.ContainsKey($_.number) -and $selectedCounts[$_.number] -eq 1 })
   Assert-MathSecrProduction ($successful.Count -eq $selectedNumbers.Count) 'Validated selections do not map one-to-one to original occurrences.'
   $sourceRecords = [Collections.Generic.List[object]]::new()
   $groups = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
@@ -149,12 +186,14 @@ function Get-MathSecrProductionReportProjection {
     $groups[$root].Count++
   }
   $sources=@($groups.Values | Sort-Object @{Expression='Count';Descending=$true}, @{Expression='FirstOrder';Descending=$false} | Select-Object -First 3)
-  $failed=@($Session.sourceTargets | Where-Object { $number=$_.number; @($selectedNumbers | Where-Object { $_ -ceq $number }).Count -eq 0 } | ForEach-Object { $_.number })
+  $failed=@($Session.sourceTargets | Where-Object { -not $selectedCounts.ContainsKey($_.number) } | ForEach-Object { $_.number })
   $original=$Session.sourceTargets.Count; $success=$StateResult.PersistedCount
   Assert-MathSecrProduction ($failed.Count -eq ($original-$success)) 'Failure rows do not cover the remaining original occurrences.'
   $diagnosed=@($StateResult.ClosedMissedSourceNumbers)+@($StateResult.UnresolvedSourceNumbers)
   Assert-MathSecrProduction ($diagnosed.Count -eq $failed.Count) 'Every failed occurrence needs a closed-miss or unresolved diagnosis.'
-  foreach($number in $failed){Assert-MathSecrProduction (@($diagnosed | Where-Object {$_ -ceq $number}).Count -eq 1) 'A failed occurrence has a missing or duplicate diagnosis.'}
+  $diagnosedCounts = [Collections.Generic.Dictionary[string,int]]::new([StringComparer]::Ordinal)
+  foreach($number in $diagnosed) { if ($diagnosedCounts.ContainsKey($number)) { $diagnosedCounts[$number]++ } else { $diagnosedCounts[$number]=1 } }
+  foreach($number in $failed){Assert-MathSecrProduction ($diagnosedCounts.ContainsKey($number) -and $diagnosedCounts[$number] -eq 1) 'A failed occurrence has a missing or duplicate diagnosis.'}
   Assert-MathSecrProduction ($Session.failureReportPdf -is [string]) 'failureReportPdf must be a path or the exact 없음 sentinel.'
   if ($failed.Count -eq 0) {
     Assert-MathSecrProduction ($Session.failureReportPdf -ceq '없음') 'A complete session must use failureReportPdf 없음.'
@@ -175,6 +214,7 @@ function Get-MathSecrProductionReportProjection {
     SelectionBeforeNextIds=@($StateResult.SelectionBeforeNextIds)
     TruthScope='receipt-structure-and-artifact-identity-only'
   }
+  } finally { if ($contextEntered) { Exit-MathSecrValidationContext -Context $Context } }
 }
 
 function New-MathSecrProductionUserSummary {
@@ -203,18 +243,19 @@ function Invoke-MathSecrProductionStep {
     [Parameter(Mandatory=$true)][pscustomobject]$InputObject,
     [string]$ProjectRoot=(Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
     [string]$TargetOccurrenceKey,
-    [int]$HistoryDepth=0)
+    [int]$HistoryDepth=0, $Context)
   $ProjectRoot=[IO.Path]::GetFullPath($ProjectRoot)
-  if ($Step -ceq 'Select') { return Test-MathSecrProductionSelection -Session $InputObject -TargetOccurrenceKey $TargetOccurrenceKey -ProjectRoot $ProjectRoot }
+  $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+  try {
+  if ($Step -ceq 'Select') { return Test-MathSecrProductionSelection -Session $InputObject -TargetOccurrenceKey $TargetOccurrenceKey -ProjectRoot $ProjectRoot -Context $Context }
   Assert-MathSecrProduction ([string]::IsNullOrEmpty($TargetOccurrenceKey)) 'TargetOccurrenceKey is allowed only for Select.'
-  Assert-MathSecrProductionRoster $InputObject $ProjectRoot
+  Assert-MathSecrProductionRoster $InputObject $ProjectRoot -Context $Context
   $appendProperty=$InputObject.snapshot.PSObject.Properties['editAppendReceipt']
   $priorValidation=$null
   if ($null -ne $appendProperty) {
     Assert-MathSecrProduction ($Step -ceq 'AfterReload' -and $HistoryDepth -ge 0 -and $HistoryDepth -lt 64) 'Edit append requires AfterReload and a bounded prior-session history.'
-    $priorPath=Get-MathSecrProductionArtifact $appendProperty.Value.priorSessionArtifact $ProjectRoot
-    $priorSession=ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $priorPath -Raw -Encoding UTF8)
-    $null=Get-MathSecrProductionArtifact $appendProperty.Value.priorSessionArtifact $ProjectRoot
+    $priorPath=Get-MathSecrProductionArtifact $appendProperty.Value.priorSessionArtifact $ProjectRoot -Context $Context
+    $priorSession=(Get-MathSecrValidationArtifact -Path $priorPath -ExpectedSha256 $appendProperty.Value.priorSessionArtifact.sha256 -Context $Context -Parse).Value
     Assert-MathSecrProduction ($priorSession.sessionId -is [string] -and $priorSession.sessionId -ceq $InputObject.sessionId -and
       $priorSession.paper.url -is [string] -and $priorSession.paper.url -ceq $InputObject.paper.url -and
       $priorSession.paper.name -is [string] -and $priorSession.paper.name -ceq $InputObject.paper.name -and
@@ -222,9 +263,10 @@ function Invoke-MathSecrProductionStep {
       $priorSession.sourceRosterArtifact.sha256 -is [string] -and [string]::Equals($priorSession.sourceRosterArtifact.sha256,$InputObject.sourceRosterArtifact.sha256,[StringComparison]::OrdinalIgnoreCase)) 'Edit append prior session has another session, paper or fixed roster.'
     # Recompute the full prior production boundary. A cached Valid flag or a
     # state-only success cannot replace its persisted capture and PDF gates.
-    $priorValidation=Invoke-MathSecrProductionStep -Step AfterReload -InputObject $priorSession -ProjectRoot $ProjectRoot -HistoryDepth ($HistoryDepth+1)
+    $priorValidation=Invoke-MathSecrProductionStep -Step AfterReload -InputObject $priorSession -ProjectRoot $ProjectRoot -HistoryDepth ($HistoryDepth+1) -Context $Context
+    Set-MathSecrCachedStateResult -Context $Context -ArtifactSha256 $appendProperty.Value.priorSessionArtifact.sha256 -Snapshot $priorSession.snapshot -Phase AfterReload -StateResult $priorValidation.StateResult
   }
-  $state=Invoke-MathSecrStateMachine -Snapshot $InputObject.snapshot -Phase $Step -ProjectRoot $ProjectRoot
+  $state=Invoke-MathSecrStateMachine -Snapshot $InputObject.snapshot -Phase $Step -ProjectRoot $ProjectRoot -Context $Context
   foreach($evidence in @($state.SelectionEvidence)) {
     Assert-MathSecrProduction ($evidence.SearchObservation.Url -ceq $InputObject.paper.url) 'Selection evidence belongs to another paper URL.'
   }
@@ -232,9 +274,11 @@ function Invoke-MathSecrProductionStep {
     Assert-MathSecrProduction ($state.State -ceq 'PRE_NEXT_GATE' -and $state.Status -ceq 'ready-for-next' -and $state.CanNextStep -eq $true) "BeforeNext rejected: $($state.State)/$($state.Status)."
     return [pscustomobject]@{Valid=$true;Step=$Step;StateResult=$state;TruthScope='receipt-structure-and-artifact-identity-only'}
   }
-  $projection=Get-MathSecrProductionReportProjection $InputObject $state $ProjectRoot
+  $projection=Get-MathSecrProductionReportProjection $InputObject $state $ProjectRoot -Context $Context
   if ($null -ne $priorValidation) {
-    $append=Test-MathSecrEditAppendReceipt $InputObject.snapshot $state.SelectedIds @($state.SelectedSourceNumbers | ForEach-Object {$number=$_;@($InputObject.snapshot.targets | Where-Object {$_.number -ceq $number})[0].occurrenceKey}) $ProjectRoot 0
+    $targetsByNumber=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    foreach($target in $InputObject.snapshot.targets) { if (-not $targetsByNumber.ContainsKey($target.number)) { $targetsByNumber[$target.number]=$target } }
+    $append=Test-MathSecrEditAppendReceipt $InputObject.snapshot $state.SelectedIds @($state.SelectedSourceNumbers | ForEach-Object {$targetsByNumber[$_].occurrenceKey}) $ProjectRoot 0 -Context $Context
     Assert-MathSecrProduction ($append.Valid -and $append.PaperUrl -ceq $InputObject.paper.url) 'Edit append receipt is not bound to the current paper.'
     Assert-MathSecrProduction ([DateTimeOffset]::Parse($projection.PersistedCardCapture.CapturedAtUtc,[Globalization.CultureInfo]::InvariantCulture) -ge [DateTimeOffset]::Parse($append.DraftCapturedAtUtc,[Globalization.CultureInfo]::InvariantCulture)) 'Edit append persisted capture predates the confirmed draft.'
     Assert-MathSecrProduction ($projection.PersistedCardCapture.CaptureId -cne $priorValidation.ReportProjection.PersistedCardCapture.CaptureId -and $projection.PersistedCardCapture.ReadEvidenceId -cne $priorValidation.ReportProjection.PersistedCardCapture.ReadEvidenceId) 'Edit append reused the prior persisted read identity.'
@@ -242,6 +286,7 @@ function Invoke-MathSecrProductionStep {
   $summary=New-MathSecrProductionUserSummary $projection
   $null=Invoke-MathSecrUserSummaryLint -Text $summary -ExpectedProjection $projection
   return [pscustomobject]@{Valid=$true;Step=$Step;StateResult=$state;ReportProjection=$projection;UserSummary=$summary;TruthScope=$projection.TruthScope}
+  } finally { Exit-MathSecrValidationContext -Context $Context }
 }
 
 function Invoke-MathSecrTypedUserSummaryLint {

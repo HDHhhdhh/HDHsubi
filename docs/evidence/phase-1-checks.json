@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-11T00:10:02.711163+00:00",
+  "scope": "Phase 1 local public regression and equivalence",
+  "liveProductBehavior": false,
+  "offlineRegression": {
+    "status": "PASS",
+    "passed": 12,
+    "failed": 0,
+    "skipped": 20,
+    "privateBundleTestsExecuted": false
+  },
+  "validationContext": {
+    "status": "PASS",
+    "optionalProjectRootEarlyRejectionCases": 20
+  },
+  "afterReloadIdentity": {
+    "status": "PASS",
+    "baselineCommit": "961c41105e96f368c48f6a39303e15520e0b3213",
+    "problemCount": 15,
+    "historyDepths": [
+      1,
+      2,
+      6
+    ],
+    "normalCases": 3,
+    "rejectionCases": 15,
+    "normalClrScalarCounts": [
+      723,
+      721,
+      713
+    ],
+    "fixedTimestampFieldsCompared": true
+  },
+  "performance": {
+    "status": "PASS with time target missed",
+    "evidence": "perf-phase1.json",
+    "stateMachineCalls": [
+      2,
+      3,
+      7
+    ],
+    "maxHashCallsPerPath": 1,
+    "artifactAndParseLimitsMet": true,
+    "history6MedianMs": 2857.1223,
+    "history6TargetMs": 2200,
+    "history6TargetMet": false
+  },
+  "syntax": {
+    "status": "PASS",
+    "scope": "all changed or added PowerShell files"
+  },
+  "sourceProvenance": {
+    "archivedFiles": 72,
+    "originalSourceHashesPreserved": true,
+    "modifiedProductionExports": [
+      "production_validation.ps1",
+      "state_machine.ps1",
+      "read_contract_json.ps1",
+      "body_comparison_contract.ps1"
+    ]
+  },
+  "ciEvidence": "Use the GitHub Actions run for this PR commit; local checks do not establish CI success.",
+  "publication": {
+    "status": "PASS",
+    "archivedSnapshotFiles": 72,
+    "hashDrift": 0
+  },
+  "publicChecks": {
+    "status": "PASS"
+  }
+}

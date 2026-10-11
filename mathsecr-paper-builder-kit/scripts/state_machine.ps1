@@ -2,6 +2,87 @@
 . (Join-Path $PSScriptRoot "body_comparison_contract.ps1")
 . (Join-Path $PSScriptRoot 'read_contract_json.ps1')
 
+# Bump this when validation semantics change; the context itself stays call-local.
+$CONTRACT_VERSION = '2026-10-11.1'
+
+function Get-MathSecrStateCacheKey {
+  param([string]$ArtifactSha256, [string]$Phase)
+  return $ArtifactSha256.ToUpperInvariant() + '|' + $Phase + '|' + $CONTRACT_VERSION
+}
+
+function Set-MathSecrCachedStateResult {
+  param($Context, [string]$ArtifactSha256, $Snapshot, [string]$Phase, $StateResult)
+  if ($null -eq $Context -or $ArtifactSha256 -notmatch '^[a-fA-F0-9]{64}$') { return }
+  # Only completed validations are reusable at another recursion depth.
+  if ($StateResult.State -cne 'REPORT' -or $StateResult.Status -cnotin @('완료', '부분 완료')) { return }
+  $height = 0
+  $appendProperty = $Snapshot.PSObject.Properties['editAppendReceipt']
+  if ($null -ne $appendProperty) {
+    $priorReceipt = Get-MathSecrStatePropertyValue $appendProperty.Value 'priorSessionArtifact'
+    $priorHash = Get-MathSecrStatePropertyValue $priorReceipt 'sha256'
+    if ($priorHash -isnot [string] -or $priorHash -notmatch '^[a-fA-F0-9]{64}$') { return }
+    $priorKey = Get-MathSecrStateCacheKey -ArtifactSha256 $priorHash -Phase AfterReload
+    if (-not $Context.StateCache.ContainsKey($priorKey)) { return }
+    $height = $Context.StateCache[$priorKey].AppendHeight + 1
+  }
+  $key = Get-MathSecrStateCacheKey -ArtifactSha256 $ArtifactSha256 -Phase $Phase
+  $Context.StateCache[$key] = [pscustomobject]@{ StateResult = $StateResult; AppendHeight = $height }
+}
+
+function Get-MathSecrCachedStateResult {
+  param($Context, [string]$ArtifactSha256, [string]$Phase, [int]$AppendDepth)
+  if ($null -eq $Context -or $ArtifactSha256 -notmatch '^[a-fA-F0-9]{64}$') { return $null }
+  $key = Get-MathSecrStateCacheKey -ArtifactSha256 $ArtifactSha256 -Phase $Phase
+  if (-not $Context.StateCache.ContainsKey($key)) { return $null }
+  $entry = $Context.StateCache[$key]
+  # A cached successful short chain must not bypass the original 64-append limit.
+  # A miss deliberately runs the original validator so its error propagation stays intact.
+  if ($entry.AppendHeight -gt 0 -and ($AppendDepth -lt 0 -or $AppendDepth + $entry.AppendHeight -gt 64)) { return $null }
+  return $entry.StateResult
+}
+
+function Test-MathSecrObjectEquals {
+  param($Left, $Right)
+  if ($null -eq $Left -or $null -eq $Right) { return $null -eq $Left -and $null -eq $Right }
+  if ($Left -is [string] -or $Right -is [string]) {
+    return $Left -is [string] -and $Right -is [string] -and [string]::Equals($Left, $Right, [StringComparison]::Ordinal)
+  }
+  if ($Left -is [bool] -or $Right -is [bool]) {
+    return $Left -is [bool] -and $Right -is [bool] -and $Left -eq $Right
+  }
+  if ((Test-IsStrictInteger $Left) -and (Test-IsStrictInteger $Right)) {
+    # JSON serializes integer widths identically. Contract parsing can produce Int64.
+    return [decimal]$Left -eq [decimal]$Right
+  }
+  $leftArray = $Left -is [array] -or $Left -is [Collections.IList]
+  $rightArray = $Right -is [array] -or $Right -is [Collections.IList]
+  if ($leftArray -or $rightArray) {
+    if (-not $leftArray -or -not $rightArray -or $Left.Count -ne $Right.Count) { return $false }
+    for ($i = 0; $i -lt $Left.Count; $i++) {
+      if (-not (Test-MathSecrObjectEquals $Left[$i] $Right[$i])) { return $false }
+    }
+    return $true
+  }
+  $leftObject = $Left -is [pscustomobject] -or $Left -is [Collections.IDictionary]
+  $rightObject = $Right -is [pscustomobject] -or $Right -is [Collections.IDictionary]
+  if ($leftObject -or $rightObject) {
+    if (-not $leftObject -or -not $rightObject) { return $false }
+    $leftNames = @(if ($Left -is [Collections.IDictionary]) { foreach ($key in $Left.Keys) { $key } } else { foreach ($property in $Left.PSObject.Properties) { $property.Name } })
+    $rightNames = @(if ($Right -is [Collections.IDictionary]) { foreach ($key in $Right.Keys) { $key } } else { foreach ($property in $Right.PSObject.Properties) { $property.Name } })
+    if ($leftNames.Count -ne $rightNames.Count) { return $false }
+    for ($i = 0; $i -lt $leftNames.Count; $i++) {
+      if (-not [string]::Equals([string]$leftNames[$i], [string]$rightNames[$i], [StringComparison]::Ordinal)) { return $false }
+      if ($Left -is [Collections.IDictionary]) { $leftValue = $Left[$leftNames[$i]] } else { $leftValue = $Left.PSObject.Properties[$leftNames[$i]].Value }
+      if ($Right -is [Collections.IDictionary]) { $rightValue = $Right[$rightNames[$i]] } else { $rightValue = $Right.PSObject.Properties[$rightNames[$i]].Value }
+      if (-not (Test-MathSecrObjectEquals $leftValue $rightValue)) { return $false }
+    }
+    return $true
+  }
+  # Uncommon scalar forms (floating point, decimal, DateTime) retain the exact
+  # old JSON representation, including 1 versus 1.0, without serializing objects.
+  return (ConvertTo-Json -InputObject $Left -Depth 100 -Compress) -ceq (ConvertTo-Json -InputObject $Right -Depth 100 -Compress)
+}
+
 function ConvertTo-StringArray {
   param($Value)
 
@@ -335,7 +416,8 @@ function Test-MathSecrSourceAnomalyReceipt {
     $Receipt,
     $Target,
     [string]$ProjectRoot,
-    [System.Collections.Generic.HashSet[string]]$InspectedIds
+    [System.Collections.Generic.HashSet[string]]$InspectedIds,
+    $Context = $null
   )
 
   if ($null -eq $Receipt -or $Receipt -isnot [pscustomobject]) {
@@ -418,9 +500,11 @@ function Test-MathSecrSourceAnomalyReceipt {
     return $false
   }
 
+  $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
   try {
-    $actualSourceHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $sourceArtifact).Hash.ToUpperInvariant()
-    $actualCandidateHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $candidateArtifact).Hash.ToUpperInvariant()
+  try {
+    $actualSourceHash = (Get-MathSecrValidationArtifact -Path $sourceArtifact -ExpectedSha256 $sourceHash -Context $Context).Sha256.ToUpperInvariant()
+    $actualCandidateHash = (Get-MathSecrValidationArtifact -Path $candidateArtifact -ExpectedSha256 $candidateHash -Context $Context).Sha256.ToUpperInvariant()
   } catch {
     return $false
   }
@@ -434,6 +518,7 @@ function Test-MathSecrSourceAnomalyReceipt {
   # This validates a raw, recomputable observation shape only. It never proves
   # exactness, mismatch, live product behavior, or external ground truth.
   return $true
+  } finally { Exit-MathSecrValidationContext -Context $Context }
 }
 
 function Get-MathSecrMetadataProperty {
@@ -481,7 +566,8 @@ function Test-MathSecrMetadataRescueReceipt {
   param(
     $Target,
     [bool]$RequireCompleteCoverage,
-    [string]$ProjectRoot
+    [string]$ProjectRoot,
+    $Context = $null
   )
 
   $receiptProperty = $Target.PSObject.Properties['metadataRescue']
@@ -686,7 +772,7 @@ function Test-MathSecrMetadataRescueReceipt {
   if ($receipt.status -ceq "source_anomaly") {
     if (
       $null -eq $sourceAnomalyReceiptProperty -or
-      -not (Test-MathSecrSourceAnomalyReceipt $sourceAnomalyReceiptProperty.Value $Target $ProjectRoot $allInspectedIds)
+      -not (Test-MathSecrSourceAnomalyReceipt $sourceAnomalyReceiptProperty.Value $Target $ProjectRoot $allInspectedIds -Context $Context)
     ) {
       return [pscustomobject]@{ Present = $true; Valid = $false }
     }
@@ -1064,7 +1150,7 @@ function Test-MathSecrBeforeNextUnusedPackets {
 }
 
 function Read-MathSecrEditAppendArtifact {
-  param($Receipt, [string]$ProjectRoot)
+  param($Receipt, [string]$ProjectRoot, $Context = $null)
   if (-not (Test-HasRequiredProperties $Receipt @('path','sha256')) -or
       $Receipt.path -isnot [string] -or $Receipt.path -cne $Receipt.path.Trim() -or
       [IO.Path]::IsPathRooted($Receipt.path) -or $Receipt.path.Contains(':') -or
@@ -1082,14 +1168,23 @@ function Read-MathSecrEditAppendArtifact {
     $cursor=Join-Path $cursor $segment
     if (((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw 'edit-append-artifact-reparse' }
   }
-  if (-not [string]::Equals((Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash,$Receipt.sha256,[StringComparison]::OrdinalIgnoreCase)) { throw 'edit-append-artifact-hash' }
-  $value=ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $full -Raw -Encoding UTF8)
-  if (-not [string]::Equals((Get-FileHash -LiteralPath $full -Algorithm SHA256).Hash,$Receipt.sha256,[StringComparison]::OrdinalIgnoreCase)) { throw 'edit-append-artifact-changed' }
-  return $value
+  $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+  try {
+  # The legacy 'edit-append-artifact-changed' code cannot occur with a single
+  # byte read: parsing and hashing now consume the same immutable byte buffer.
+  try {
+    return (Get-MathSecrValidationArtifact -Path $full -ExpectedSha256 $Receipt.sha256 -Context $Context -Parse).Value
+  } catch {
+    if ($_.Exception.Data['MathSecrArtifactError'] -ceq 'hash') { throw 'edit-append-artifact-hash' }
+    throw
+  }
+  } finally { Exit-MathSecrValidationContext -Context $Context }
 }
 
 function Test-MathSecrEditAppendReceipt {
-  param($Snapshot, $ExpectedIds, $ExpectedKeys, [string]$ProjectRoot, [int]$Depth)
+  param($Snapshot, $ExpectedIds, $ExpectedKeys, [string]$ProjectRoot, [int]$Depth, $Context = $null)
+  $contextEntered = $false
+  try {
   try {
     if ($Depth -ge 64) { throw 'edit-append-history-depth' }
     $receipt=$Snapshot.editAppendReceipt
@@ -1097,13 +1192,19 @@ function Test-MathSecrEditAppendReceipt {
         -not (Test-IsStrictInteger $receipt.schemaVersion) -or $receipt.schemaVersion -ne 1 -or
         -not (Test-IsCanonicalId $receipt.appendId) -or $receipt.surface -isnot [string] -or $receipt.surface -cne 'aside-repl' -or
         $receipt.deltaTargets -isnot [array] -or $receipt.deltaTargets.Count -eq 0) { throw 'edit-append-schema' }
-    $prior=Read-MathSecrEditAppendArtifact $receipt.priorSessionArtifact $ProjectRoot
+    $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+    $contextEntered = $true
+    $prior=Read-MathSecrEditAppendArtifact $receipt.priorSessionArtifact $ProjectRoot -Context $Context
     if (-not (Test-HasRequiredProperties $prior @('schemaVersion','sessionId','paper','sourceTargets','sourceRosterArtifact','snapshot')) -or
         -not (Test-IsStrictInteger $prior.schemaVersion) -or $prior.schemaVersion -ne 1 -or
         -not (Test-HasRequiredProperties $prior.paper @('url')) -or $prior.paper.url -isnot [string] -or
         $prior.snapshot -isnot [pscustomobject] -or $prior.snapshot.targets -isnot [array] -or
         $prior.snapshot.targets.Count -ne $Snapshot.targets.Count) { throw 'edit-append-prior-session' }
-    $priorState=Invoke-MathSecrStateMachine -Snapshot $prior.snapshot -ProjectRoot $ProjectRoot -Phase AfterReload -AppendDepth ($Depth+1)
+    $priorState = Get-MathSecrCachedStateResult -Context $Context -ArtifactSha256 $receipt.priorSessionArtifact.sha256 -Phase AfterReload -AppendDepth ($Depth+1)
+    if ($null -eq $priorState) {
+      $priorState = Invoke-MathSecrStateMachine -Snapshot $prior.snapshot -ProjectRoot $ProjectRoot -Phase AfterReload -AppendDepth ($Depth+1) -Context $Context
+      Set-MathSecrCachedStateResult -Context $Context -ArtifactSha256 $receipt.priorSessionArtifact.sha256 -Snapshot $prior.snapshot -Phase AfterReload -StateResult $priorState
+    }
     if ($priorState.State -cne 'REPORT' -or $priorState.Status -cnotin @('완료','부분 완료') -or $priorState.PersistedCount -lt 1) { throw 'edit-append-prior-state' }
     if (-not (Test-IsStrictIdArray $Snapshot.selectionBeforeNextIds) -or
         -not (Test-MathSecrStateOptionalOccurrenceKeyArray $Snapshot 'selectionBeforeNextOccurrenceKeys') -or
@@ -1112,7 +1213,21 @@ function Test-MathSecrEditAppendReceipt {
         -not (Test-IsStrictBoolean $Snapshot.nextClicked) -or -not $Snapshot.nextClicked -or
         -not (Test-IsStrictBoolean $prior.snapshot.nextClicked) -or -not $prior.snapshot.nextClicked -or
         -not (Test-OrderedIdsEqual (Get-MathSecrStateOptionalStringArray $prior.snapshot 'selectionBeforeNextOccurrenceKeys') (Get-MathSecrStateOptionalStringArray $Snapshot 'selectionBeforeNextOccurrenceKeys'))) { throw 'edit-append-first-next-rewritten' }
-    $priorKeys=@($priorState.SelectedSourceNumbers | ForEach-Object { $number=$_; @($prior.snapshot.targets | Where-Object {$_.number -ceq $number})[0].occurrenceKey })
+    $priorTargetsByNumber = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    $targetsByKey = [Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    foreach ($target in $prior.snapshot.targets) {
+      if (-not $priorTargetsByNumber.ContainsKey([string]$target.number)) { $priorTargetsByNumber.Add([string]$target.number, $target) }
+    }
+    foreach ($target in $Snapshot.targets) {
+      if (-not $targetsByKey.ContainsKey([string]$target.occurrenceKey)) { $targetsByKey.Add([string]$target.occurrenceKey, $target) }
+    }
+    $priorKeys = @($priorState.SelectedSourceNumbers | ForEach-Object { $priorTargetsByNumber[[string]$_].occurrenceKey })
+    $priorIndexes = [Collections.Generic.Dictionary[string,int]]::new([StringComparer]::Ordinal)
+    for ($i = 0; $i -lt $priorKeys.Count; $i++) {
+      if (-not $priorIndexes.ContainsKey([string]$priorKeys[$i])) { $priorIndexes.Add([string]$priorKeys[$i], $i) }
+    }
+    $expectedKeySet = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($key in $ExpectedKeys) { [void]$expectedKeySet.Add([string]$key) }
     $deltaIds=[Collections.Generic.List[string]]::new();$deltaKeys=[Collections.Generic.List[string]]::new()
     for($i=0;$i -lt $Snapshot.targets.Count;$i++) {
       $old=$prior.snapshot.targets[$i];$current=$Snapshot.targets[$i]
@@ -1123,15 +1238,15 @@ function Test-MathSecrEditAppendReceipt {
           $old.sourceBodyArtifact.path -cne $current.sourceBodyArtifact.path -or
           $old.sourceBodyArtifact.sha256 -isnot [string] -or $current.sourceBodyArtifact.sha256 -isnot [string] -or
           -not [string]::Equals($old.sourceBodyArtifact.sha256,$current.sourceBodyArtifact.sha256,[StringComparison]::OrdinalIgnoreCase)) { throw 'edit-append-roster-changed' }
-      if ($priorKeys -ccontains $current.occurrenceKey) {
-        if ((ConvertTo-Json -InputObject $old -Depth 100 -Compress) -cne (ConvertTo-Json -InputObject $current -Depth 100 -Compress)) { throw 'edit-append-prior-selection-changed' }
-      } elseif (@($ExpectedKeys) -ccontains $current.occurrenceKey) {
+      if ($priorIndexes.ContainsKey([string]$current.occurrenceKey)) {
+        if (-not (Test-MathSecrObjectEquals $old $current)) { throw 'edit-append-prior-selection-changed' }
+      } elseif ($expectedKeySet.Contains([string]$current.occurrenceKey)) {
         $deltaKeys.Add($current.occurrenceKey);$deltaIds.Add($current.selectedId)
       }
     }
     if ($deltaIds.Count -ne $receipt.deltaTargets.Count -or @($ExpectedIds).Count -ne ($priorState.PersistedCount+$deltaIds.Count)) { throw 'edit-append-delta-coverage' }
     for($i=0;$i -lt $deltaIds.Count;$i++) {
-      $row=$receipt.deltaTargets[$i];$target=@($Snapshot.targets | Where-Object {$_.occurrenceKey -ceq $deltaKeys[$i]})[0]
+      $row=$receipt.deltaTargets[$i];$target=$targetsByKey[$deltaKeys[$i]]
       if (-not (Test-HasRequiredProperties $row @('sourceProblemNumber','occurrenceKey','problemId')) -or
           $row.sourceProblemNumber -isnot [string] -or $row.sourceProblemNumber -cne $target.number -or
           -not (Test-IsCanonicalOccurrenceKey $row.occurrenceKey) -or $row.occurrenceKey -cne $deltaKeys[$i] -or
@@ -1139,18 +1254,21 @@ function Test-MathSecrEditAppendReceipt {
     }
     # Derive the whole bundle from the two independently bound sets, in source
     # order. The historical FirstNext selection remains a separate observation.
-    $combinedIds=@();$combinedKeys=@()
+    $combinedIds=[Collections.Generic.List[string]]::new();$combinedKeys=[Collections.Generic.List[string]]::new()
+    $deltaIndexes = [Collections.Generic.Dictionary[string,int]]::new([StringComparer]::Ordinal)
+    for ($i = 0; $i -lt $deltaKeys.Count; $i++) {
+      if (-not $deltaIndexes.ContainsKey($deltaKeys[$i])) { $deltaIndexes.Add($deltaKeys[$i], $i) }
+    }
     foreach($target in $Snapshot.targets) {
-      $oldIndex=[Array]::IndexOf([string[]]$priorKeys,[string]$target.occurrenceKey)
-      $newIndex=[Array]::IndexOf([string[]]$deltaKeys,[string]$target.occurrenceKey)
-      if($oldIndex -ge 0){$combinedIds+=$priorState.PersistedIds[$oldIndex];$combinedKeys+=$target.occurrenceKey}
-      elseif($newIndex -ge 0){$combinedIds+=$deltaIds[$newIndex];$combinedKeys+=$target.occurrenceKey}
+      $key = [string]$target.occurrenceKey
+      if($priorIndexes.ContainsKey($key)){$combinedIds.Add($priorState.PersistedIds[$priorIndexes[$key]]);$combinedKeys.Add($key)}
+      elseif($deltaIndexes.ContainsKey($key)){$combinedIds.Add($deltaIds[$deltaIndexes[$key]]);$combinedKeys.Add($key)}
     }
     if (-not (Test-OrderedIdsEqual $ExpectedIds $combinedIds) -or -not (Test-OrderedIdsEqual $ExpectedKeys $combinedKeys)) { throw 'edit-append-combined-order' }
-    $before=Read-MathSecrEditAppendArtifact $receipt.beforeObservationArtifact $ProjectRoot
-    $add=Read-MathSecrEditAppendArtifact $receipt.addActionArtifact $ProjectRoot
-    $confirm=Read-MathSecrEditAppendArtifact $receipt.confirmActionArtifact $ProjectRoot
-    $draft=Read-MathSecrEditAppendArtifact $receipt.draftObservationArtifact $ProjectRoot
+    $before=Read-MathSecrEditAppendArtifact $receipt.beforeObservationArtifact $ProjectRoot -Context $Context
+    $add=Read-MathSecrEditAppendArtifact $receipt.addActionArtifact $ProjectRoot -Context $Context
+    $confirm=Read-MathSecrEditAppendArtifact $receipt.confirmActionArtifact $ProjectRoot -Context $Context
+    $draft=Read-MathSecrEditAppendArtifact $receipt.draftObservationArtifact $ProjectRoot -Context $Context
     if (-not (Test-HasRequiredProperties $before @('capturedAtUtc','url','priorEditIds','modalSelectedIds','action')) -or
         -not (Test-MathSecrObservationTimestamp $before.capturedAtUtc) -or $before.url -isnot [string] -or $before.url -cne $prior.paper.url -or
         $before.action -isnot [string] -or $before.action -cne '추가' -or
@@ -1163,7 +1281,7 @@ function Test-MathSecrEditAppendReceipt {
           -not (Test-MathSecrObservationTimestamp $action.startedAtUtc) -or -not (Test-MathSecrObservationTimestamp $action.completedAtUtc) -or
           $action.timingBasis -isnot [string] -or $action.timingBasis -cnotin @('observation-window','recorded-execution') -or $action.url -isnot [string] -or $action.url -cne $prior.paper.url -or
           $action.controlName -isnot [string] -or $action.controlName -cne $entry.name -or $action.action -isnot [string] -or $action.action -cne 'click') { throw 'edit-append-action-evidence' }
-      $execution=Read-MathSecrEditAppendArtifact $action.evidenceArtifact $ProjectRoot
+      $execution=Read-MathSecrEditAppendArtifact $action.evidenceArtifact $ProjectRoot -Context $Context
       $binding=$action.executionBinding
       if (-not (Test-HasRequiredProperties $execution @('schemaVersion','records')) -or
           -not (Test-IsStrictInteger $execution.schemaVersion) -or $execution.schemaVersion -ne 1 -or $execution.records -isnot [array] -or
@@ -1183,14 +1301,14 @@ function Test-MathSecrEditAppendReceipt {
     if ($add.actionId -ceq $confirm.actionId) { throw 'edit-append-reused-action' }
     if ($add.timingBasis -ceq 'observation-window') {
       if (-not (Test-HasRequiredProperties $add @('afterObservationArtifact'))) { throw 'edit-append-action-window' }
-      $addAfter=Read-MathSecrEditAppendArtifact $add.afterObservationArtifact $ProjectRoot
+      $addAfter=Read-MathSecrEditAppendArtifact $add.afterObservationArtifact $ProjectRoot -Context $Context
       if (-not (Test-HasRequiredProperties $addAfter @('capturedAtUtc','url','draftIds')) -or
           -not (Test-MathSecrObservationTimestamp $addAfter.capturedAtUtc) -or $addAfter.url -isnot [string] -or $addAfter.url -cne $prior.paper.url -or
           -not (Test-IsStrictIdArray $addAfter.draftIds) -or -not (Test-OrderedIdsEqual $combinedIds $addAfter.draftIds) -or
           $add.startedAtUtc -cne $before.capturedAtUtc -or $add.completedAtUtc -cne $addAfter.capturedAtUtc) { throw 'edit-append-action-window' }
     } else {
       if (-not (Test-HasRequiredProperties $add @('afterObservationArtifact'))) { throw 'edit-append-add-observation' }
-      $addAfter=Read-MathSecrEditAppendArtifact $add.afterObservationArtifact $ProjectRoot
+      $addAfter=Read-MathSecrEditAppendArtifact $add.afterObservationArtifact $ProjectRoot -Context $Context
       if (-not (Test-HasRequiredProperties $addAfter @('schemaVersion','surface','controlName','action','startedAtUtc','completedAtUtc','capturedAtUtc','url','draftIds')) -or
           -not (Test-IsStrictInteger $addAfter.schemaVersion) -or $addAfter.schemaVersion -ne 1 -or
           $addAfter.surface -isnot [string] -or $addAfter.surface -cne 'aside-repl' -or $addAfter.controlName -isnot [string] -or $addAfter.controlName -cne '추가' -or
@@ -1202,8 +1320,8 @@ function Test-MathSecrEditAppendReceipt {
     }
     if ($confirm.timingBasis -cne 'recorded-execution') { throw 'edit-append-confirm-timing' }
     if (-not (Test-HasRequiredProperties $confirm @('beforeObservationArtifact','afterObservationArtifact'))) { throw 'edit-append-confirm-observations' }
-    $confirmBefore=Read-MathSecrEditAppendArtifact $confirm.beforeObservationArtifact $ProjectRoot
-    $confirmAfter=Read-MathSecrEditAppendArtifact $confirm.afterObservationArtifact $ProjectRoot
+    $confirmBefore=Read-MathSecrEditAppendArtifact $confirm.beforeObservationArtifact $ProjectRoot -Context $Context
+    $confirmAfter=Read-MathSecrEditAppendArtifact $confirm.afterObservationArtifact $ProjectRoot -Context $Context
     foreach($observed in @($confirmBefore,$confirmAfter)) {
       if (-not (Test-HasRequiredProperties $observed @('capturedAtUtc','url','draftIds','controlName','surface')) -or
           -not (Test-MathSecrObservationTimestamp $observed.capturedAtUtc) -or $observed.url -isnot [string] -or $observed.url -cne $prior.paper.url -or
@@ -1221,8 +1339,9 @@ function Test-MathSecrEditAppendReceipt {
         -not (Test-OrderedIdsEqual $combinedIds $Snapshot.edit.draftIds)) { throw 'edit-append-draft-bundle' }
     $times=@($before.capturedAtUtc,$add.startedAtUtc,$add.completedAtUtc,$addAfter.capturedAtUtc,$confirmBefore.capturedAtUtc,$confirm.startedAtUtc,$confirm.completedAtUtc,$confirmAfter.capturedAtUtc,$draft.capturedAtUtc) | ForEach-Object {[DateTimeOffset]::Parse($_,[Globalization.CultureInfo]::InvariantCulture)}
     for($i=1;$i -lt $times.Count;$i++){if($times[$i] -lt $times[$i-1]){throw 'edit-append-action-order'}}
-    return [pscustomobject]@{Valid=$true;SelectedIds=$combinedIds;SelectedOccurrenceKeys=$combinedKeys;PriorSession=$prior;PaperUrl=$prior.paper.url;DraftCapturedAtUtc=$draft.capturedAtUtc;AppendId=$receipt.appendId;Errors=@()}
+    return [pscustomobject]@{Valid=$true;SelectedIds=@($combinedIds);SelectedOccurrenceKeys=@($combinedKeys);PriorSession=$prior;PaperUrl=$prior.paper.url;DraftCapturedAtUtc=$draft.capturedAtUtc;AppendId=$receipt.appendId;Errors=@()}
   } catch { return [pscustomobject]@{Valid=$false;Errors=@($_.Exception.Message)} }
+  } finally { if ($contextEntered) { Exit-MathSecrValidationContext -Context $Context } }
 }
 
 function New-StateResult {
@@ -1275,8 +1394,11 @@ function Invoke-MathSecrStateMachine {
     [pscustomobject]$Snapshot,
     [string]$ProjectRoot = (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
     [string]$Phase = "AfterReload",
-    [int]$AppendDepth = 0
+    [int]$AppendDepth = 0,
+    $Context = $null
   )
+  $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+  try {
 
   $ProjectRoot = [System.IO.Path]::GetFullPath($ProjectRoot)
 
@@ -1813,7 +1935,7 @@ function Invoke-MathSecrStateMachine {
     if ($resolution -like "*selected") {
       $selectedIdProperty = $target.PSObject.Properties['selectedId']
       if ($resolution -eq "metadata_selected") {
-        $metadataPreview = Test-MathSecrMetadataRescueReceipt $target $false $ProjectRoot
+        $metadataPreview = Test-MathSecrMetadataRescueReceipt $target $false $ProjectRoot -Context $Context
         if (-not $metadataPreview.Valid) {
           # Defer the result to the metadata gate below so malformed metadata
           # receipts report the dedicated contract status even when the
@@ -1846,7 +1968,7 @@ function Invoke-MathSecrStateMachine {
       return New-StateResult @{Input=$Snapshot;Derived=$derived;Phase=$Phase;State='EDIT_APPEND_VERIFY';Status='차단';Trace=@($trace);EvidenceErrors=@('edit-append-after-reload-only');BlockedActions=@('next_step')}
     }
     $trace.Add('EDIT_APPEND_VERIFY')
-    $append=Test-MathSecrEditAppendReceipt $Snapshot $expectedSelectedIds $expectedSelectedOccurrenceKeys $ProjectRoot $AppendDepth
+    $append=Test-MathSecrEditAppendReceipt $Snapshot $expectedSelectedIds $expectedSelectedOccurrenceKeys $ProjectRoot $AppendDepth -Context $Context
     if (-not $append.Valid) {
       return New-StateResult @{Input=$Snapshot;Derived=$derived;Phase=$Phase;State='EDIT_APPEND_VERIFY';Status='차단';Trace=@($trace);EvidenceErrors=@($append.Errors);BlockedActions=@('next_step')}
     }
@@ -1919,7 +2041,7 @@ function Invoke-MathSecrStateMachine {
       return New-StateResult @{ Input = $Snapshot; Derived = $derived; Phase = $Phase; State = 'INITIAL_SEARCH'; Status = 'selected-search-receipt-invalid'; Trace = @($trace); BlockedActions = @('select_cards', 'select_all', 'next_step') }
     }
     $bodyComparison = Test-MathSecrBodyComparisonReceipt -Receipt $bodyProperty.Value -Target $selectedRow.Target `
-      -ProjectRoot $ProjectRoot -InspectedIds $selectedSearch.InspectedIds -AttemptId $selectedSearch.AttemptId
+      -ProjectRoot $ProjectRoot -InspectedIds $selectedSearch.InspectedIds -AttemptId $selectedSearch.AttemptId -Context $Context
     if (-not $bodyComparison.Valid) {
       return New-StateResult @{ Input = $Snapshot; Derived = $derived; Phase = $Phase; State = 'INITIAL_SEARCH'; Status = 'body-comparison-receipt-invalid'; Trace = @($trace); EvidenceErrors = $bodyComparison.Errors; BlockedActions = @('select_cards', 'select_all', 'next_step') }
     }
@@ -1982,7 +2104,7 @@ function Invoke-MathSecrStateMachine {
     $metadataReceipt = $metadataReceiptProperty.Value
     $metadataStatusProperty = if ($metadataReceipt -is [pscustomobject]) { $metadataReceipt.PSObject.Properties['status'] } else { $null }
     $requireCompleteCoverage = $null -ne $metadataStatusProperty -and $metadataStatusProperty.Value -in @( "missed", "source_anomaly" )
-    $metadataValidation = Test-MathSecrMetadataRescueReceipt $target $requireCompleteCoverage $ProjectRoot
+    $metadataValidation = Test-MathSecrMetadataRescueReceipt $target $requireCompleteCoverage $ProjectRoot -Context $Context
     if (-not $metadataValidation.Valid) {
       $metadataRescueInvalid = $true
     }
@@ -2170,4 +2292,5 @@ function Invoke-MathSecrStateMachine {
   $trace.Add("REPORT")
   $status = if ($expectedSelectedIds.Count -eq @($Snapshot.targets).Count) { "완료" } else { "부분 완료" }
   return New-StateResult @{ Input = $Snapshot; Derived = $derived; Phase = $Phase; State = "REPORT"; Status = $status; Trace = @($trace); SelectionEvidence = @($selectionEvidence); BlockedActions = @() }
+  } finally { Exit-MathSecrValidationContext -Context $Context }
 }

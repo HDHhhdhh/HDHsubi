@@ -19,6 +19,7 @@ try {
     $roots.Add($root)
     $fixture = New-MathSecrAppendHistoryFixture -ProblemCount $case.N -HistoryDepth $case.H -OutRoot $root
     Assert-HistoryTest ($fixture.Manifest.sessions.Count -eq ($case.H + 1)) 'History session count changed.'
+    Assert-HistoryTest ($fixture.Manifest.artifactCount -eq @(Get-ChildItem -LiteralPath $root -File -Recurse).Count) 'Manifest artifact count differs from the final inventory.'
     foreach ($stage in $fixture.Manifest.sessions) {
       $session = Read-MathSecrEditAppendArtifact $stage.artifact $root
       $before = ConvertTo-Json -InputObject $session -Depth 100 -Compress
@@ -49,10 +50,11 @@ try {
   Expect-HistoryRejection {Assert-MathSecrBenchmarkTempRoot $ProjectRoot}
   Expect-HistoryRejection {New-MathSecrAppendHistoryFixture -ProblemCount 2 -HistoryDepth 2 -OutRoot $roots[0]}
   $measured = & (Join-Path $PSScriptRoot 'perf/measure_after_reload.ps1') -ProblemCount 3 -HistoryDepth 2 -Repeat 2 | ConvertFrom-Json
-  Assert-HistoryTest ($measured.phase0FormulaMatches -and $measured.samples.Count -eq 2) 'Proxy counting failed.'
+  Assert-HistoryTest ($measured.phase1FormulaMatches -and $measured.samples.Count -eq 2) 'Proxy counting failed.'
   foreach ($sample in $measured.samples) {
-    Assert-HistoryTest ($sample.calls.'Invoke-MathSecrStateMachine' -eq 9 -and $sample.calls.'Invoke-MathSecrProductionStep' -eq 3 -and
-      $sample.calls.'Get-FileHash' -gt 0 -and $sample.calls.'ConvertFrom-MathSecrContractJson' -gt 0) 'Proxy counters did not reset or include recursive calls.'
+    Assert-HistoryTest ($sample.calls.'Invoke-MathSecrStateMachine' -eq 3 -and $sample.calls.'Invoke-MathSecrProductionStep' -eq 3 -and
+      $sample.hashCalls -gt 0 -and $sample.maxHashCallsPerPath -eq 1 -and
+      $sample.calls.'ConvertFrom-MathSecrContractJson' -gt 0) 'Proxy counters did not reset or include recursive calls.'
   }
   Write-Output 'AppendHistoryFixture PASS (H=0/1/2, all intermediate stages, immutable FirstNext, tamper/missing receipt rejection, scoped cleanup, proxy recursion/reset).'
 } finally {

@@ -236,7 +236,12 @@ for number in range(1, int(sys.argv[2]) + 1):
   }
   $manifest = [pscustomobject]@{schemaVersion=1;kind='new-phase0-synthetic-history';truthScope='offline-contract';
     liveProductBehavior=$false;problemCount=$ProblemCount;historyDepth=$HistoryDepth;sessions=$sessions.ToArray();
-    finalSessionArtifact=$prior;validated=$true}
+    finalSessionArtifact=$prior;validated=$true;
+    artifactCount=(@(Get-ChildItem -LiteralPath $root -File -Recurse).Count + 1)}
+  # Include fixture.json itself; write it once, then verify the final inventory.
   $null = Write-MathSecrBenchmarkArtifact $manifest $root 'fixture.json'
+  if ($manifest.artifactCount -ne @(Get-ChildItem -LiteralPath $root -File -Recurse).Count) {
+    throw 'Synthetic artifact count does not match the final file inventory.'
+  }
   return [pscustomobject]@{Root=$root;Manifest=$manifest;Session=$value}
 }

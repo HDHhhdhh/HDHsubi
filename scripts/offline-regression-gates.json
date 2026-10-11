@@ -464,6 +464,20 @@
       "reason": "New Phase 0 synthetic harness; inputs are generated only under system temp, with no private fixture provenance claim.",
       "publicationStatus": "public-new-synthetic",
       "passPattern": "AppendHistoryFixture PASS"
+    },
+    {
+      "id": "ValidationContext",
+      "script": "scripts/test_validation_context.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "scripts/perf/append_history_support.ps1"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Phase 1 synthetic cache isolation and rejection tests, generated under system temp without private fixture substitutes.",
+      "publicationStatus": "public-new-synthetic",
+      "passPattern": "ValidationContext PASS"
     }
   ]
 }

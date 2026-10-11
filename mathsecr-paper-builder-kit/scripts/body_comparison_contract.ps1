@@ -68,7 +68,9 @@ function Test-MathSecrSelectedSearchReceipt {
 }
 
 function Test-MathSecrBodyComparisonReceipt {
-  param($Receipt, $Target, [string]$ProjectRoot, [string[]]$InspectedIds, [string]$AttemptId)
+  param($Receipt, $Target, [string]$ProjectRoot, [string[]]$InspectedIds, [string]$AttemptId, $Context = $null)
+  $contextEntered = $false
+  try {
 
   $errors = [System.Collections.Generic.List[string]]::new()
   if (-not (Test-MathSecrSearchRequiredProperties $Receipt @(
@@ -113,6 +115,10 @@ function Test-MathSecrBodyComparisonReceipt {
 
   $source = Resolve-MathSecrStateArtifactPath $ProjectRoot $Receipt.sourceRenderArtifact
   $candidate = Resolve-MathSecrStateArtifactPath $ProjectRoot $Receipt.candidateRenderArtifact
+  if ($null -ne $source -or $null -ne $candidate) {
+    $Context = Enter-MathSecrValidationContext -Context $Context -ProjectRoot $ProjectRoot
+    $contextEntered = $true
+  }
   $sourceBindingProperty = $Target.PSObject.Properties['sourceBodyArtifact']
   $sourceBinding = if ($null -ne $sourceBindingProperty) { $sourceBindingProperty.Value } else { $null }
   if (-not (Test-MathSecrSearchRequiredProperties $sourceBinding @('path', 'sha256'))) {
@@ -131,10 +137,11 @@ function Test-MathSecrBodyComparisonReceipt {
       $errors.Add("body-artifact-shape:$side")
     } else {
       try {
-        if (-not [string]::Equals((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash, $hash, [StringComparison]::OrdinalIgnoreCase)) {
-          $errors.Add("body-artifact-hash:$side")
-        }
-      } catch { $errors.Add("body-artifact-unreadable:$side") }
+        [void](Get-MathSecrValidationArtifact -Path $path -ExpectedSha256 $hash -Context $Context)
+      } catch {
+        if ($_.Exception.Data['MathSecrArtifactError'] -ceq 'hash') { $errors.Add("body-artifact-hash:$side") }
+        else { $errors.Add("body-artifact-unreadable:$side") }
+      }
     }
   }
   if ($null -ne $source -and $null -ne $candidate -and
@@ -142,4 +149,5 @@ function Test-MathSecrBodyComparisonReceipt {
     $errors.Add('body-source-candidate-path-reused')
   }
   return [pscustomobject]@{ Valid = $errors.Count -eq 0; Errors = @($errors) }
+  } finally { if ($contextEntered) { Exit-MathSecrValidationContext -Context $Context } }
 }

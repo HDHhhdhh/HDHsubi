@@ -478,6 +478,27 @@
       "reason": "Phase 1 synthetic cache isolation and rejection tests, generated under system temp without private fixture substitutes.",
       "publicationStatus": "public-new-synthetic",
       "passPattern": "ValidationContext PASS"
+    },
+    {
+      "id": "AssemblePipeline",
+      "script": "mathsecr-paper-builder-kit/scripts/test_assemble_pipeline.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/test-fixtures/iab-simulator/index.html",
+        "mathsecr-paper-builder-kit/test-fixtures/search-observation/simulator-adapter.json",
+        "mathsecr-paper-builder-kit/test-fixtures/control-map/schema.json",
+        "mathsecr-paper-builder-kit/test-fixtures/control-map/simulator.json",
+        "mathsecr-paper-builder-kit/test-fixtures/control-map/mathsecr-current.json",
+        "mathsecr-paper-builder-kit/test-fixtures/control-map/collector_assembly_test.js",
+        "mathsecr-paper-builder-kit/test-fixtures/body-judgment/schema.json",
+        "scripts/perf/assembly_support.ps1"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Isolated DOM policy rejection plus public synthetic assembly, selection, helper equivalence and resident validation; no live product claim.",
+      "publicationStatus": "public-new-synthetic",
+      "passPattern": "AssemblePipeline PASS"
     }
   ]
 }

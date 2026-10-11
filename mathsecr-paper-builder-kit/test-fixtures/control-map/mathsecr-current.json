@@ -1,0 +1,46 @@
+{
+  "controlMapVersion": "control-map-v1",
+  "observedAtUtc": null,
+  "surface": "aside-repl",
+  "pageKind": "paper-search",
+  "id": "mathsecr-unobserved-template-v1",
+  "evidenceId": "pending-research-r2",
+  "scopeMode": {
+    "selector": null,
+    "read": "text"
+  },
+  "sourceChips": {
+    "selector": null,
+    "read": "text"
+  },
+  "filterChips": null,
+  "selectedScopeChecks": [
+    {
+      "selector": null,
+      "read": "attribute",
+      "attribute": null,
+      "equals": null
+    }
+  ],
+  "queryChips": [
+    {
+      "selector": null,
+      "read": "text",
+      "kind": "text"
+    }
+  ],
+  "resultCount": {
+    "selector": null,
+    "read": "text",
+    "pattern": null
+  },
+  "resultIds": {
+    "selector": null,
+    "read": "attribute",
+    "attribute": null,
+    "trim": false
+  },
+  "loading": null,
+  "resultSubmitId": null,
+  "resultCriteriaKey": null
+}

@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Observed MathSecr control map or unobserved template",
+  "type": "object",
+  "required": [
+    "controlMapVersion",
+    "observedAtUtc",
+    "surface",
+    "pageKind",
+    "id",
+    "evidenceId",
+    "scopeMode",
+    "sourceChips",
+    "filterChips",
+    "selectedScopeChecks",
+    "queryChips",
+    "resultCount",
+    "resultIds",
+    "loading",
+    "resultSubmitId",
+    "resultCriteriaKey"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "controlMapVersion": {
+      "const": "control-map-v1"
+    },
+    "observedAtUtc": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "Z$"
+    },
+    "surface": {
+      "enum": [
+        "aside-repl",
+        "offline-dom-test"
+      ]
+    },
+    "pageKind": {
+      "enum": [
+        "paper-search",
+        "simulator-search"
+      ]
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidenceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scopeMode": {
+      "$ref": "#/$defs/descriptor"
+    },
+    "sourceChips": {
+      "$ref": "#/$defs/descriptor"
+    },
+    "filterChips": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/descriptor"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "selectedScopeChecks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/descriptor"
+          },
+          {
+            "required": [
+              "equals"
+            ]
+          }
+        ]
+      }
+    },
+    "queryChips": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/descriptor"
+          },
+          {
+            "required": [
+              "kind"
+            ]
+          }
+        ]
+      }
+    },
+    "resultCount": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/descriptor"
+        },
+        {
+          "required": [
+            "pattern"
+          ]
+        }
+      ]
+    },
+    "resultIds": {
+      "$ref": "#/$defs/descriptor"
+    },
+    "loading": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/descriptor"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "resultSubmitId": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/descriptor"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "resultCriteriaKey": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/descriptor"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "descriptor": {
+      "type": "object",
+      "required": [
+        "selector",
+        "read"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "selector": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "read": {
+          "enum": [
+            "text",
+            "attribute"
+          ]
+        },
+        "attribute": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "trim": {
+          "type": "boolean"
+        },
+        "stripSuffix": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "jsonPath": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "pattern": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "equals": {
+          "type": [
+            "string",
+            "boolean",
+            "number",
+            "null"
+          ]
+        },
+        "kind": {
+          "enum": [
+            "text",
+            "formula"
+          ]
+        }
+      }
+    }
+  }
+}

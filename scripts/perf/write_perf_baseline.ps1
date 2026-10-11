@@ -18,7 +18,7 @@ $measurements = @(foreach ($depth in @(1,2,6)) {
   $json | ConvertFrom-Json
 })
 $hashes = [ordered]@{}
-foreach ($name in @('production_validation.ps1','state_machine.ps1','read_contract_json.ps1')) {
+foreach ($name in @('production_validation.ps1','state_machine.ps1','read_contract_json.ps1','body_comparison_contract.ps1')) {
   $hashes[$name] = (Get-FileHash -LiteralPath (Join-Path $project "mathsecr-paper-builder-kit/scripts/$name")).Hash.ToLowerInvariant()
 }
 $document = [ordered]@{
@@ -37,4 +37,4 @@ $parent = Split-Path -Parent $out
 $null = New-Item -ItemType Directory -Path $parent -Force
 $json = (ConvertTo-Json -InputObject $document -Depth 15).Replace([Environment]::NewLine, [string][char]10) + [char]10
 [IO.File]::WriteAllText($out, $json, [Text.UTF8Encoding]::new($false))
-Write-Host 'Phase 0 baseline PASS (N=15, H=1/2/6); measurements written.'
+Write-Host 'Performance measurement PASS (N=15, H=1/2/6); measurements written without replacing earlier evidence.'

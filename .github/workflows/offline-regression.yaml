@@ -37,3 +37,20 @@ jobs:
           $module = Join-Path $env:RUNNER_TEMP 'mathsecr-dom/node_modules/playwright'
           $browser = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft/Edge/Application/msedge.exe'
           ./scripts/run_offline_regression.ps1 -PlaywrightModule $module -BrowserPath $browser
+      - name: Compare Phase 0 and current AfterReload behavior
+        shell: pwsh
+        run: |
+          $baselineSha = '961c41105e96f368c48f6a39303e15520e0b3213'
+          $tempRoot = [IO.Path]::GetFullPath($env:RUNNER_TEMP).TrimEnd('\','/') + [IO.Path]::DirectorySeparatorChar
+          $baselineRoot = [IO.Path]::GetFullPath((Join-Path $tempRoot ('phase1-baseline-' + [guid]::NewGuid().ToString('N'))))
+          if (-not $baselineRoot.StartsWith($tempRoot,[StringComparison]::OrdinalIgnoreCase)) { throw 'Baseline must stay in runner temp.' }
+          git fetch --no-tags origin $baselineSha
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git worktree add --detach $baselineRoot $baselineSha
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          try {
+            ./scripts/perf/compare_after_reload.ps1 -BaselineRoot $baselineRoot -CandidateRoot $pwd.Path
+          } finally {
+            git worktree remove $baselineRoot
+            if ($LASTEXITCODE -ne 0) { throw 'Baseline worktree cleanup failed.' }
+          }

@@ -1,0 +1,152 @@
+{
+  "status": "PASS",
+  "problemCount": 15,
+  "historyDepth": 6,
+  "repeat": 1,
+  "elapsedMs": 3477.1664,
+  "scope": "diagnostic function proxies; warmed synthetic fixture; overhead included; parent/child times overlap; outerInclusive suppresses self-recursion double counting",
+  "functions": [
+    {
+      "name": "Invoke-MathSecrProductionStep",
+      "calls": 7,
+      "outerCalls": 1,
+      "inclusiveMs": 13768.235,
+      "outerInclusiveMs": 3460.315
+    },
+    {
+      "name": "Invoke-MathSecrStateMachine",
+      "calls": 7,
+      "outerCalls": 7,
+      "inclusiveMs": 1541.49,
+      "outerInclusiveMs": 1541.49
+    },
+    {
+      "name": "Invoke-MathSecrUserSummaryLint",
+      "calls": 7,
+      "outerCalls": 7,
+      "inclusiveMs": 1176.11,
+      "outerInclusiveMs": 1176.11
+    },
+    {
+      "name": "Assert-FailedProblemReportPdf",
+      "calls": 6,
+      "outerCalls": 6,
+      "inclusiveMs": 1145.15,
+      "outerInclusiveMs": 1145.15
+    },
+    {
+      "name": "Test-MathSecrEditAppendReceipt",
+      "calls": 12,
+      "outerCalls": 12,
+      "inclusiveMs": 1018.682,
+      "outerInclusiveMs": 1018.682
+    },
+    {
+      "name": "Test-MathSecrObjectEquals",
+      "calls": 29532,
+      "outerCalls": 138,
+      "inclusiveMs": 5405.111,
+      "outerInclusiveMs": 820.206
+    },
+    {
+      "name": "Test-MathSecrSelectedSearchReceipt",
+      "calls": 84,
+      "outerCalls": 84,
+      "inclusiveMs": 730.943,
+      "outerInclusiveMs": 730.943
+    },
+    {
+      "name": "Test-MathSecrSearchObservation",
+      "calls": 168,
+      "outerCalls": 168,
+      "inclusiveMs": 546.748,
+      "outerInclusiveMs": 546.748
+    },
+    {
+      "name": "Test-MathSecrSearchAttemptContract",
+      "calls": 84,
+      "outerCalls": 84,
+      "inclusiveMs": 443.805,
+      "outerInclusiveMs": 443.805
+    },
+    {
+      "name": "Resolve-MathSecrStateArtifactPath",
+      "calls": 273,
+      "outerCalls": 273,
+      "inclusiveMs": 216.961,
+      "outerInclusiveMs": 216.961
+    },
+    {
+      "name": "Test-MathSecrBodyComparisonReceipt",
+      "calls": 84,
+      "outerCalls": 84,
+      "inclusiveMs": 181.19,
+      "outerInclusiveMs": 181.19
+    },
+    {
+      "name": "Assert-MathSecrProductionRoster",
+      "calls": 7,
+      "outerCalls": 7,
+      "inclusiveMs": 178.432,
+      "outerInclusiveMs": 178.432
+    },
+    {
+      "name": "Read-MathSecrEditAppendArtifact",
+      "calls": 120,
+      "outerCalls": 120,
+      "inclusiveMs": 106.001,
+      "outerInclusiveMs": 106.001
+    },
+    {
+      "name": "Get-MathSecrValidationArtifact",
+      "calls": 433,
+      "outerCalls": 433,
+      "inclusiveMs": 83.47,
+      "outerInclusiveMs": 83.47
+    },
+    {
+      "name": "Get-MathSecrProductionReportProjection",
+      "calls": 7,
+      "outerCalls": 7,
+      "inclusiveMs": 40.541,
+      "outerInclusiveMs": 40.541
+    },
+    {
+      "name": "Get-MathSecrProductionArtifact",
+      "calls": 20,
+      "outerCalls": 20,
+      "inclusiveMs": 36.178,
+      "outerInclusiveMs": 36.178
+    },
+    {
+      "name": "Read-MathSecrArtifactBytes",
+      "calls": 92,
+      "outerCalls": 92,
+      "inclusiveMs": 24.208,
+      "outerInclusiveMs": 24.208
+    },
+    {
+      "name": "ConvertFrom-MathSecrContractJson",
+      "calls": 62,
+      "outerCalls": 62,
+      "inclusiveMs": 17.958,
+      "outerInclusiveMs": 17.958
+    },
+    {
+      "name": "Get-MathSecrProductionPersistedCapture",
+      "calls": 7,
+      "outerCalls": 7,
+      "inclusiveMs": 15.45,
+      "outerInclusiveMs": 15.45
+    }
+  ],
+  "truthScope": "offline-contract",
+  "liveProductBehavior": false,
+  "contractSha256": {
+    "production_validation.ps1": "5f61e756286d2001c89cd42cb956245fb0a8210f6eace37cb992dd808a68ba24",
+    "state_machine.ps1": "0f7745c808eb2b6c9c0ed8754da9291ab916e1251f931821dbe99fa165c6fde8",
+    "read_contract_json.ps1": "e8df102ec48ae18d0ede5445f6e306cb2c5f2b94122c522efc3b72dfff8693d1",
+    "body_comparison_contract.ps1": "d98f5dd98c643598e77480e13f9269b4a17ffbb60f161f57c9fb76301c694e06"
+  },
+  "measurementCheckpoint": "Initial Phase 1 implementation, before production helper early-error ordering correction; digests match perf-phase1-initial.json."
+}

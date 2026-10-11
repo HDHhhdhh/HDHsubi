@@ -1,6 +1,6 @@
-# Phase 0 회귀 inventory
+# 공개 회귀 inventory
 
-이 목록은 [실행 manifest](../../scripts/offline-regression-gates.json)와 같은 gate 31개를 분류한다. `public`은 11개, `private-bundle`은 20개다. 원래 `test_*.ps1` 23개를 빠짐없이 포함한다. 검색 관측의 `All`은 Contract/Collector/CuaRestricted 세 gate로 나눠 모든 분기를 실행한다. 원래 full runner의 문서 검사·kit 검사·fixture 생성·body-exact corpus 검사도 보존해서 표시한다.
+이 목록은 [실행 manifest](../../scripts/offline-regression-gates.json)와 같은 gate 32개를 분류한다. `public`은 12개, `private-bundle`은 20개다. Phase 0의 공개 gate 11개에 Phase 1의 ValidationContext를 추가했다. 원래 `test_*.ps1` 23개를 빠짐없이 포함한다. 검색 관측의 `All`은 Contract/Collector/CuaRestricted 세 gate로 나눠 모든 분기를 실행한다. 원래 full runner의 문서 검사·kit 검사·fixture 생성·body-exact corpus 검사도 보존해서 표시한다.
 
 `private-bundle`은 실행 준비 등급이다. 모든 파일이 비공개라는 판정은 아니다. 합성 helper도 원본 파일과 공개 승인 근거가 없으면 이 등급으로 둔다. 누락 파일을 다른 자료로 대체하지 않았다. D4 자료가 제공되면 내용과 provenance를 확인한 뒤 등급을 바꿔야 한다.
 
@@ -39,6 +39,7 @@
 | [verify_body_exact_benchmark.ps1](../../mathsecr-paper-builder-kit/scripts/verify_body_exact_benchmark.ps1) | `mathsecr-paper-builder-kit/test-fixtures/docs`<br>`mathsecr-paper-builder-kit/test-fixtures/evaluation/ground-truth-claims.json`<br>`.omo/evidence` | 미확인 또는 의도적 제외 · Private blinded/gold corpus and independent evidence are deliberately excluded. | `private-bundle` |
 | [test_offline_runner.ps1](../../scripts/test_offline_runner.ps1) | `scripts/perf/append_history_support.ps1`<br>`scripts/perf/measure_after_reload.ps1` | 가능 · 공개 합성/지역 계약 | `public` |
 | [test_append_history_fixture.ps1](../../scripts/test_append_history_fixture.ps1) | `scripts/perf/append_history_support.ps1`<br>`scripts/perf/measure_after_reload.ps1` | 가능 · 공개 합성/지역 계약 | `public` |
+| [test_validation_context.ps1](../../scripts/test_validation_context.ps1) | `scripts/perf/append_history_support.ps1` | 가능 · 호출 간 캐시 격리, 변조 거부, 형식 및 독립 호출 호환성 | `public` |
 
 ## 실행과 실패 처리
 
@@ -57,4 +58,4 @@ pwsh -NoProfile -File ./scripts/run_offline_regression.ps1 -PlaywrightModule <mo
 
 Collector는 저장소의 local simulator만 열고 HTTP(S) 요청을 중단한다. 이는 재사용 가능한 합성 회귀이며 수학비서의 live 조작이나 browser 가용성 증명이 아니다. 새 AppendHistoryFixture gate는 원래 helper를 복원한 것이 아니라 공개 계약으로 만든 별도 합성 시험이다. 기존 ProductionValidation/StateMachine/PartialSavePhases 전체 suite는 여전히 SKIP이다.
 
-기존 단정, production 계약, full runner, 설치된 skill 및 AGENTS/SKILL/prompts는 변경하지 않았다. 연도 테스트 2개는 기존 contract reader로 날짜 문자열의 시간대 정보를 보존한다. SOURCE_SNAPSHOT의 원본 sourceSha256은 보존하고 이 두 export의 해시·크기·transformation을 갱신했다. 새 파일은 Phase 0에서 작성한 파일이며 원본 export 파일로 기록하지 않는다.
+Phase 0의 연도 테스트 2개는 기존 contract reader로 날짜 문자열의 시간대 정보를 보존한다. Phase 1은 검증 모듈 4개에 호출 단위 캐시와 구조 비교를 추가했다. 이력 fixture의 호출 횟수 단정은 H+1 기준으로 바꿨다. full runner, 설치된 skill 및 AGENTS/SKILL/prompts는 변경하지 않았다. SOURCE_SNAPSHOT의 원본 sourceSha256은 보존하고 변경한 export의 해시·크기·transformation만 갱신한다. 새 시험은 새로 작성한 공개 합성 시험이며 원본 export 파일로 기록하지 않는다.

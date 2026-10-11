@@ -9,9 +9,11 @@
 - 복사 원본과 공개 파일의 SHA-256을 기록한 SOURCE_SNAPSHOT.
 - 공개 파일 목록·문서 링크·민감 정보 검사와 제한된 합성 검사 도구.
 
-테스트 코드 한 곳의 기기 표시명은 합성 이름으로 바꿨다. SOURCE_SNAPSHOT의 transformation에 표시했다. production 실행 구현과 로컬 canonical 정책은 바꾸지 않았다.
+초기 공개에서는 테스트 코드 한 곳의 기기 표시명을 합성 이름으로 바꿨다. SOURCE_SNAPSHOT의 transformation에 표시했다. 당시 production 실행 구현과 로컬 canonical 정책은 바꾸지 않았다.
 
 Phase 0에서는 연도 테스트 2개의 JSON reader를 기존 contract reader로 연결했다. PowerShell 버전과 PC 시간대가 달라도 원래 ISO 날짜 문자열과 offset을 보존한다. 단정과 fixture는 그대로 유지했다. 원본 sourceSha256은 보존하고 변경한 export의 해시·크기·transformation만 기록했다.
+
+Phase 1에서는 검증 모듈 4개에 호출 단위 캐시, 단일 읽기·해시, 구조 비교를 추가했다. 변경 전후 결과와 오류는 별도 PowerShell 프로세스로 비교한다. 원본 sourceSha256은 보존하며 변경한 export를 transformation으로 구분한다. [Phase 1 검증 결과](evidence/phase-1.md)에 검증 범위와 수치를 기록한다.
 
 ## 제외한 내용
 
@@ -31,7 +33,7 @@ Phase 0에서는 연도 테스트 2개의 JSON reader를 기존 contract reader�
 
 ## 실행할 수 있는 공개본 검사
 
-Python 3과 PowerShell 7을 준비한다. 서비스 로그인과 브라우저는 이 검사에 필요하지 않다.
+Python 3과 PowerShell 7을 준비한다. 서비스 로그인은 필요하지 않다. offline regression의 Collector는 Edge/Chrome으로 로컬 simulator를 검사한다. 의존성은 [회귀 inventory](evidence/regression-inventory.md)를 따른다.
 
 ```powershell
 python ./scripts/validate_publication.py
@@ -46,7 +48,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_offline_regression.p
 | publication validator | 새 문서의 로컬 링크, JSON 형식, public allowlist, 복사 해시, 실제 개인 경로·키·토큰·금지 확장자 |
 | Selection Journal All | 요청·재시도·ACK·재개, 실파일 왕복, 중복과 손상 입력 거부 |
 | Search Query Plan | 원본 순서, literal 단서, 원본 위치, 입력 shape의 허용·거부 |
-| Phase 0 public offline regression | 11개 공개 gate: 연도 계약, 관측/collector, 회귀 receipt, PDF 생성, 저널, 검색어, 새 이력 fixture·runner 검증 |
+| public offline regression | 12개 공개 gate: 연도 계약, 관측/collector, 회귀 receipt, PDF 생성, 저널, 검색어, 이력 fixture·runner·캐시 검증 |
 
 이들은 공개 packaging과 독립 가능한 지역 계약의 검사다. 전체 production 회귀, 브라우저 연결, 저장, 수학적 정답을 증명하지 않는다. 기존 전체 검사 PASS 기록을 새로 실행한 것처럼 표시하지 않는다.
 

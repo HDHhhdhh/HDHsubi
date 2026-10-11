@@ -92,9 +92,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/body_comparison_contract.ps1",
       "sourceSha256": "71c105bf232c310d9faf6449a7997cde10777855a56894571808fdac44819845",
-      "exportSha256": "71c105bf232c310d9faf6449a7997cde10777855a56894571808fdac44819845",
-      "bytes": 8792,
-      "transformation": null
+      "exportSha256": "d98f5dd98c643598e77480e13f9269b4a17ffbb60f161f57c9fb76301c694e06",
+      "bytes": 9143,
+      "transformation": "Phase 1: share the invocation artifact cache for image hashes while preserving independent-call validation and errors."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/check.ps1",
@@ -162,16 +162,16 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/production_validation.ps1",
       "sourceSha256": "05bc6d9932213ece96fd84129e185671e86e089d3d215f11d3103a9e9937de15",
-      "exportSha256": "05bc6d9932213ece96fd84129e185671e86e089d3d215f11d3103a9e9937de15",
-      "bytes": 24918,
-      "transformation": null
+      "exportSha256": "ab8d2ee0059dbc9fa10e31b86f8c540afbea0f2aceef7d97c86a02b74edb2259",
+      "bytes": 27774,
+      "transformation": "Phase 1: propagate per-invocation validation context, reuse validated prior states and artifact bytes, and index target joins; preserve output, early rejection order, and error contracts."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/read_contract_json.ps1",
       "sourceSha256": "60b40be0c4fd957bde00f96f41ee8e89fd6311d2e4739890783cb5d8dfafbd31",
-      "exportSha256": "60b40be0c4fd957bde00f96f41ee8e89fd6311d2e4739890783cb5d8dfafbd31",
-      "bytes": 439,
-      "transformation": null
+      "exportSha256": "e8df102ec48ae18d0ede5445f6e306cb2c5f2b94122c522efc3b72dfff8693d1",
+      "bytes": 4493,
+      "transformation": "Phase 1: read and hash artifact bytes once, preserve BOM-inclusive hashes and existing JSON type semantics, and scope artifact/state caches to one top-level invocation."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/regression_evidence_contract.ps1",
@@ -239,9 +239,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/state_machine.ps1",
       "sourceSha256": "09b2be660ea37b222db2f4200d782da36dadc6bf02dd80a859d0f06684bb92ff",
-      "exportSha256": "09b2be660ea37b222db2f4200d782da36dadc6bf02dd80a859d0f06684bb92ff",
-      "bytes": 101601,
-      "transformation": null
+      "exportSha256": "0f7745c808eb2b6c9c0ed8754da9291ab916e1251f931821dbe99fa165c6fde8",
+      "bytes": 109144,
+      "transformation": "Phase 1: cache validated state results within one invocation, retain append-depth rejection, and compare objects structurally while preserving scalar, property, and array semantics."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_aside_preflight.ps1",

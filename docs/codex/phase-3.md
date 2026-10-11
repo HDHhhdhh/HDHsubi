@@ -60,8 +60,8 @@ flowchart LR
    - `$MathSecrSurfaceBrowserFamilies`. surface→browserFamily 허용 쌍 1개씩이다. `aside-repl`→`aside`, `codex-iab`→`codex`, `codex-chrome-ext`→`chrome`, `offline-dom-test`→`playwright`.
    - `Test-MathSecrSupportedSurface -Surface`. 문자열이고 허용값이면 `$true`다. 대소문자를 구분한다.
    - `Test-MathSecrSurfacePaperUrl -Surface -Url`. `aside-repl`·`codex-iab`·`codex-chrome-ext`는 `^https://www\.mathsecr\.com/mypaper/[0-9]+$`다. `offline-dom-test`는 절대 `file:` URI이고 `[Uri]::LocalPath`가 `/test-fixtures/iab-simulator/index.html`(구분자는 `\`도 허용)로 끝나야 한다. 다른 host, scheme, 경로는 `$false`다.
-   - `Test-MathSecrSurfaceIdentityReceipt -Receipt -PaperUrl`. 반환은 `{Valid, Surface, Errors}`다. 필수 필드는 `schemaVersion`(1), `surface`, `browserFamily`, `profileOrSessionId`, `tabId`, `url`, `observedAtUtc`다. 규칙: `surface`가 허용값이 아니면 `surface-unsupported`. `browserFamily`가 표의 쌍과 다르면 `surface-browser-family`. `url`이 `PaperUrl`과 Ordinal로 다르거나 `Test-MathSecrSurfacePaperUrl`이 `$false`면 `surface-url`. `profileOrSessionId`·`tabId`가 빈 문자열이거나 앞뒤 공백이 있으면 `surface-identity-invalid`. `observedAtUtc`는 `Z`로 끝나는 UTC 타임스탬프다. 선택 필드 `probeArtifact{path, sha256}`는 있으면 `Get-MathSecrValidationArtifact`로 해시를 검증한다. 없으면 통과한다. Phase 3b가 `offline-dom-test`를 뺀 surface에 필수로 바꾼다.
-   - `Get-MathSecrSessionSurface -Session -Context`. `session.surfaceIdentity`가 없으면 `'aside-repl'`을 돌려준다. 있으면 receipt를 검증하고 그 `surface`를 돌려준다. 거부면 `Errors`를 그대로 가진 예외를 던진다. 예외 문장은 `surface-identity-invalid: <errors>`다.
+   - `Test-MathSecrSurfaceIdentityReceipt -Receipt -PaperUrl -ProjectRoot -Context`. 반환은 `{Valid, Surface, Errors}`다. 필수 필드는 `schemaVersion`(1), `surface`, `browserFamily`, `profileOrSessionId`, `tabId`, `url`, `observedAtUtc`다. 규칙: `surface`가 허용값이 아니면 `surface-unsupported`. `browserFamily`가 표의 쌍과 다르면 `surface-browser-family`. `url`이 `PaperUrl`과 Ordinal로 다르거나 `Test-MathSecrSurfacePaperUrl`이 `$false`면 `surface-url`. `profileOrSessionId`·`tabId`가 빈 문자열이거나 앞뒤 공백이 있으면 `surface-identity-invalid`. `observedAtUtc`는 `Z`로 끝나는 UTC 타임스탬프다. 선택 필드 `probeArtifact{path, sha256}`는 있으면 `Resolve-MathSecrStateArtifactPath $ProjectRoot $path`로 안전 경로를 풀고 `Get-MathSecrValidationArtifact -Path -ExpectedSha256 -Context`로 단일 읽기 해시를 검증한다. 경로가 풀리지 않거나 해시가 다르면 `surface-identity-invalid`다. 없으면 통과한다. Phase 3b가 `offline-dom-test`를 뺀 surface에 필수로 바꾼다.
+   - `Get-MathSecrSessionSurface -Session -Context`. Context는 활성 상태여야 한다. `ProjectRoot`는 `$Context.ProjectRoot`를 쓴다. `session.surfaceIdentity`가 없으면 `'aside-repl'`을 돌려준다. 있으면 `Test-MathSecrSurfaceIdentityReceipt -PaperUrl $Session.paper.url`로 검증하고 그 `surface`를 돌려준다. 거부면 `Errors`를 그대로 가진 예외를 던진다. 예외 문장은 `surface-identity-invalid: <errors>`다.
 2. surface를 한 번 정하고 아래로 넘긴다.
    - `Invoke-MathSecrProductionStep:240`에서 `$surface = Get-MathSecrSessionSurface -Session $InputObject -Context $Context`를 한 번 부른다. 세 step 모두 같다. 아래 함수에 `-Surface $surface`를 넘긴다.
    - `Invoke-MathSecrStateMachine`에 `[string]$Surface = 'aside-repl'`을 더한다. `:1329`, `:1416`, `:1450`, `:1464`의 `-cne 'aside-repl'`을 `-cne $Surface`로 바꾼다. 거부 토큰은 기존 문장(`edit-append-schema` 등)을 유지한다.
@@ -73,13 +73,16 @@ flowchart LR
    - `Invoke-MathSecrUserSummaryLint`에 `[string]$Surface = 'aside-repl'`을 더한다. `:798`의 paper 링크 정규식을 surface별로 둔다. `offline-dom-test`는 `(<url>file:[^)]+)`를 받고 `Test-MathSecrSurfacePaperUrl`로 검사한다. 나머지는 지금 정규식이다. `New-MathSecrProductionUserSummary`가 만드는 0번 줄 링크는 `session.paper.url`을 그대로 쓴다. `Invoke-MathSecrTypedUserSummaryLint:292`도 session에서 surface를 읽어 넘긴다.
    - `assemble_target.ps1`와 `New-MathSecrAssembledTarget`에 `[string]$Surface = 'aside-repl'`을 더한다. 최종 검증 2개에 넘긴다. 다른 동작은 바꾸지 않는다.
    - `$CONTRACT_VERSION`을 `'2026-10-11.3'`으로 올린다.
+   - 캐시 격리(Issue #2 질문 1). `Get-MathSecrStateCacheKey:8-11`의 key에 `'|' + $Surface`를 더한다. `AppendReceiptCache` 항목에 `Surface`를 넣고 조회 조건에 `Surface -ceq`를 더한다. `Test-MathSecrEditAppendReceipt`와 `Invoke-MathSecrEditAppendReceiptValidation`에 `[string]$Surface = 'aside-repl'`을 더한다. 같은 snapshot을 다른 surface로 검증하면 캐시를 쓰지 않는다. `test_validation_context.ps1`에 이 사례 1개를 더한다.
+   - append history(Issue #2 질문 2). prior session의 surface도 같은 규칙으로 정한다. 선언이 없으면 `aside-repl`이다. 선언이 있으면 prior의 `paper.url`로 identity receipt를 검증한다. prior surface가 현재 `$Surface`와 다르면 `surface-mismatch`로 거부한다. 재귀 깊이마다 같다.
+   - 모든 관측 receipt(Issue #2 질문 3). 예외가 없다. 선택에 쓰이지 않은 attempt, metadata rescue bucket의 observation도 현재 surface와 같아야 한다. `search_attempt_contract.ps1:419`는 바꾸지 않는다. 호출자가 검사한다. state machine이 target 행의 `searchAttemptReceipt.attempts[].observationReceipt.submission.surface`와 `metadataRescue` 안의 observation receipt를 모두 `$Surface`와 비교한다. 다르면 `surface-mismatch`다. `Test-MathSecrSelectedSearchReceipt` 안의 호출 2곳(`body_comparison_contract.ps1:21`, `:50`)과 `selection_assembly.ps1:155`에는 `-Surface`를 넘긴다.
 3. 공개 합성 fixture에 surface를 더한다.
    - `New-MathSecrBenchmarkObservation`과 `New-MathSecrAppendHistoryFixture`에 `[string]$Surface = 'aside-repl'`과 `[string]$PaperUrl`을 더한다. `PaperUrl`이 비어 있으면 `https://www.mathsecr.com/mypaper/123`이다. 기본값 호출의 출력 바이트는 지금과 같아야 한다. 이것이 동일성 24개의 전제다.
    - `Surface`가 `aside-repl`이 아니면 session에 `surfaceIdentity`를 넣는다. `browserFamily`는 표의 쌍이다. `profileOrSessionId='synthetic-profile'`, `tabId='synthetic-tab'`, `url=$PaperUrl`, `observedAtUtc='2026-10-11T00:00:00.000Z'`. snapshot에는 `asideRepl` 대신 `surfaceState`를 넣는다. 관측·capture·append receipt의 `surface`와 모든 `url`을 바꾼다.
    - `offline-dom-test`의 `PaperUrl`은 실제 simulator 파일의 `file:` URI다. `[Uri]::new((Join-Path $kit 'test-fixtures/iab-simulator/index.html')).AbsoluteUri`로 만든다. 다른 경로를 쓰지 않는다.
 4. 시험을 더한다. `scripts/test_surface_contract.ps1`. 마지막 줄은 `SurfaceContract PASS`다. fixture는 OS 임시 폴더다.
    - 양성 12개. surface 4개 × step 3개(Select, BeforeNext, AfterReload). `New-MathSecrAppendHistoryFixture -ProblemCount 3 -HistoryDepth 1 -Surface <s>`와 Phase 2의 `assembly_support.ps1` 방식으로 Select·BeforeNext session을 만든다. 모두 `Valid=$true`다.
-   - 음성 7개. 각각 거부되고 토큰이 Error 또는 Status 메시지에 있어야 한다.
+   - 음성 9개. 각각 거부되고 토큰이 Error 또는 Status 메시지에 있어야 한다.
      1. `surfaceIdentity.surface='codex-iab'`, `browserFamily='aside'` → `surface-browser-family`.
      2. `surfaceIdentity.surface='codex-iab'` session에 persisted capture `surface='aside-repl'` → 거부. `production_validation.ps1:132`의 기존 문장이다.
      3. `surfaceIdentity.surface='chrome'` → `surface-unsupported`.
@@ -87,6 +90,8 @@ flowchart LR
      5. `offline-dom-test` session에 `paper.url='https://www.mathsecr.com/mypaper/123'` → `surface-url`.
      6. snapshot에 `asideRepl`과 `surfaceState`가 함께 있음 → `surface-mismatch`.
      7. `codex-chrome-ext` session의 `editAppendReceipt.surface='codex-iab'` → `edit-append-schema`.
+     8. `codex-iab` session의 prior session(append history H=1)에 `surfaceIdentity` 없음 → `surface-mismatch`.
+     9. `aside-repl` session에서 선택되지 않은 두 번째 attempt의 `observationReceipt.submission.surface='codex-iab'` → `surface-mismatch`.
    - `test_assemble_pipeline.ps1` 경로 A를 둘로 나눈다. A1: 기존대로 `-Surface` 없이 `selected-search-receipt-invalid`(혼입 거부). A2: `offline-dom-test` session(작업 3)과 `assemble_target.ps1 -Surface offline-dom-test`로 조립 → 종료 코드 0 → 상주 모드 Select·BeforeNext `Valid=$true`. 기존 단정은 지우지 않는다.
    - `scripts/offline-regression-gates.json`에 `SurfaceContract` gate를 `public`으로 더한다. `passPattern`은 `SurfaceContract PASS`다. 공개 gate는 14개가 된다.
 5. 측정과 기록.
@@ -120,7 +125,7 @@ pwsh -NoProfile -File ./scripts/perf/measure_after_reload.ps1 -ProblemCount 15 -
 ```
 
 - 공개 gate가 14 PASS, 0 FAIL, 20 SKIP이다. `SurfaceContract PASS`와 `AssemblePipeline PASS`가 로그에 있다.
-- 양성 12개 PASS. 음성 7개 거부. 경로 A1 거부, 경로 A2 PASS.
+- 양성 12개 PASS. 음성 9개 거부. 경로 A1 거부, 경로 A2 PASS.
 - 동일성 24개가 `AfterReloadIdentity PASS`다. 기준 commit은 Phase 0 그대로다.
 - H=6 중앙값이 2.2초 이하다. `pdfValidatorStarts` 1, `appendReceiptValidations` H는 그대로다.
 - `validate_publication.py`의 hash drift가 0이다. 바뀐 export 5개의 transformation이 PR에 있다.
@@ -128,4 +133,4 @@ pwsh -NoProfile -File ./scripts/perf/measure_after_reload.ps1 -ProblemCount 15 -
 
 ## PR
 
-브랜치 `codex/phase-3a`. base는 `main`이다. 제목 `Phase 3a: surface 계약`. 추론 노력 `high`. PR 본문에 surface별 양성·음성 표, 바뀐 export 5개, 동일성 결과, H=6 값을 쓴다. `ASIDE_REPL_READY` 이름 정리와 `probeArtifact` 필수화는 후속 항목으로 적는다. 모호하면 구현 전에 Issue #2에 질문한다.
+브랜치 `codex/phase-3a`. base는 `main`이다. 제목 `Phase 3a: surface 계약`. 추론 노력 `high`. PR 본문에 surface별 양성·음성 표(12·9), 바뀐 export 5개, 동일성 결과, H=6 값을 쓴다. `ASIDE_REPL_READY` 이름 정리와 `probeArtifact` 필수화는 후속 항목으로 적는다. 모호하면 구현 전에 Issue #2에 질문한다.

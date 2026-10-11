@@ -1,7 +1,8 @@
 # Loaded by state_machine.ps1; reuse its canonical identity and artifact helpers.
 # Receipt integrity is not an independent mathematical or visual oracle.
+. (Join-Path $PSScriptRoot 'surface_contract.ps1')
 function Test-MathSecrSelectedSearchReceipt {
-  param($Target, [string]$Resolution)
+  param($Target, [string]$Resolution, [string]$Surface = 'aside-repl')
   $invalid = [pscustomobject]@{ Valid = $false; AttemptId = ''; InspectedIds = @(); Projection = $null }
   $bodyProperty = $Target.PSObject.Properties['bodyComparisonReceipt']
   if ($null -eq $bodyProperty -or
@@ -19,7 +20,7 @@ function Test-MathSecrSelectedSearchReceipt {
         $observationProperty = $bucket.PSObject.Properties['observationReceipt']
         if ($null -eq $observationProperty) { continue }
         $observation = Test-MathSecrSearchObservation -Packet $observationProperty.Value `
-          -AttemptId $attemptId -Chips @($Target.metadataRescue.textChips) -ResultCount $bucket.resultCount
+          -AttemptId $attemptId -Chips @($Target.metadataRescue.textChips) -ResultCount $bucket.resultCount -Surface $Surface
         if ($observation.FreshResultVerified -and
             @($observationProperty.Value.submission.criteria.chips | Where-Object { $_.kind -cne 'text' }).Count -eq 0) {
           $observationReceipt = $observationProperty.Value
@@ -48,27 +49,23 @@ function Test-MathSecrSelectedSearchReceipt {
         @($attempt.exactMatchIds) -cnotcontains $Target.selectedId -or
         @($attempt.inspectedIds) -cnotcontains $Target.selectedId) { return $invalid }
     $observation = Test-MathSecrSearchObservation -Packet $attempt.observationReceipt `
-      -AttemptId $attemptId -Chips @($attempt.chips | ForEach-Object { $_.value }) -ResultCount $attempt.resultCount
+      -AttemptId $attemptId -Chips @($attempt.chips | ForEach-Object { $_.value }) -ResultCount $attempt.resultCount -Surface $Surface
     if (-not $observation.FreshResultVerified) { return $invalid }
     $observationReceipt = $attempt.observationReceipt
     $inspectedIds = @($attempt.inspectedIds)
   }
   if ($null -eq $observationReceipt) { return $invalid }
-  # Offline DOM tests exercise collection, but cannot be used as live paper
-  # selection receipts. The actual read must remain on a MathSecr paper route.
-  $paperUri = $null
-  if ($observationReceipt.submission.surface -cne 'aside-repl' -or
-      -not [Uri]::TryCreate($observationReceipt.submission.url, [UriKind]::Absolute, [ref]$paperUri) -or
-      $paperUri.Scheme -cne 'https' -or
-      @('www.mathsecr.com', 'mathsecr.com') -cnotcontains $paperUri.Host -or
-      $paperUri.AbsolutePath -cnotmatch '^/mypaper/[^/]+/?$') { return $invalid }
+  # Selection evidence is bound to the caller's declared surface and route.
+  # Offline selection is restricted to the isolated simulator file URI.
+  if ($observationReceipt.submission.surface -cne $Surface -or
+      -not (Test-MathSecrSurfacePaperUrl -Surface $Surface -Url $observationReceipt.submission.url)) { return $invalid }
   $visibleIds = @($observation.Projection.OrderedVisibleIds)
   if ($visibleIds -cnotcontains $Target.selectedId) { return $invalid }
   return [pscustomobject]@{ Valid = $true; AttemptId = $attemptId; InspectedIds = $inspectedIds; Projection = $observation.Projection }
 }
 
 function Test-MathSecrBodyComparisonReceipt {
-  param($Receipt, $Target, [string]$ProjectRoot, [string[]]$InspectedIds, [string]$AttemptId, $Context = $null)
+  param($Receipt, $Target, [string]$ProjectRoot, [string[]]$InspectedIds, [string]$AttemptId, $Context = $null, [string]$Surface = 'aside-repl')
   $contextEntered = $false
   try {
 

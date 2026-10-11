@@ -248,6 +248,30 @@ try {
         }
       } finally { Exit-MathSecrValidationContext -Context $context }
     }
+    # Surface belongs to both cache identities, even for the same snapshot and
+    # artifact. A rejected cross-surface call must execute rather than reuse PASS.
+    $context = Enter-MathSecrValidationContext -ProjectRoot $root
+    $script:contextAppendValidationCount = 0
+    try {
+      $surfaceArguments = @{Snapshot=$snapshot;ExpectedIds=$expectedIds;ExpectedKeys=$expectedKeys;ProjectRoot=$root;Depth=0;Context=$context}
+      $asideResult = Test-MathSecrEditAppendReceipt @surfaceArguments -Surface aside-repl
+      $iabResult = Test-MathSecrEditAppendReceipt @surfaceArguments -Surface codex-iab
+      $asideAgain = Test-MathSecrEditAppendReceipt @surfaceArguments -Surface aside-repl
+      Assert-ValidationContextTest ($asideResult.Valid -and -not $iabResult.Valid -and
+        $iabResult.Errors -ccontains 'edit-append-schema' -and
+        [object]::ReferenceEquals($asideResult,$asideAgain) -and $script:contextAppendValidationCount -eq 2) 'Append cache crossed a surface boundary.'
+      $priorArtifact = $snapshot.editAppendReceipt.priorSessionArtifact
+      $asideState = $pdfValidation.StateResult
+      $iabState = Copy-MathSecrBenchmarkObject $asideState
+      Set-MathSecrCachedStateResult -Context $context -ArtifactSha256 $priorArtifact.sha256 -Snapshot $pdfSession.snapshot -Phase AfterReload -StateResult $asideState -Surface aside-repl
+      $otherState = Get-MathSecrCachedStateResult -Context $context -ArtifactSha256 $priorArtifact.sha256 -Phase AfterReload -AppendDepth 1 -Surface codex-iab
+      Assert-ValidationContextTest ($null -eq $otherState) 'State cache crossed a surface boundary.'
+      Set-MathSecrCachedStateResult -Context $context -ArtifactSha256 $priorArtifact.sha256 -Snapshot $pdfSession.snapshot -Phase AfterReload -StateResult $iabState -Surface codex-iab
+      $cachedAside = Get-MathSecrCachedStateResult -Context $context -ArtifactSha256 $priorArtifact.sha256 -Phase AfterReload -AppendDepth 1 -Surface aside-repl
+      $cachedIab = Get-MathSecrCachedStateResult -Context $context -ArtifactSha256 $priorArtifact.sha256 -Phase AfterReload -AppendDepth 1 -Surface codex-iab
+      Assert-ValidationContextTest ([object]::ReferenceEquals($asideState,$cachedAside) -and
+        [object]::ReferenceEquals($iabState,$cachedIab)) 'Writing one surface replaced another surface state cache entry.'
+    } finally { Exit-MathSecrValidationContext -Context $context }
   } finally { Set-Item Function:Invoke-MathSecrEditAppendReceiptValidation $script:contextOriginalAppendValidation }
 
   $capturePath = Join-Path $root $fixture.Session.persistedCardObservationArtifact.path

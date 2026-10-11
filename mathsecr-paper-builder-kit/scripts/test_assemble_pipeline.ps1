@@ -15,8 +15,11 @@ $pwsh=(Get-Command pwsh).Source
 function Assert-AssemblyTest {param([bool]$Condition,[string]$Message);if (-not $Condition) {throw $Message}}
 function Read-AssemblyJson {param([string]$Path);return ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $Path -Raw -Encoding UTF8)}
 function Invoke-AssemblyTest {
-  param([string]$ObservationName,[string]$JudgmentName,[string]$OutputName,[string]$RosterName='source-roster.json')
-  $output=@(& $pwsh -NoProfile -File (Join-Path $kit 'scripts/assemble_target.ps1') -ProjectRoot $root -RosterPath $RosterName -OccurrenceKey $session.snapshot.targets[0].occurrenceKey -ObservationPath $ObservationName -BodyJudgmentPath $JudgmentName -CandidateRenderPath 'candidate-1.png' -OutPath $OutputName 2>&1 | ForEach-Object {[string]$_})
+  param([string]$ObservationName,[string]$JudgmentName,[string]$OutputName,[string]$RosterName='source-roster.json',
+    [string]$Surface,[string]$FixtureRoot=$root)
+  $surfaceArgument=@{}
+  if ($PSBoundParameters.ContainsKey('Surface')) { $surfaceArgument.Surface=$Surface }
+  $output=@(& $pwsh -NoProfile -File (Join-Path $kit 'scripts/assemble_target.ps1') -ProjectRoot $FixtureRoot -RosterPath $RosterName -OccurrenceKey $session.snapshot.targets[0].occurrenceKey -ObservationPath $ObservationName -BodyJudgmentPath $JudgmentName -CandidateRenderPath 'candidate-1.png' -OutPath $OutputName @surfaceArgument 2>&1 | ForEach-Object {[string]$_})
   $code=$LASTEXITCODE
   Assert-AssemblyTest ($output.Count -eq 1) ("Assembler must return exactly one JSON line: "+($output -join ' '))
   return [pscustomobject]@{Code=$code;Response=(ConvertFrom-MathSecrContractJson $output[0])}
@@ -42,6 +45,8 @@ if (-not $BrowserPath) {
 if (-not $PlaywrightModule -or -not $BrowserPath) {throw 'Assembly DOM test requires Playwright module and a browser executable.'}
 $root=Join-Path ([IO.Path]::GetTempPath()) ('mathsecr-phase0-assembly-'+[guid]::NewGuid().ToString('N'))
 $worker=$null
+$offlineWorker=$null
+$offlineRoot=Join-Path ([IO.Path]::GetTempPath()) ('mathsecr-phase0-assembly-'+[guid]::NewGuid().ToString('N'))
 try {
   foreach ($name in @('simulator','mathsecr-current')) {
     $valid=Test-Json -Json (Get-Content -LiteralPath (Join-Path $kit "test-fixtures/control-map/$name.json") -Raw) -SchemaFile (Join-Path $kit 'test-fixtures/control-map/schema.json')
@@ -78,6 +83,25 @@ try {
   $null=Write-MathSecrBenchmarkArtifact $observationB $root 'observation-b.json'
   $null=Write-MathSecrBenchmarkArtifact $judgment $root 'judgment.json'
   Assert-AssemblyRejection 'observation-a.json' 'judgment.json' 'target-a.json' 'selected-search-receipt-invalid'
+  Write-Output 'AssemblyPath A1 PASS (default Aside rejects simulator receipt: selected-search-receipt-invalid).'
+  # A2 uses the same actual file-DOM packet as A1 and an explicitly declared
+  # offline session. No receipt surface or URL is rewritten to obtain acceptance.
+  $offlineFixture=New-MathSecrAppendHistoryFixture -ProblemCount 3 -HistoryDepth 0 -OutRoot $offlineRoot -Surface offline-dom-test
+  $offlineSession=New-MathSecrAssemblySession $offlineFixture
+  Assert-AssemblyTest ($offlineSession.paper.url -ceq $dom.submission.url) 'Offline fixture URL differs from the collected simulator URL.'
+  $null=Write-MathSecrBenchmarkArtifact $observationA $offlineRoot 'observation-a.json'
+  $null=Write-MathSecrBenchmarkArtifact $judgment $offlineRoot 'judgment.json'
+  $offlineAssembly=Invoke-AssemblyTest 'observation-a.json' 'judgment.json' 'target-a2.json' -Surface offline-dom-test -FixtureRoot $offlineRoot
+  Assert-AssemblyTest ($offlineAssembly.Code -eq 0 -and $offlineAssembly.Response.assembled) 'Offline simulator A2 assembly failed.'
+  $offlineSession.snapshot.targets[0]=Read-AssemblyJson (Join-Path $offlineRoot 'target-a2.json')
+  $offlineSession.snapshot.selectionBeforeNextIds=@($offlineSession.snapshot.targets.selectedId)
+  $null=Write-MathSecrBenchmarkArtifact $offlineSession $offlineRoot 'offline-session.json'
+  $offlineWorker=Start-MathSecrResidentValidation $ProjectRoot $offlineRoot
+  $offlineSelect=Invoke-MathSecrResidentCommand $offlineWorker @{step='Select';inputPath='offline-session.json';targetOccurrenceKey=$targetKey}
+  $offlineNext=Invoke-MathSecrResidentCommand $offlineWorker @{step='BeforeNext';inputPath='offline-session.json'}
+  Assert-AssemblyTest ($offlineSelect.Valid -and $offlineNext.Valid) ('Offline simulator resident A2 failed: '+(ConvertTo-Json @($offlineSelect,$offlineNext) -Depth 80 -Compress))
+  Stop-MathSecrResidentValidation $offlineWorker;$offlineWorker=$null
+  Write-Output 'AssemblyPath A2 PASS (offline-dom-test assembler exit 0; resident Select and BeforeNext Valid=true).'
   $assembled=Invoke-AssemblyTest 'observation-b.json' 'judgment.json' 'target-b.json'
   Assert-AssemblyTest ($assembled.Code -eq 0 -and $assembled.Response.assembled -and $assembled.Response.resolution -ceq 'initial_selected') 'Synthetic assembly failed.'
   $target=Read-AssemblyJson (Join-Path $root 'target-b.json')
@@ -189,8 +213,10 @@ try {
   $noStep=Invoke-MathSecrResidentCommand $worker @{inputPath='assembly-session.json'}
   Assert-AssemblyTest (-not $noStep.Valid -and $null -eq $noStep.Step) 'Missing step did not return a recoverable error.'
   Stop-MathSecrResidentValidation $worker -Eof;$worker=$null
-  Write-Output 'AssemblePipeline PASS (simulator policy rejection, synthetic Select/BeforeNext, four specified negatives, roster binding, helper/CLI identity, resident isolation/exit/EOF).'
+  Write-Output 'AssemblePipeline PASS (A1 mixed-surface rejection, A2 offline simulator Select/BeforeNext, synthetic Select/BeforeNext, four specified negatives, roster binding, helper/CLI identity, resident isolation/exit/EOF).'
 } finally {
+  if ($null -ne $offlineWorker) {Stop-MathSecrResidentValidation $offlineWorker}
   if ($null -ne $worker) {Stop-MathSecrResidentValidation $worker}
+  if (Test-Path -LiteralPath $offlineRoot) {Remove-MathSecrOwnedBenchmarkRoot $offlineRoot}
   Remove-MathSecrOwnedBenchmarkRoot $root
 }

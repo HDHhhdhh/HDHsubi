@@ -771,7 +771,7 @@ function Invoke-MathSecrReportLint {
 }
 
 function Invoke-MathSecrUserSummaryLint {
-  param([string]$Text, [pscustomobject]$ExpectedProjection, $Context)
+  param([string]$Text, [pscustomobject]$ExpectedProjection, $Context, [string]$Surface = 'aside-repl')
 
   Assert-True (-not [string]::IsNullOrWhiteSpace($Text)) "User summary must not be blank"
   $normalized = (($Text -replace "`r`n", "`n") -replace "`r", "`n").Trim()
@@ -795,8 +795,11 @@ function Invoke-MathSecrUserSummaryLint {
   Assert-True ($lines[5] -eq "3. 실패한 문제 이미지 크롭 보고서 PDF") "User summary must contain the failed-problem PDF line"
   Assert-True ($lines[7] -eq "4. 출처") "User summary must contain the 출처 section"
 
-  $paperMatch = [regex]::Match($lines[1], '^- \[(?<label>[^\]]+)\]\((?<url>https://www\.mathsecr\.com/mypaper/[0-9]+)\)$')
-  Assert-True $paperMatch.Success "Paper link must be a MathSecr mypaper Markdown link"
+  $paperPattern = if ($Surface -ceq 'offline-dom-test') {
+    '^- \[(?<label>[^\]]+)\]\((?<url>file:[^)]+)\)$'
+  } else { '^- \[(?<label>[^\]]+)\]\((?<url>https://www\.mathsecr\.com/mypaper/[0-9]+)\)$' }
+  $paperMatch = [regex]::Match($lines[1], $paperPattern)
+  Assert-True ($paperMatch.Success -and (Test-MathSecrSurfacePaperUrl -Surface $Surface -Url $paperMatch.Groups['url'].Value)) "Paper link must be a MathSecr mypaper Markdown link"
   $paperLabel = $paperMatch.Groups['label'].Value
   $paperUrl = $paperMatch.Groups['url'].Value
   Assert-True (-not [string]::IsNullOrWhiteSpace($paperLabel)) "Paper link label must not be blank"

@@ -44,7 +44,8 @@ function Write-MathSecrBenchmarkArtifact {
 }
 
 function New-MathSecrBenchmarkObservation {
-  param([string]$AttemptId, [string]$CandidateId)
+  param([string]$AttemptId, [string]$CandidateId, [string]$Surface='aside-repl', [string]$PaperUrl)
+  if (-not $PaperUrl) { $PaperUrl = 'https://www.mathsecr.com/mypaper/123' }
   $criteria = [pscustomobject]@{
     scopeMode='내 문제지'; sourceChips=@('합성 DB'); filterChips=@('대수')
     chips=@([pscustomobject]@{kind='text';value='본문'}, [pscustomobject]@{kind='text';value='조건'})
@@ -58,7 +59,7 @@ function New-MathSecrBenchmarkObservation {
       raw=[pscustomobject]@{
         captureId="capture-$AttemptId-$index"; capturedAtUtc=('2026-10-11T00:00:0{0}.000Z' -f $index)
         timeOriginMs=1000; monotonicMs=($index + 1)
-        url='https://www.mathsecr.com/mypaper/123'; title='Synthetic Phase 0 fixture'
+        url=$PaperUrl; title='Synthetic Phase 0 fixture'
         criteria=(Copy-MathSecrBenchmarkObject $criteria); scopeSelectionConfirmed=$true
         result=[pscustomobject]@{count=1;orderedIds=@($CandidateId);loading=$false;observedSubmitId=$null;observedCriteriaKey=$null}
       }
@@ -67,8 +68,8 @@ function New-MathSecrBenchmarkObservation {
   return [pscustomobject]@{
     schemaVersion=1; attemptId=$AttemptId
     submission=[pscustomobject]@{
-      submitId="submit-$AttemptId"; actionEvidenceId="action-$AttemptId"; action='검색하기'; surface='aside-repl'
-      completedAtUtc='2026-10-11T00:00:00.500Z'; url='https://www.mathsecr.com/mypaper/123'
+      submitId="submit-$AttemptId"; actionEvidenceId="action-$AttemptId"; action='검색하기'; surface=$Surface
+      completedAtUtc='2026-10-11T00:00:00.500Z'; url=$PaperUrl
       criteria=$criteria; resultCriteriaKey=$null
     }
     beforeSubmit=$reads[0]; observations=@($reads[1], $reads[2])
@@ -76,7 +77,7 @@ function New-MathSecrBenchmarkObservation {
 }
 
 function New-MathSecrBenchmarkTarget {
-  param($SourceRow, [string]$CandidateName)
+  param($SourceRow, [string]$CandidateName, [string]$Surface='aside-repl', [string]$PaperUrl)
   $number = $SourceRow.number
   $id = 'candidate-' + $number
   $attempt = 'attempt-' + $number
@@ -93,7 +94,7 @@ function New-MathSecrBenchmarkTarget {
           [pscustomobject]@{value='조건';provenance='literal-body';evidenceReceipt='synthetic-condition'})
         submitted=$true;freshResultVerified=$true;resultCount=1;exactFound=$true;inspectedIds=@($id);exactMatchIds=@($id)
         resetBefore=$true;clearReceipt='synthetic-clean';removedChips=@()
-        observationReceipt=(New-MathSecrBenchmarkObservation $attempt $id)
+        observationReceipt=(New-MathSecrBenchmarkObservation $attempt $id -Surface $Surface -PaperUrl $PaperUrl)
       })
       candidateRecoveryEvidence=[pscustomobject]@{routes=@();coverage=@()}
       commonChips=@('본문','조건');exactMatchIds=@($id);literalOnlyLadderCompleted=$true
@@ -116,9 +117,16 @@ function New-MathSecrAppendHistoryFixture {
   param(
     [ValidateRange(1, 1000)][int]$ProblemCount,
     [ValidateRange(0, 63)][int]$HistoryDepth,
-    [Parameter(Mandatory)][string]$OutRoot
+    [Parameter(Mandatory)][string]$OutRoot,
+    [string]$Surface='aside-repl',
+    [string]$PaperUrl
   )
   if ($HistoryDepth -ge $ProblemCount) { throw 'Each append must add a new row; ProblemCount must exceed HistoryDepth.' }
+  if (-not $PaperUrl) {
+    $PaperUrl = if ($Surface -ceq 'offline-dom-test') {
+      [Uri]::new((Join-Path $PSScriptRoot '../../mathsecr-paper-builder-kit/test-fixtures/iab-simulator/index.html')).AbsoluteUri
+    } else { 'https://www.mathsecr.com/mypaper/123' }
+  }
   $root = Assert-MathSecrBenchmarkTempRoot $OutRoot
   if (Test-Path -LiteralPath $root) {
     if (-not (Test-Path -LiteralPath $root -PathType Container) -or @(Get-ChildItem -LiteralPath $root -Force).Count) {
@@ -144,7 +152,7 @@ for number in range(1, int(sys.argv[2]) + 1):
       sourceBodyArtifact=[pscustomobject]@{path=$name;sha256=(Get-FileHash -LiteralPath (Join-Path $root $name)).Hash.ToLowerInvariant()}}
   })
   $roster = Write-MathSecrBenchmarkArtifact ([pscustomobject]@{schemaVersion=1;targets=$rows}) $root 'source-roster.json'
-  $targets = @(foreach ($row in $rows) { New-MathSecrBenchmarkTarget $row ("candidate-" + $row.number + '.png') })
+  $targets = @(foreach ($row in $rows) { New-MathSecrBenchmarkTarget $row ("candidate-" + $row.number + '.png') -Surface $Surface -PaperUrl $PaperUrl })
   $initialCount = $ProblemCount - $HistoryDepth
   $initialIds = @($targets[0..($initialCount - 1)] | ForEach-Object {$_.selectedId})
   $sessions = [Collections.Generic.List[object]]::new()
@@ -163,8 +171,8 @@ for number in range(1, int(sys.argv[2]) + 1):
     $origin = [datetimeoffset]::Parse('2026-10-11T00:00:10.000Z').AddSeconds($stage * 10)
     $stamp = {param([double]$Seconds) $origin.AddSeconds($Seconds).ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'", [cultureinfo]::InvariantCulture)}
     $capture = [pscustomobject]@{
-      schemaVersion=1;captureId="persisted-capture-$stage";collectorVersion='phase0-synthetic-v1';surface='aside-repl'
-      capturedAtUtc=(& $stamp 7);url='https://www.mathsecr.com/mypaper/123';title='Synthetic Phase 0 fixture'
+      schemaVersion=1;captureId="persisted-capture-$stage";collectorVersion='phase0-synthetic-v1';surface=$Surface
+      capturedAtUtc=(& $stamp 7);url=$PaperUrl;title='Synthetic Phase 0 fixture'
       readEvidenceId="persisted-read-$stage"
       cards=@($cards | ForEach-Object {[pscustomobject]@{problemId=$_.problemId;rawVisibleDbName=$_.rawVisibleDbName}})
     }
@@ -180,6 +188,16 @@ for number in range(1, int(sys.argv[2]) + 1):
       }
       persistedCards=$cards;failureReportPdf='없음'
       persistedCardObservationArtifact=(Write-MathSecrBenchmarkArtifact $capture $root "persisted-$stage.json")
+    }
+    if ($Surface -cne 'aside-repl') {
+      $session | Add-Member -NotePropertyName surfaceIdentity -NotePropertyValue ([pscustomobject]@{
+        schemaVersion=1;surface=$Surface;browserFamily=$MathSecrSurfaceBrowserFamilies[$Surface]
+        profileOrSessionId='synthetic-profile';tabId='synthetic-tab';url=$PaperUrl;observedAtUtc='2026-10-11T00:00:00.000Z'
+      })
+      $session.snapshot.PSObject.Properties.Remove('asideRepl')
+      $session.snapshot | Add-Member -NotePropertyName surfaceState -NotePropertyValue ([pscustomobject]@{
+        surface=$Surface;available=$true;paperVerified=$true;offSurfaceLiveManipulation=$false
+      })
     }
     if ($selectedCount -lt $ProblemCount) {
       $items = @(foreach ($number in ($selectedCount + 1)..$ProblemCount) {
@@ -204,21 +222,21 @@ for number in range(1, int(sys.argv[2]) + 1):
       $evidence = Write-MathSecrBenchmarkArtifact $execution $root "execution-$stage.json"
       $beforeReceipt = Write-MathSecrBenchmarkArtifact $before $root "before-$stage.json"
       $afterReceipt = Write-MathSecrBenchmarkArtifact $after $root "after-$stage.json"
-      $add = [pscustomobject]@{actionId="synthetic-add-$stage";surface='aside-repl';startedAtUtc=$before.capturedAtUtc;
+      $add = [pscustomobject]@{actionId="synthetic-add-$stage";surface=$Surface;startedAtUtc=$before.capturedAtUtc;
         completedAtUtc=$after.capturedAtUtc;timingBasis='observation-window';url=$capture.url;controlName='추가';action='click';
         evidenceArtifact=$evidence;afterObservationArtifact=$afterReceipt;
         executionBinding=[pscustomobject]@{commandRecordKey='add-command';resultRecordKey='add-result';completionMarker='SYNTHETIC_APPEND_COMPLETED:'}}
-      $confirmBefore = [pscustomobject]@{capturedAtUtc=(& $stamp 2.5);url=$capture.url;draftIds=$ids;controlName='확인';surface='aside-repl'}
+      $confirmBefore = [pscustomobject]@{capturedAtUtc=(& $stamp 2.5);url=$capture.url;draftIds=$ids;controlName='확인';surface=$Surface}
       $confirmAfter = [pscustomobject]@{schemaVersion=1;capturedAtUtc=(& $stamp 4.5);url=$capture.url;draftIds=$ids;
-        controlName='확인';surface='aside-repl';action='click';startedAtUtc=(& $stamp 3);completedAtUtc=(& $stamp 4)}
-      $confirm = [pscustomobject]@{actionId="synthetic-confirm-$stage";surface='aside-repl';startedAtUtc=$confirmAfter.startedAtUtc;
+        controlName='확인';surface=$Surface;action='click';startedAtUtc=(& $stamp 3);completedAtUtc=(& $stamp 4)}
+      $confirm = [pscustomobject]@{actionId="synthetic-confirm-$stage";surface=$Surface;startedAtUtc=$confirmAfter.startedAtUtc;
         completedAtUtc=$confirmAfter.completedAtUtc;timingBasis='recorded-execution';url=$capture.url;controlName='확인';action='click';
         evidenceArtifact=$evidence;executionBinding=[pscustomobject]@{commandRecordKey='confirm-command';resultRecordKey='confirm-result';completionMarker='SYNTHETIC_CONFIRM_COMPLETED:'};
         beforeObservationArtifact=(Write-MathSecrBenchmarkArtifact $confirmBefore $root "confirm-before-$stage.json");
         afterObservationArtifact=(Write-MathSecrBenchmarkArtifact $confirmAfter $root "confirm-after-$stage.json")}
       $draft = [pscustomobject]@{capturedAtUtc=(& $stamp 5);url=$capture.url;draftIds=$ids}
       $delta = $currentTargets[$selectedCount - 1]
-      $receipt = [pscustomobject]@{schemaVersion=1;appendId="synthetic-append-$stage";surface='aside-repl';
+      $receipt = [pscustomobject]@{schemaVersion=1;appendId="synthetic-append-$stage";surface=$Surface;
         priorSessionArtifact=$prior;beforeObservationArtifact=$beforeReceipt;
         deltaTargets=@([pscustomobject]@{sourceProblemNumber=$delta.number;occurrenceKey=$delta.occurrenceKey;problemId=$delta.selectedId});
         addActionArtifact=(Write-MathSecrBenchmarkArtifact $add $root "add-$stage.json");

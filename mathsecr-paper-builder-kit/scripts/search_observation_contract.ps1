@@ -1,5 +1,6 @@
 ﻿# Freshness heuristic for independently captured read-only DOM observations.
 # It does not establish backend causality, body exactness, or complete lazy coverage.
+. (Join-Path $PSScriptRoot 'surface_contract.ps1')
 
 function Test-MathSecrObservationObject {
   param($Value, [string[]]$Fields)
@@ -113,7 +114,7 @@ function Test-MathSecrObservationShape {
 
 function Test-MathSecrSearchObservation {
   [CmdletBinding()]
-  param($Packet, $AttemptId, $Chips, $ResultCount)
+  param($Packet, $AttemptId, $Chips, $ResultCount, [string]$Surface = $null)
   $errors = New-Object 'System.Collections.Generic.List[string]'
   $risks = New-Object 'System.Collections.Generic.List[string]'
   $projection = $null
@@ -128,7 +129,8 @@ function Test-MathSecrSearchObservation {
     if (-not (Test-MathSecrObservationObject $s @('submitId','actionEvidenceId','action','surface','completedAtUtc','url','criteria','resultCriteriaKey'))) { $shape = $false }
     else {
       if (-not (Test-MathSecrObservationToken $s.submitId) -or -not (Test-MathSecrObservationToken $s.actionEvidenceId) -or
-          $s.action -cne '검색하기' -or @('aside-repl','offline-dom-test') -cnotcontains $s.surface -or
+          $s.action -cne '검색하기' -or -not (Test-MathSecrSupportedSurface $s.surface) -or
+          (-not [string]::IsNullOrEmpty($Surface) -and $s.surface -cne $Surface) -or
           -not (Test-MathSecrObservationTimestamp $s.completedAtUtc) -or -not (Test-MathSecrObservationText $s.url) -or
           -not (Test-MathSecrObservationCriteria $s.criteria) -or
           ($null -ne $s.resultCriteriaKey -and -not (Test-MathSecrObservationToken $s.resultCriteriaKey))) { $shape = $false }

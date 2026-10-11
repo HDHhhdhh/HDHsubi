@@ -1,6 +1,6 @@
 # 공개 회귀 inventory
 
-이 목록은 [실행 manifest](../../scripts/offline-regression-gates.json)와 같은 gate 33개를 분류한다. `public`은 13개, `private-bundle`은 20개다. Phase 0의 공개 gate 11개에 Phase 1의 ValidationContext와 Phase 2의 AssemblePipeline을 추가했다. 원래 `test_*.ps1` 23개를 빠짐없이 포함한다. 검색 관측의 `All`은 Contract/Collector/CuaRestricted 세 gate로 나눠 모든 분기를 실행한다. 원래 full runner의 문서 검사·kit 검사·fixture 생성·body-exact corpus 검사도 보존해서 표시한다.
+이 목록은 [실행 manifest](../../scripts/offline-regression-gates.json)와 같은 gate 34개를 분류한다. `public`은 14개, `private-bundle`은 20개다. Phase 0의 공개 gate 11개에 Phase 1의 ValidationContext, Phase 2의 AssemblePipeline, Phase 3a의 SurfaceContract를 추가했다. 원래 `test_*.ps1` 23개를 빠짐없이 포함한다. 검색 관측의 `All`은 Contract/Collector/CuaRestricted 세 gate로 나눠 모든 분기를 실행한다. 원래 full runner의 문서 검사·kit 검사·fixture 생성·body-exact corpus 검사도 보존해서 표시한다.
 
 `private-bundle`은 실행 준비 등급이다. 모든 파일이 비공개라는 판정은 아니다. 합성 helper도 원본 파일과 공개 승인 근거가 없으면 이 등급으로 둔다. 누락 파일을 다른 자료로 대체하지 않았다. D4 자료가 제공되면 내용과 provenance를 확인한 뒤 등급을 바꿔야 한다.
 
@@ -41,6 +41,7 @@
 | [test_append_history_fixture.ps1](../../scripts/test_append_history_fixture.ps1) | `scripts/perf/append_history_support.ps1`<br>`scripts/perf/measure_after_reload.ps1` | 가능 · 공개 합성/지역 계약 | `public` |
 | [test_validation_context.ps1](../../scripts/test_validation_context.ps1) | `scripts/perf/append_history_support.ps1` | 가능 · 호출 간 캐시 격리, 변조 거부, 형식 및 독립 호출 호환성 | `public` |
 | [test_assemble_pipeline.ps1](../../mathsecr-paper-builder-kit/scripts/test_assemble_pipeline.ps1) | simulator·기존 adapter·control map schema/값·본문 판정 schema; 실행 입력은 OS 임시 폴더에 생성 | 가능 · 공개 신규 합성 | `public` |
+| [test_surface_contract.ps1](../../scripts/test_surface_contract.ps1) | surface 계약·assembly helper·simulator 파일; 실행 입력은 OS 임시 폴더에 생성 | 가능 · surface 4종 × step 3개, 혼입 등 음성 9개, 선택 probe 안전 경로 | `public` |
 
 ## 실행과 실패 처리
 
@@ -64,3 +65,5 @@ Phase 0의 연도 테스트 2개는 기존 contract reader로 날짜 문자열�
 Phase 1b는 기존 ValidationContext와 AppendHistoryFixture gate에 PDF worker 수명·오류 진단, append 내용·형식·기대 목록 변조와 실제 실행 횟수 검사를 추가했다. gate 수는 12 public / 20 private-bundle 그대로이며, 별도 동일성 비교는 PDF 손상 2종을 포함한 24개 사례다.
 
 Phase 2는 AssemblePipeline gate를 추가했다. 실제 DOM 관측의 선택 정책 거부와 별도 합성 입력의 조립·Select·BeforeNext 성공, helper/CLI 동일성 및 상주 명령 격리를 검사한다. 공개 13개, 비공개 자료 미제공 20개를 유지한다.
+
+Phase 3a는 SurfaceContract gate를 추가해 공개 14개가 된다. 양성 12개와 음성 9개를 검사한다. AssemblePipeline은 기존 A1 혼입 거부를 유지하고, 선언한 offline-dom-test session으로 A2 조립·상주 Select·BeforeNext 성공을 추가한다. ValidationContext에는 state/append 캐시의 surface 격리 단정을 추가한다. 비공개 gate 20개는 계속 SKIP이다.

@@ -90,7 +90,7 @@ function Assert-MathSecrBodyJudgmentInput {
 
 function New-MathSecrAssembledTarget {
   param($Roster, [string]$OccurrenceKey, $Observation, $Judgment, [string]$CandidateRelativePath,
-    [string]$ProjectRoot, $InputHashes)
+    [string]$ProjectRoot, $InputHashes, [string]$Surface = 'aside-repl')
   Assert-MathSecrBodyJudgmentInput $Judgment
   if (-not (Test-HasRequiredProperties $Roster @('schemaVersion','targets')) -or
       -not (Test-IsStrictInteger $Roster.schemaVersion) -or $Roster.schemaVersion -ne 1 -or
@@ -152,8 +152,16 @@ function New-MathSecrAssembledTarget {
       beforeSubmit=(Copy-MathSecrAssemblyObject $inputAttempt.beforeSubmit)
       observations=(Copy-MathSecrAssemblyObject $inputAttempt.observations)
     }
-    $observed = Test-MathSecrSearchObservation -Packet $receipt -AttemptId $attemptId -Chips @($inputAttempt.chips.value) -ResultCount $resultCount
-    if (-not $observed.FreshResultVerified) { throw "observation-rejected:$attemptId" }
+    $observed = Test-MathSecrSearchObservation -Packet $receipt -AttemptId $attemptId -Chips @($inputAttempt.chips.value) -ResultCount $resultCount -Surface $Surface
+    if (-not $observed.FreshResultVerified) {
+      # Keep the existing simulator-in-Aside selection rejection at this earlier
+      # surface guard. No target or output artifact is created on this path.
+      $observedSurface = Get-MathSecrSurfacePropertyValue $receipt.submission 'surface'
+      if ((Test-MathSecrSupportedSurface $observedSurface) -and $observedSurface -cne $Surface) {
+        throw 'selected-search-receipt-invalid'
+      }
+      throw "observation-rejected:$attemptId"
+    }
     $isWinning = $attemptId -ceq $Judgment.searchAttemptId
     $exactIds = @(if ($isWinning -and @($last.raw.result.orderedIds) -ccontains $Judgment.candidateId) {$Judgment.candidateId})
     [pscustomobject]@{
@@ -202,9 +210,9 @@ function New-MathSecrAssembledTarget {
     resolution='initial_selected'
   }
   $target = Copy-MathSecrAssemblyObject $target
-  $selected = Test-MathSecrSelectedSearchReceipt -Target $target -Resolution $target.resolution
+  $selected = Test-MathSecrSelectedSearchReceipt -Target $target -Resolution $target.resolution -Surface $Surface
   if (-not $selected.Valid) { throw 'selected-search-receipt-invalid' }
-  $bodyArgs = @{Receipt=$target.bodyComparisonReceipt;Target=$target;ProjectRoot=$ProjectRoot;InspectedIds=$selected.InspectedIds;AttemptId=$selected.AttemptId}
+  $bodyArgs = @{Receipt=$target.bodyComparisonReceipt;Target=$target;ProjectRoot=$ProjectRoot;InspectedIds=$selected.InspectedIds;AttemptId=$selected.AttemptId;Surface=$Surface}
   $body = Test-MathSecrBodyComparisonReceipt @bodyArgs
   if (-not $body.Valid) { throw "body-comparison-rejected:$($body.Errors -join ';')" }
   $lines = @(foreach ($key in @('roster','observation','judgment','candidateRender')) {$key+':'+$InputHashes.$key})

@@ -19,9 +19,10 @@ flowchart LR
 먼저 현재 Aside 응답을 검사한다. `HostId`를 생략하면 `--host local`을 명시한다. 저장된 원격 기본 host를 상속하지 않는다. `AccountId`를 생략하면 CLI의 기본 account를 사용한다. 실제 제작 REPL이 `--host local --account u0`를 사용하면 검사에도 같은 값을 전달한다. 이 인수는 각 검사 명령에만 적용하며 전역 host/account 설정을 바꾸지 않는다.
 
 ```powershell
-& ./mathsecr-paper-builder-kit/scripts/check_aside_repl.ps1 `
+& ./mathsecr-paper-builder-kit/scripts/check_browser_surface.ps1 -Surface aside-repl -PaperUrl '<paper url>' `
   -HostId local -AccountId u0 `
-  -OutPath '.omo/evidence/current-run/aside-probe.json'
+  -ProbeReceiptPath '.omo/evidence/current-run/surface-probe.json'
+& ./mathsecr-paper-builder-kit/scripts/check_browser_surface.ps1 -Surface codex-iab -ToolReceiptPath '.omo/evidence/current-run/codex-tool-receipt.json' -PaperUrl '<paper url>' -ProbeReceiptPath '.omo/evidence/current-run/surface-probe.json'
 ```
 
 검사는 읽기 전용 `skills list`와 `listBrowserTabs()`만 실행한다. 현재 실행 PC는 `executionMachineName`, 지정한 경로는 `effectiveHostId`와 `hostSelectionBasis`에 기록한다. 이 필드는 실제 연결된 원격 PC를 증명하지 않는다. 기기 이름만으로 원격 작업을 추론하지 않는다. 사용자가 원격 작업을 명시 요청한 경우에만 `-RemoteRequested -RemoteRequestEvidence '<실제 사용자 지시>'`를 함께 전달한다. 둘 중 하나라도 없으면 CLI를 조회하거나 실행하기 전에 거부한다. 요청 여부는 호출자가 실제 사용자 지시에서 확인해야 하며 문자열 존재만으로 증명하지 않는다. 시간 초과나 연결 실패는 `unavailable`이다. 브라우저 종료 진단이 실제 반환된 경우에만 고정 종료 문구를 사용한다.
@@ -61,6 +62,12 @@ Select도 고정 원본 roster에 결합된 session을 받는다. 조립한 targ
   "schemaVersion": 1,
   "sessionId": "current-session",
   "paper": { "name": "문제지 이름", "url": "https://www.mathsecr.com/mypaper/123" },
+  "surfaceIdentity": {
+    "schemaVersion": 1, "surface": "aside-repl", "browserFamily": "aside",
+    "profileOrSessionId": "제작 REPL의 실제 session ID", "tabId": "실제 targetId",
+    "url": "https://www.mathsecr.com/mypaper/123", "observedAtUtc": "2026-10-11T09:00:00.0000000Z",
+    "probeArtifact": { "path": ".omo/evidence/current-run/surface-probe.json", "sha256": "실제 파일의 SHA-256" }
+  },
   "sourceRosterArtifact": { "path": ".omo/evidence/current-run/source-roster.json", "sha256": "실제 파일의 SHA-256" },
   "sourceTargets": [ { "number": "1", "occurrenceKey": "source-row-1", "sourceBodyArtifact": { "path": ".omo/evidence/current-run/source-1.png", "sha256": "실제 원본 크롭 SHA-256" } } ],
   "snapshot": { "targets": [ { "number": "1", "occurrenceKey": "source-row-1", "sourceBodyArtifact": { "path": ".omo/evidence/current-run/source-1.png", "sha256": "실제 원본 크롭 SHA-256" } } ] },

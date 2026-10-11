@@ -25,13 +25,40 @@ function New-SurfacePreNextSession {
   return $session
 }
 
+function Add-SurfaceTestProbe {
+  param($Session,[string]$Root,[int]$Stage,[string]$Surface)
+  if ($Surface -ceq 'offline-dom-test') { return }
+  if ($null -eq $Session.PSObject.Properties['surfaceIdentity']) {
+    $Session | Add-Member -NotePropertyName surfaceIdentity -NotePropertyValue ([pscustomobject]@{
+      schemaVersion=1;surface=$Surface;browserFamily=$MathSecrSurfaceBrowserFamilies[$Surface]
+      profileOrSessionId='synthetic-profile';tabId='synthetic-tab';url=$Session.paper.url;observedAtUtc='2026-10-11T00:00:00.000Z'
+    })
+  }
+  if ($Surface -ceq 'aside-repl') {
+    $probe=New-MathSecrSurfaceProbeReceipt $Surface aside-cli
+    $probe.failureClass='none';$probe.identity.identityBasis='aside-session'
+    $probe.identity.tabId=$Session.surfaceIdentity.tabId;$probe.identity.url=$Session.paper.url
+  } else {
+    $metadata=if ($Surface -ceq 'codex-iab') { [pscustomobject]@{codexSessionId=$Session.surfaceIdentity.profileOrSessionId} }
+      else { [pscustomobject]@{extensionInstanceId=$Session.surfaceIdentity.profileOrSessionId} }
+    $tool=[pscustomobject]@{
+      schemaVersion=1;tool='mcp__cua_repl';capturedAtUtc='2026-10-11T00:00:00.000Z';surface=$Surface
+      browser=[pscustomobject]@{id='synthetic-browser';type=$(if ($Surface -ceq 'codex-iab') {'iab'} else {'extension'});family=$(if ($Surface -ceq 'codex-iab') {$null} else {'chrome'});metadata=$metadata}
+      tab=[pscustomobject]@{id=$Session.surfaceIdentity.tabId;url=$Session.paper.url;title='Synthetic paper'}
+    }
+    $toolArtifact=Write-MathSecrBenchmarkArtifact $tool $Root "tool-receipt-$Stage.json"
+    $probe=ConvertFrom-MathSecrCodexToolReceipt $Surface $tool $toolArtifact $Session.paper.url
+  }
+  $Session.surfaceIdentity | Add-Member -NotePropertyName probeArtifact -NotePropertyValue (Write-MathSecrBenchmarkArtifact $probe $Root "surface-probe-$Stage.json")
+}
+
 $roots=[Collections.Generic.List[string]]::new()
 $fixtures=@{}
 try {
   foreach ($surface in $MathSecrSupportedSurfaces) {
     $root=Join-Path ([IO.Path]::GetTempPath()) ('mathsecr-phase0-surface-'+[guid]::NewGuid().ToString('N'))
     $roots.Add($root)
-    $fixture=New-MathSecrAppendHistoryFixture -ProblemCount 3 -HistoryDepth 1 -OutRoot $root -Surface $surface
+    $fixture=New-MathSecrAppendHistoryFixture -ProblemCount 3 -HistoryDepth 1 -OutRoot $root -Surface $surface -PrepareSession ${function:Add-SurfaceTestProbe}
     $fixtures[$surface]=$fixture
     $preNext=New-SurfacePreNextSession $fixture
     foreach ($step in @('Select','BeforeNext','AfterReload')) {
@@ -117,16 +144,59 @@ try {
     Assert-SurfaceTest (-not (Test-MathSecrSurfacePaperUrl offline-dom-test $badUrl)) "Invalid offline paper URL accepted: $badUrl"
   }
   $fixture=$fixtures['codex-iab']; $root=$fixture.Root
+  $session=Copy-MathSecrBenchmarkObject $fixture.Session
+  $session.surfaceIdentity.PSObject.Properties.Remove('probeArtifact')
+  Assert-SurfaceRejection 10 codex-iab { Invoke-MathSecrProductionStep -Step AfterReload -InputObject $session -ProjectRoot $root } 'surface-probe-required'
+  $originalProbe=Read-MathSecrEditAppendArtifact $fixture.Session.surfaceIdentity.probeArtifact $root
+  $case=11
+  foreach ($failureClass in @('install','connect','read','input')) {
+    $session=Copy-MathSecrBenchmarkObject $fixture.Session
+    $probeReceipt=Copy-MathSecrBenchmarkObject $originalProbe
+    $probeReceipt.failureClass=$failureClass
+    $session.surfaceIdentity.probeArtifact=Write-MathSecrBenchmarkArtifact $probeReceipt $root "probe-failed-$failureClass.json"
+    Assert-SurfaceRejection $case codex-iab { Invoke-MathSecrProductionStep -Step AfterReload -InputObject $session -ProjectRoot $root } "surface-probe-failed:$failureClass"
+    $case++
+  }
+  $session=Copy-MathSecrBenchmarkObject $fixture.Session
+  $probeReceipt=Copy-MathSecrBenchmarkObject $originalProbe
+  $probeReceipt.surface='aside-repl';$probeReceipt.browserFamily='aside';$probeReceipt.source.kind='aside-cli'
+  $probeReceipt.identity.identityBasis='aside-session';$probeReceipt.identity.profileOrSessionId=$null
+  $session.surfaceIdentity.probeArtifact=Write-MathSecrBenchmarkArtifact $probeReceipt $root 'probe-mixed-surface.json'
+  Assert-SurfaceRejection 15 codex-iab { Invoke-MathSecrProductionStep -Step AfterReload -InputObject $session -ProjectRoot $root } 'surface-mismatch'
+  $session=Copy-MathSecrBenchmarkObject $fixture.Session
+  $probeReceipt=Copy-MathSecrBenchmarkObject $originalProbe
+  $probeReceipt.identity.tabId='different-synthetic-tab'
+  $session.surfaceIdentity.probeArtifact=Write-MathSecrBenchmarkArtifact $probeReceipt $root 'probe-mixed-tab.json'
+  Assert-SurfaceRejection 16 codex-iab { Invoke-MathSecrProductionStep -Step AfterReload -InputObject $session -ProjectRoot $root } 'surface-probe-identity-mismatch'
+  $case=17
+  foreach ($field in @('profileOrSessionId','url')) {
+    $session=Copy-MathSecrBenchmarkObject $fixture.Session
+    $probeReceipt=Copy-MathSecrBenchmarkObject $originalProbe
+    $probeReceipt.identity.$field=if ($field -ceq 'url') {'https://www.mathsecr.com/mypaper/124'} else {'different-synthetic-session'}
+    $session.surfaceIdentity.probeArtifact=Write-MathSecrBenchmarkArtifact $probeReceipt $root "probe-mixed-$field.json"
+    Assert-SurfaceRejection $case codex-iab { Invoke-MathSecrProductionStep -Step AfterReload -InputObject $session -ProjectRoot $root } 'surface-probe-identity-mismatch'
+    $case++
+  }
+  $session=Copy-MathSecrBenchmarkObject $fixture.Session
+  $session.surfaceIdentity.probeArtifact=Write-MathSecrBenchmarkArtifact @($originalProbe) $root 'probe-singleton-array.json'
+  Assert-SurfaceRejection 19 codex-iab { Invoke-MathSecrProductionStep -Step AfterReload -InputObject $session -ProjectRoot $root } 'surface-identity-invalid'
+  $offline=$fixtures['offline-dom-test'].Session.surfaceIdentity
+  Assert-SurfaceTest ((Test-MathSecrSurfaceIdentityReceipt -Receipt $offline -PaperUrl $offline.url).Valid) 'Offline identity unexpectedly required a probe.'
+
   foreach ($field in @('profileOrSessionId','tabId','observedAtUtc','schemaVersion')) {
     $identity=Copy-MathSecrBenchmarkObject $fixture.Session.surfaceIdentity
     $identity.$field=switch ($field) { 'observedAtUtc' {'2026-10-11T00:00:00+00:00'}; 'schemaVersion' {$true}; default {' padded '} }
     $result=Test-MathSecrSurfaceIdentityReceipt -Receipt $identity -PaperUrl $fixture.Session.paper.url
     Assert-SurfaceTest (-not $result.Valid -and $result.Errors -ccontains 'surface-identity-invalid') "Invalid identity $field accepted."
   }
-  # The mandated state artifact resolver retains its image-extension allowlist.
-  $probe=Copy-MathSecrBenchmarkObject $fixture.Session.sourceTargets[0].sourceBodyArtifact
+  # JSON probes opt in to the extension override; other artifact callers retain
+  # the original image allowlist and the call-local single-read cache.
+  $probe=Copy-MathSecrBenchmarkObject $fixture.Session.surfaceIdentity.probeArtifact
+  Assert-SurfaceTest ($null -eq (Resolve-MathSecrStateArtifactPath $root $probe.path)) 'Default artifact resolver allowed JSON.'
+  Assert-SurfaceTest ($null -ne (Resolve-MathSecrStateArtifactPath $root $probe.path -AllowedExtensions @('.json'))) 'Explicit JSON artifact resolver rejected the probe.'
   $identity=Copy-MathSecrBenchmarkObject $fixture.Session.surfaceIdentity
-  $identity | Add-Member -NotePropertyName probeArtifact -NotePropertyValue $probe
+  $identity | Add-Member -NotePropertyName probeArtifact -NotePropertyValue $probe -Force
+  Assert-SurfaceTest (Test-MathSecrSurfaceIdentityReceipt -Receipt $identity -PaperUrl $identity.url -ProjectRoot $root).Valid 'Standalone JSON probe rejected.'
   $context=Enter-MathSecrValidationContext -ProjectRoot $root
   try {
     foreach ($index in 1..2) {

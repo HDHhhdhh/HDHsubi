@@ -111,7 +111,7 @@ Installation and `check.ps1` fail with a nonzero exit code when:
 - `-CheckOnly` targets a missing project root or Codex home;
 - installed `AGENTS.md`, the copied kit, or the installed skill is missing or out of sync;
 - a required evidence path is absent;
-- a live reusable prompt omits the canonical `ASIDE_REPL_HARD_STOP` sentence or permits a non-Aside-REPL live-browser fallback;
+- a live reusable prompt omits the canonical `SURFACE_HARD_STOP` sentence or permits a off-surface live-browser fallback;
 - a report uses card/visual identity fallback evidence without `artifact=<path>; sha256=<64 hex>; identity=<concrete description>`, or the artifact is not an existing trusted `ProjectRoot`-relative file whose SHA-256 matches the receipt;
 - the project-specific document validator fails.
 

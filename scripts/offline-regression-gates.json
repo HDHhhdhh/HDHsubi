@@ -513,6 +513,19 @@
       "reason": "Phase 3a declared surface, identity, history and mixed-receipt contracts with OS-temp synthetic fixtures; no live product claim.",
       "publicationStatus": "public-new-synthetic",
       "passPattern": "SurfaceContract PASS"
+    },
+    {
+      "id": "SurfaceProbe",
+      "script": "scripts/test_browser_surface_probe.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/scripts/surface_probe.ps1",
+        "mathsecr-paper-builder-kit/scripts/check_browser_surface.ps1"
+      ],
+      "parameters": { "ProjectRoot": "{projectRoot}" },
+      "reason": "Phase 3b pure probe classification, receipt format and isolated CLI tests with OS-temp synthetic files; no live browser or Aside command.",
+      "publicationStatus": "public-new-synthetic",
+      "passPattern": "SurfaceProbe PASS"
     }
   ]
 }

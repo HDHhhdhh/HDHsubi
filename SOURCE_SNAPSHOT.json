@@ -8,9 +8,9 @@
     {
       "path": "mathsecr-paper-builder-kit/AGENTS.md",
       "sourceSha256": "c3e26773c5886a2566583049145453377a78d80fdd9ac731da4cf188974dd454",
-      "exportSha256": "c3e26773c5886a2566583049145453377a78d80fdd9ac731da4cf188974dd454",
-      "bytes": 34528,
-      "transformation": null
+      "exportSha256": "747dcaa6c8397476c064fbc29d8195a2ed3d481d28fe69fc4277571baeef8c25",
+      "bytes": 34658,
+      "transformation": "Phase 3b: apply the declared surface hard stop and limit the fixed Aside off response to Aside sessions."
     },
     {
       "path": "mathsecr-paper-builder-kit/docs/db_inference_contract.md",
@@ -29,9 +29,9 @@
     {
       "path": "mathsecr-paper-builder-kit/docs/production_validation.md",
       "sourceSha256": "0486b11649795ae42af206e55364345dfee35581474759a418a5f5e973bb0cb8",
-      "exportSha256": "0486b11649795ae42af206e55364345dfee35581474759a418a5f5e973bb0cb8",
-      "bytes": 18494,
-      "transformation": null
+      "exportSha256": "f2ca9b3300a3045850da698f19d5bc96d3521513234acc1f4dba8b3f0dc82c23",
+      "bytes": 19207,
+      "transformation": "Phase 3b: show surface probe commands and the identity-bound JSON probe artifact."
     },
     {
       "path": "mathsecr-paper-builder-kit/docs/search_observation_contract.md",
@@ -64,23 +64,23 @@
     {
       "path": "mathsecr-paper-builder-kit/prompts/mathsecr_new_paper_prompt.md",
       "sourceSha256": "bb60879ae2bb62bbb290ceec6abc5d154be0610e2699651f4c0a192685516810",
-      "exportSha256": "bb60879ae2bb62bbb290ceec6abc5d154be0610e2699651f4c0a192685516810",
-      "bytes": 10690,
-      "transformation": null
+      "exportSha256": "db45b6c033cdf258fde22f520e89c8d1355de78436526ba6d219d691ff1d2b63",
+      "bytes": 10821,
+      "transformation": "Phase 3b: bind live work and probe guidance to the declared surface."
     },
     {
       "path": "mathsecr-paper-builder-kit/prompts/start-prompt.md",
       "sourceSha256": "2e13aa96a0e461b0abf119f9059b8e9daf86a0afa987ab591803eafccc984120",
-      "exportSha256": "2e13aa96a0e461b0abf119f9059b8e9daf86a0afa987ab591803eafccc984120",
-      "bytes": 2070,
-      "transformation": null
+      "exportSha256": "28523088fcb72dd219a09ebfd2dbd5d0171a485eaa3b752438c1d287289caf3d",
+      "bytes": 2267,
+      "transformation": "Phase 3b: declare the session surface and require the canonical surface hard stop."
     },
     {
       "path": "mathsecr-paper-builder-kit/README.md",
       "sourceSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
-      "exportSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
-      "bytes": 14606,
-      "transformation": null
+      "exportSha256": "457b9e3a73b15db0557779e9a306ffd0ea6290f259ec03d596cbb3cd1a3f9342",
+      "bytes": 14600,
+      "transformation": "Phase 3b: name the canonical surface hard stop and off-surface fallback check."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/aside_preflight.ps1",
@@ -106,9 +106,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/check_aside_repl.ps1",
       "sourceSha256": "6739c1f0f570c8464332a1ff6d7c573dd9be2ae5466d0a115d274d952bd62f12",
-      "exportSha256": "6739c1f0f570c8464332a1ff6d7c573dd9be2ae5466d0a115d274d952bd62f12",
-      "bytes": 5295,
-      "transformation": null
+      "exportSha256": "9e879581c6c9911ab6a49f8b0cc5c5a14c34f98d1db1c66c15263f80784b8fb1",
+      "bytes": 2249,
+      "transformation": "Phase 3b: forward live execution to the surface probe while retaining legacy stdout, exit codes and pure argv compatibility."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/create_failed_problem_report.py",
@@ -239,9 +239,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/state_machine.ps1",
       "sourceSha256": "09b2be660ea37b222db2f4200d782da36dadc6bf02dd80a859d0f06684bb92ff",
-      "exportSha256": "c9ff7651a8b0d3a8d47c695e11d9b518429cc1999270f097f80af7f7bddbed14",
-      "bytes": 118331,
-      "transformation": "Phase 1: cache validated state results within one invocation, retain append-depth rejection, and compare objects structurally while preserving scalar, property, and array semantics. Phase 1b: share successful append validations only for the same snapshot reference, JSON content digest, CLR type fingerprint, copied expected lists, project root and depth; retain original validator body and rejection paths. Phase 3a: declared Surface argument, surface-specific snapshot block, all-observation and prior-session guards, and surface isolation of state/append caches; default Aside state names and trace retained."
+      "exportSha256": "d439e5cff675054bb254a98b55faff2745e488490916eec370ec9ae1cb4a7c59",
+      "bytes": 118386,
+      "transformation": "Phase 1: cache validated state results within one invocation, retain append-depth rejection, and compare objects structurally while preserving scalar, property, and array semantics. Phase 1b: share successful append validations only for the same snapshot reference, JSON content digest, CLR type fingerprint, copied expected lists, project root and depth; retain original validator body and rejection paths. Phase 3a: declared Surface argument, surface-specific snapshot block, all-observation and prior-session guards, and surface isolation of state/append caches; default Aside state names and trace retained. Phase 3b: permit an explicit JSON extension allowlist while preserving default image artifact resolution."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_aside_preflight.ps1",
@@ -295,9 +295,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_install_contract.ps1",
       "sourceSha256": "e80d6b96135e7a3ec61daf0c01826c4a35c52f11f2010841c169a0d96e913e15",
-      "exportSha256": "e80d6b96135e7a3ec61daf0c01826c4a35c52f11f2010841c169a0d96e913e15",
-      "bytes": 35636,
-      "transformation": null
+      "exportSha256": "0ab434556d5a923ba760ab83acadb1fba44c36a1dabc5484a67535ded1720909",
+      "bytes": 35645,
+      "transformation": "Phase 3b: require the canonical surface hard stop in the installed prompt."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_partial_save_phases.ps1",
@@ -407,9 +407,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/validate_mathsecr_docs.ps1",
       "sourceSha256": "7ffa55d4d38d0a67e7c2eb9586e61c85d5650ba56ea5e3b7aef74ec748030dfa",
-      "exportSha256": "7ffa55d4d38d0a67e7c2eb9586e61c85d5650ba56ea5e3b7aef74ec748030dfa",
-      "bytes": 55847,
-      "transformation": null
+      "exportSha256": "b71219981cc709c80f113d6918403365f085e6560d6468439d24663487af93fd",
+      "bytes": 57272,
+      "transformation": "Phase 3b: validate surface markers and prompt policy, rejecting legacy tokens and off-surface switches."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/validate_production_step.ps1",
@@ -449,9 +449,9 @@
     {
       "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/SKILL.md",
       "sourceSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
-      "exportSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
-      "bytes": 43927,
-      "transformation": null
+      "exportSha256": "c92c6fe166b77b2b6bcce1ad1a8d2906bdb2a6b476279a1ef33876b0f2ac9a97",
+      "bytes": 44020,
+      "transformation": "Phase 3b: apply surface policy and probe guidance while preserving the search and production contracts."
     },
     {
       "path": "mathsecr-paper-builder-kit/test-fixtures/iab-simulator/index.html",

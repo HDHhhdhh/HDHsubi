@@ -16,6 +16,21 @@ function Assert-ValidationContextRejection {
   Assert-ValidationContextTest ($message -ceq $ExpectedMessage) ("Rejection changed: " + $message)
 }
 
+function Get-ValidationContextRejection {
+  param([scriptblock]$Action)
+  try { $null = & $Action } catch { return $_.Exception.Message }
+  throw 'Invalid PDF was accepted.'
+}
+
+function Assert-ValidationWorkerExited {
+  param([int]$WorkerId)
+  $timer = [Diagnostics.Stopwatch]::StartNew()
+  while ($null -ne (Get-Process -Id $WorkerId -ErrorAction SilentlyContinue) -and $timer.Elapsed.TotalSeconds -lt 5) {
+    Start-Sleep -Milliseconds 25
+  }
+  Assert-ValidationContextTest ($null -eq (Get-Process -Id $WorkerId -ErrorAction SilentlyContinue)) "PDF worker $WorkerId survived context disposal."
+}
+
 $root = Join-Path ([IO.Path]::GetTempPath()) ('mathsecr-phase0-context-' + [guid]::NewGuid().ToString('N'))
 try {
   # These independent calls rejected incomplete input before needing a root.
@@ -52,6 +67,189 @@ try {
   }
 
   $fixture = New-MathSecrAppendHistoryFixture -ProblemCount 4 -HistoryDepth 2 -OutRoot $root
+  # Observe the real worker inside production, then inspect the OS after each
+  # top-level call. Reusing an explicit context must start a fresh worker.
+  $startCommand = Get-Command Start-MathSecrPdfValidator -ErrorAction Stop
+  $script:contextOriginalPdfStart = $startCommand.ScriptBlock
+  $script:contextWorkerIds = [Collections.Generic.List[int]]::new()
+  $parameters = [Management.Automation.ProxyCommand]::GetParamBlock([Management.Automation.CommandMetadata]::new($startCommand))
+  $proxy = '[CmdletBinding()] param({0}) process {{ $value = & $script:contextOriginalPdfStart @PSBoundParameters; $script:contextWorkerIds.Add($Context.Resources[''pdf-validator''].Process.Id); $value }}' -f $parameters
+  Set-Item Function:Start-MathSecrPdfValidator ([scriptblock]::Create($proxy))
+  try {
+    $lifecycleContext = New-MathSecrValidationContext -ProjectRoot $root
+    foreach ($call in 1..2) {
+      $result = Invoke-MathSecrProductionStep -Step AfterReload -InputObject $fixture.Session -ProjectRoot $root -Context $lifecycleContext
+      Assert-ValidationContextTest $result.Valid 'Lifecycle validation failed.'
+      Assert-ValidationContextTest ($script:contextWorkerIds.Count -eq $call) 'A top-level production call did not start exactly one PDF worker.'
+      Assert-ValidationWorkerExited $script:contextWorkerIds[$call - 1]
+      Assert-ValidationContextTest ($lifecycleContext.ActiveDepth -eq 0 -and $lifecycleContext.Resources.Count -eq 0 -and $lifecycleContext.Disposers.Count -eq 0) 'A completed context retained resources.'
+    }
+    Assert-ValidationContextTest ($script:contextWorkerIds[0] -ne $script:contextWorkerIds[1]) 'A reused context retained the previous worker PID.'
+  } finally { Set-Item Function:Start-MathSecrPdfValidator $script:contextOriginalPdfStart }
+
+  $pdfSession = ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath (Join-Path $root $fixture.Manifest.sessions[0].artifact.path) -Raw -Encoding UTF8)
+  $pdfValidation = Invoke-MathSecrProductionStep -Step AfterReload -InputObject $pdfSession -ProjectRoot $root
+  $pdfPath = $pdfSession.failureReportPdf
+  $pdfBytes = [IO.File]::ReadAllBytes($pdfPath)
+  try {
+    [IO.File]::WriteAllBytes($pdfPath, [byte[]]$pdfBytes[0..([int][Math]::Floor($pdfBytes.Length / 2) - 1)])
+    $workerMessage = Get-ValidationContextRejection {
+      Invoke-MathSecrProductionStep -Step AfterReload -InputObject $pdfSession -ProjectRoot $root -Context (New-MathSecrValidationContext -ProjectRoot $root)
+    }
+    $onceMessage = Get-ValidationContextRejection {
+      Invoke-MathSecrUserSummaryLint -Text $pdfValidation.UserSummary -ExpectedProjection $pdfValidation.ReportProjection
+    }
+    Assert-ValidationContextTest ($workerMessage.StartsWith('Failed-problem report PDF validation failed: ')) 'Truncated PDF failed outside the PDF validator.'
+    Assert-ValidationContextTest ($workerMessage -ceq $onceMessage) ("Worker and one-shot PDF diagnostics differ: " + $workerMessage + ' / ' + $onceMessage)
+  } finally { [IO.File]::WriteAllBytes($pdfPath, $pdfBytes) }
+  $restoredPdf = Invoke-MathSecrProductionStep -Step AfterReload -InputObject $pdfSession -ProjectRoot $root
+  Assert-ValidationContextTest $restoredPdf.Valid 'Restored PDF was rejected.'
+
+  # A partially truncated EOF marker is recoverable and emits a pypdf warning.
+  # Force a subsequent page-count rejection to compare the entire diagnostic,
+  # including the warning, then verify the next worker request has a clean buffer.
+  $warningContext = Enter-MathSecrValidationContext -ProjectRoot $root
+  try {
+    $warningBytes = [byte[]]$pdfBytes.Clone()
+    $eofIndex = [Text.Encoding]::ASCII.GetString($warningBytes).LastIndexOf('%%EOF', [StringComparison]::Ordinal)
+    Assert-ValidationContextTest ($eofIndex -ge 0) 'Generated PDF has no EOF marker.'
+    $warningBytes[$eofIndex + 4] = [byte]0x20
+    [IO.File]::WriteAllBytes($pdfPath, $warningBytes)
+    $warningWorker = Get-ValidationContextRejection { Assert-FailedProblemReportPdf -Path $pdfPath -FailedProblems @(999999) -Context $warningContext }
+    $warningOnce = Get-ValidationContextRejection { Assert-FailedProblemReportPdf -Path $pdfPath -FailedProblems @(999999) }
+    Assert-ValidationContextTest ($warningWorker -ceq $warningOnce -and $warningWorker.Contains('EOF marker seems truncated')) 'Worker did not preserve the complete one-shot warning diagnostic.'
+    [IO.File]::WriteAllBytes($pdfPath, $pdfBytes)
+    $cleanWorker = Get-ValidationContextRejection { Assert-FailedProblemReportPdf -Path $pdfPath -FailedProblems @(999999) -Context $warningContext }
+    $cleanOnce = Get-ValidationContextRejection { Assert-FailedProblemReportPdf -Path $pdfPath -FailedProblems @(999999) }
+    Assert-ValidationContextTest ($cleanWorker -ceq $cleanOnce -and -not $cleanWorker.Contains('EOF marker seems truncated')) 'A worker response retained a warning from the previous request.'
+    $null = Invoke-MathSecrUserSummaryLint -Text $pdfValidation.UserSummary -ExpectedProjection $pdfValidation.ReportProjection -Context $warningContext
+  } finally {
+    [IO.File]::WriteAllBytes($pdfPath, $pdfBytes)
+    Exit-MathSecrValidationContext -Context $warningContext
+  }
+
+  $context = Enter-MathSecrValidationContext -ProjectRoot $root
+  try {
+    $null = Invoke-MathSecrProductionStep -Step AfterReload -InputObject $pdfSession -ProjectRoot $root -Context $context
+    $worker = $context.Resources['pdf-validator'].Process
+    $killedId = $worker.Id
+    $worker.Kill()
+    Assert-ValidationContextTest ($worker.WaitForExit(5000)) 'Killed worker did not exit promptly.'
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    $killedMessage = Get-ValidationContextRejection {
+      Invoke-MathSecrUserSummaryLint -Text $pdfValidation.UserSummary -ExpectedProjection $pdfValidation.ReportProjection -Context $context
+    }
+    $timer.Stop()
+    Assert-ValidationContextTest ($killedMessage.StartsWith('Failed-problem report PDF validation failed: ')) 'Worker termination changed the PDF error prefix.'
+    Assert-ValidationContextTest ($timer.Elapsed.TotalSeconds -lt 10) 'A killed worker waited for the 120-second response deadline.'
+    Assert-ValidationContextTest ($context.Resources['pdf-validator'].Process.Id -eq $killedId) 'A killed worker was restarted within the same context.'
+  } finally { Exit-MathSecrValidationContext -Context $context }
+  Assert-ValidationWorkerExited $killedId
+  $recovered = Invoke-MathSecrProductionStep -Step AfterReload -InputObject $pdfSession -ProjectRoot $root -Context $context
+  Assert-ValidationContextTest $recovered.Valid 'A new top-level call did not recover after worker termination.'
+
+  # Stage 1 has no prior append receipt, so every proxy count below measures
+  # this snapshot alone rather than recursive append validations.
+  $appendSession = ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath (Join-Path $root $fixture.Manifest.sessions[1].artifact.path) -Raw -Encoding UTF8)
+  $snapshot = $appendSession.snapshot
+  $expectedIds = [string[]]@($appendSession.persistedCards | ForEach-Object {$_.problemId})
+  $expectedKeys = [string[]]@($appendSession.persistedCards | ForEach-Object {$_.occurrenceKey})
+  $appendCommand = Get-Command Invoke-MathSecrEditAppendReceiptValidation -ErrorAction Stop
+  $script:contextOriginalAppendValidation = $appendCommand.ScriptBlock
+  $script:contextAppendValidationCount = 0
+  $parameters = [Management.Automation.ProxyCommand]::GetParamBlock([Management.Automation.CommandMetadata]::new($appendCommand))
+  $proxy = '[CmdletBinding()] param({0}) process {{ $script:contextAppendValidationCount++; & $script:contextOriginalAppendValidation @PSBoundParameters }}' -f $parameters
+  Set-Item Function:Invoke-MathSecrEditAppendReceiptValidation ([scriptblock]::Create($proxy))
+  try {
+    $context = Enter-MathSecrValidationContext -ProjectRoot $root
+    $appendArguments = @{Snapshot=$snapshot;ExpectedIds=$expectedIds;ExpectedKeys=$expectedKeys;ProjectRoot=$root;Depth=0;Context=$context}
+    $originalAppendId = $snapshot.editAppendReceipt.appendId
+    try {
+      $first = Test-MathSecrEditAppendReceipt @appendArguments
+      $second = Test-MathSecrEditAppendReceipt @appendArguments
+      Assert-ValidationContextTest ($first.Valid -and [object]::ReferenceEquals($first,$second) -and $script:contextAppendValidationCount -eq 1) 'Identical append inputs did not reuse one validation result.'
+      $copyArguments = $appendArguments.Clone()
+      $copyArguments.Snapshot = Copy-MathSecrBenchmarkObject $snapshot
+      $copied = Test-MathSecrEditAppendReceipt @copyArguments
+      Assert-ValidationContextTest ($copied.Valid -and -not [object]::ReferenceEquals($first,$copied) -and $script:contextAppendValidationCount -eq 2) 'A copied snapshot reused a different object reference cache entry.'
+      $orderArguments = $appendArguments.Clone()
+      $orderArguments.ExpectedIds = [string[]]$expectedIds.Clone()
+      [array]::Reverse($orderArguments.ExpectedIds)
+      $reordered = Test-MathSecrEditAppendReceipt @orderArguments
+      Assert-ValidationContextTest (-not $reordered.Valid -and $script:contextAppendValidationCount -eq 3) 'Changed expected ID order reused a cached result.'
+      $keyOrderArguments = $appendArguments.Clone()
+      $keyOrderArguments.ExpectedKeys = [string[]]$expectedKeys.Clone()
+      [array]::Reverse($keyOrderArguments.ExpectedKeys)
+      $reorderedKeys = Test-MathSecrEditAppendReceipt @keyOrderArguments
+      Assert-ValidationContextTest (-not $reorderedKeys.Valid -and $script:contextAppendValidationCount -eq 4) 'Changed expected key order reused a cached result.'
+      # Internal spaces are valid opaque-token content; commas are forbidden.
+      $snapshot.editAppendReceipt.appendId = 'bad,id'
+      foreach ($expectedCount in 5..6) {
+        $mutated = Test-MathSecrEditAppendReceipt @appendArguments
+        Assert-ValidationContextTest (-not $mutated.Valid -and @($mutated.Errors).Count -eq 1 -and $mutated.Errors[0] -ceq 'edit-append-schema' -and $script:contextAppendValidationCount -eq $expectedCount) 'A mutated snapshot or rejected result bypassed actual validation.'
+      }
+      $snapshot.editAppendReceipt.appendId = $originalAppendId
+      $restoredAppend = Test-MathSecrEditAppendReceipt @appendArguments
+      Assert-ValidationContextTest ($restoredAppend.Valid -and -not [object]::ReferenceEquals($first,$restoredAppend) -and $script:contextAppendValidationCount -eq 7) 'A restored snapshot reused its stale pre-mutation result.'
+    } finally {
+      $snapshot.editAppendReceipt.appendId = $originalAppendId
+      Exit-MathSecrValidationContext -Context $context
+    }
+
+    # JSON preserves values but erases some CLR type distinctions. Both pairs
+    # below serialize identically while the original contract rejects one type.
+    $typeCases = @(
+      @{Property='schemaVersion';ValidValue=$snapshot.editAppendReceipt.schemaVersion;InvalidValue=[DayOfWeek]::Monday},
+      @{Property='appendId';ValidValue=[string]'x';InvalidValue=[char]'x'}
+    )
+    foreach ($typeCase in $typeCases) {
+      $propertyName = $typeCase.Property
+      $originalValue = $snapshot.editAppendReceipt.$propertyName
+      $context = Enter-MathSecrValidationContext -ProjectRoot $root
+      $script:contextAppendValidationCount = 0
+      try {
+        $snapshot.editAppendReceipt.$propertyName = $typeCase.ValidValue
+        $typeArguments = @{Snapshot=$snapshot;ExpectedIds=$expectedIds;ExpectedKeys=$expectedKeys;ProjectRoot=$root;Depth=0;Context=$context}
+        $first = Test-MathSecrEditAppendReceipt @typeArguments
+        Assert-ValidationContextTest ($first.Valid -and $script:contextAppendValidationCount -eq 1) "Initial $propertyName type validation failed."
+        $validJson = ConvertTo-Json -InputObject $snapshot -Depth 100 -Compress
+        $snapshot.editAppendReceipt.$propertyName = $typeCase.InvalidValue
+        Assert-ValidationContextTest ((ConvertTo-Json -InputObject $snapshot -Depth 100 -Compress) -ceq $validJson) "The $propertyName type regression no longer exercises equal JSON content."
+        $invalidType = Test-MathSecrEditAppendReceipt @typeArguments
+        Assert-ValidationContextTest (-not $invalidType.Valid -and @($invalidType.Errors).Count -eq 1 -and $invalidType.Errors[0] -ceq 'edit-append-schema' -and $script:contextAppendValidationCount -eq 2) "A JSON-equivalent invalid $propertyName CLR type reused a cached success."
+        $snapshot.editAppendReceipt.$propertyName = $typeCase.ValidValue
+        $restoredType = Test-MathSecrEditAppendReceipt @typeArguments
+        Assert-ValidationContextTest ($restoredType.Valid -and -not [object]::ReferenceEquals($first,$restoredType) -and $script:contextAppendValidationCount -eq 3) "Restoring the $propertyName CLR type revived a stale cached success."
+      } finally {
+        $snapshot.editAppendReceipt.$propertyName = $originalValue
+        Exit-MathSecrValidationContext -Context $context
+      }
+    }
+
+    foreach ($listName in @('ExpectedIds','ExpectedKeys')) {
+      $context = Enter-MathSecrValidationContext -ProjectRoot $root
+      $script:contextAppendValidationCount = 0
+      try {
+        $list = [Collections.Generic.List[string]]::new()
+        $originalValues = if ($listName -ceq 'ExpectedIds') {$expectedIds} else {$expectedKeys}
+        $list.AddRange([string[]]$originalValues)
+        $listArguments = @{Snapshot=$snapshot;ExpectedIds=$expectedIds;ExpectedKeys=$expectedKeys;ProjectRoot=$root;Depth=0;Context=$context}
+        $listArguments[$listName] = $list
+        $first = Test-MathSecrEditAppendReceipt @listArguments
+        Assert-ValidationContextTest ($first.Valid -and $script:contextAppendValidationCount -eq 1) "Initial $listName list validation failed."
+        $list.Add('extra-item')
+        $copyArguments = $listArguments.Clone()
+        $copyArguments[$listName] = [string[]]$originalValues.Clone()
+        $cached = Test-MathSecrEditAppendReceipt @copyArguments
+        Assert-ValidationContextTest ([object]::ReferenceEquals($first,$cached) -and $script:contextAppendValidationCount -eq 1) "Mutating the caller's $listName list changed the cached input copy."
+        foreach ($expectedCount in 2..3) {
+          $changedList = Test-MathSecrEditAppendReceipt @listArguments
+          Assert-ValidationContextTest (-not $changedList.Valid -and $script:contextAppendValidationCount -eq $expectedCount) "A changed $listName list reused a cached result or cached a rejection."
+        }
+      } finally { Exit-MathSecrValidationContext -Context $context }
+    }
+  } finally { Set-Item Function:Invoke-MathSecrEditAppendReceiptValidation $script:contextOriginalAppendValidation }
+
   $capturePath = Join-Path $root $fixture.Session.persistedCardObservationArtifact.path
   $originalBytes = [IO.File]::ReadAllBytes($capturePath)
   $originalDigest = $fixture.Session.persistedCardObservationArtifact.sha256

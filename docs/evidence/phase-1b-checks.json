@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-11T03:22:37.534095+00:00",
+  "scope": "Phase 1b local public regression and equivalence",
+  "liveProductBehavior": false,
+  "offlineRegression": {
+    "status": "PASS",
+    "passed": 12,
+    "failed": 0,
+    "skipped": 20,
+    "privateBundleTestsExecuted": false
+  },
+  "validationContext": {
+    "status": "PASS",
+    "optionalProjectRootEarlyRejectionCases": 20,
+    "workerLifecycleAndRecovery": true,
+    "pdfDiagnosticsIdentity": true,
+    "warningBufferIsolation": true,
+    "appendContentAndExpectedListMutation": true,
+    "jsonEquivalentClrTypeMutation": true
+  },
+  "afterReloadIdentity": {
+    "status": "PASS",
+    "baselineCommit": "961c41105e96f368c48f6a39303e15520e0b3213",
+    "problemCount": 15,
+    "historyDepths": [
+      1,
+      2,
+      6
+    ],
+    "normalCases": 3,
+    "rejectionCases": 21,
+    "normalClrScalarCounts": [
+      723,
+      721,
+      713
+    ],
+    "fixedTimestampFieldsCompared": true,
+    "pdfTruncationCases": [
+      "pdf-truncated-latest",
+      "pdf-truncated-earliest"
+    ]
+  },
+  "performance": {
+    "status": "PASS",
+    "evidence": "perf-phase1b.json",
+    "stateMachineCalls": [
+      2,
+      3,
+      7
+    ],
+    "pdfValidatorStarts": [
+      1,
+      1,
+      1
+    ],
+    "pdfValidatorOneShots": [
+      0,
+      0,
+      0
+    ],
+    "pdfChecks": [
+      1,
+      2,
+      6
+    ],
+    "appendReceiptCalls": [
+      2,
+      4,
+      12
+    ],
+    "appendReceiptValidations": [
+      1,
+      2,
+      6
+    ],
+    "appendReceiptReuses": [
+      1,
+      2,
+      6
+    ],
+    "maxHashCallsPerPath": 1,
+    "artifactAndParseLimitsMet": true,
+    "allNineSamplesMeetCountTargets": true,
+    "history6MedianMs": 1847.5012,
+    "history6TargetMs": 2200,
+    "history6TargetMet": true
+  },
+  "syntax": {
+    "status": "PASS",
+    "scope": "all changed or added PowerShell files"
+  },
+  "sourceProvenance": {
+    "archivedFiles": 72,
+    "originalSourceHashesPreserved": true,
+    "modifiedProductionExports": [
+      "report_contract.ps1",
+      "read_contract_json.ps1",
+      "state_machine.ps1",
+      "production_validation.ps1"
+    ]
+  },
+  "optionalTask4": {
+    "applied": false,
+    "reason": "Retain artifact bytes and one hash per path within the invocation."
+  },
+  "pdfWorkerProcesses": {
+    "status": "PASS",
+    "remaining": 0
+  },
+  "ciEvidence": "Use the GitHub Actions run for this PR commit; local checks do not establish CI success.",
+  "publication": {
+    "status": "PASS",
+    "archivedSnapshotFiles": 72,
+    "hashDrift": 0
+  },
+  "publicChecks": {
+    "status": "PASS"
+  }
+}

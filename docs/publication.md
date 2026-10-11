@@ -15,6 +15,8 @@ Phase 0에서는 연도 테스트 2개의 JSON reader를 기존 contract reader�
 
 Phase 1에서는 검증 모듈 4개에 호출 단위 캐시, 단일 읽기·해시, 구조 비교를 추가했다. 변경 전후 결과와 오류는 별도 PowerShell 프로세스로 비교한다. 원본 sourceSha256은 보존하며 변경한 export를 transformation으로 구분한다. [Phase 1 검증 결과](evidence/phase-1.md)에 검증 범위와 수치를 기록한다.
 
+Phase 1b는 같은 최상위 호출 안에서 PDF 검증 프로세스와 성공한 append 검증 결과를 공유한다. PDF마다 검증을 실행하며 호출 종료 시 프로세스를 정리한다. snapshot 내용과 CLR 형식, 기대 목록이 달라지면 다시 검증한다. [Phase 1b 검증 결과](evidence/phase-1b.md)에 계측과 오류 동일성, worker 종료 검사를 기록한다.
+
 ## 제외한 내용
 
 원본 PDF/HWPX, 문항 렌더와 크롭, 실제 문제 DB inventory, 개인 문제지 주소, 원시 세션 JSONL, 실제 브라우저 캡처·프로필·인증 자료를 제외했다. 임시 OCR/Python 환경과 개별 문제지용 one-off 스크립트도 제외했다.

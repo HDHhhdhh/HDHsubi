@@ -52,7 +52,41 @@ function New-MathSecrValidationContext {
     ActiveDepth=0
     ArtifactCache=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::OrdinalIgnoreCase)
     StateCache=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    AppendReceiptCache=[Collections.Generic.Dictionary[object,object]]::new([Collections.Generic.ReferenceEqualityComparer]::Instance)
+    Resources=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    Disposers=[Collections.Generic.List[scriptblock]]::new()
   }
+}
+
+function Register-MathSecrValidationResource {
+  param([Parameter(Mandatory=$true)]$Context,
+    [Parameter(Mandatory=$true)][string]$Name,
+    [Parameter(Mandatory=$true)]$Value,
+    [Parameter(Mandatory=$true)][scriptblock]$Dispose)
+  if ($Context.ActiveDepth -le 0) { throw 'Validation resources require an active context.' }
+  if ($Context.Resources.ContainsKey($Name)) { throw "Validation resource already registered: $Name" }
+  # Capture each value independently. The resource-specific disposer receives
+  # that value; the context lifetime manager never needs to know its type.
+  $resourceValue = $Value
+  $resourceDisposer = $Dispose
+  $cleanup = { & $resourceDisposer $resourceValue }.GetNewClosure()
+  $Context.Resources.Add($Name, $Value)
+  $Context.Disposers.Add($cleanup)
+}
+
+function Clear-MathSecrValidationContext {
+  param([Parameter(Mandatory=$true)]$Context)
+  for ($index = $Context.Disposers.Count - 1; $index -ge 0; $index--) {
+    $cleanup = $Context.Disposers[$index]
+    # A cleanup failure must neither mask the validation error nor prevent
+    # remaining resources from being released.
+    try { $null = & $cleanup } catch {}
+  }
+  $Context.Disposers.Clear()
+  $Context.Resources.Clear()
+  $Context.ArtifactCache.Clear()
+  $Context.StateCache.Clear()
+  $Context.AppendReceiptCache.Clear()
 }
 
 function Enter-MathSecrValidationContext {
@@ -61,8 +95,7 @@ function Enter-MathSecrValidationContext {
   if ($null -eq $Context) { $Context = New-MathSecrValidationContext -ProjectRoot $root }
   if ($Context.ActiveDepth -eq 0) {
     # Even an explicitly reused context begins a fresh top-level validation.
-    $Context.ArtifactCache.Clear()
-    $Context.StateCache.Clear()
+    Clear-MathSecrValidationContext -Context $Context
     $Context.ProjectRoot = $root
   } elseif (-not [string]::Equals($Context.ProjectRoot,$root,[StringComparison]::OrdinalIgnoreCase)) {
     throw 'Validation context cannot cross project roots during a validation.'
@@ -75,8 +108,7 @@ function Exit-MathSecrValidationContext {
   param([Parameter(Mandatory=$true)]$Context)
   $Context.ActiveDepth--
   if ($Context.ActiveDepth -eq 0) {
-    $Context.ArtifactCache.Clear()
-    $Context.StateCache.Clear()
+    Clear-MathSecrValidationContext -Context $Context
   }
 }
 

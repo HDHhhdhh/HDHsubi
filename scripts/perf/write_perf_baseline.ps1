@@ -18,7 +18,7 @@ $measurements = @(foreach ($depth in @(1,2,6)) {
   $json | ConvertFrom-Json
 })
 $hashes = [ordered]@{}
-foreach ($name in @('production_validation.ps1','state_machine.ps1','read_contract_json.ps1','body_comparison_contract.ps1')) {
+foreach ($name in @('production_validation.ps1','state_machine.ps1','read_contract_json.ps1','body_comparison_contract.ps1','report_contract.ps1')) {
   $hashes[$name] = (Get-FileHash -LiteralPath (Join-Path $project "mathsecr-paper-builder-kit/scripts/$name")).Hash.ToLowerInvariant()
 }
 $document = [ordered]@{

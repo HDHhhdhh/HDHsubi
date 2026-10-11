@@ -59,3 +59,5 @@ pwsh -NoProfile -File ./scripts/run_offline_regression.ps1 -PlaywrightModule <mo
 Collector는 저장소의 local simulator만 열고 HTTP(S) 요청을 중단한다. 이는 재사용 가능한 합성 회귀이며 수학비서의 live 조작이나 browser 가용성 증명이 아니다. 새 AppendHistoryFixture gate는 원래 helper를 복원한 것이 아니라 공개 계약으로 만든 별도 합성 시험이다. 기존 ProductionValidation/StateMachine/PartialSavePhases 전체 suite는 여전히 SKIP이다.
 
 Phase 0의 연도 테스트 2개는 기존 contract reader로 날짜 문자열의 시간대 정보를 보존한다. Phase 1은 검증 모듈 4개에 호출 단위 캐시와 구조 비교를 추가했다. 이력 fixture의 호출 횟수 단정은 H+1 기준으로 바꿨다. full runner, 설치된 skill 및 AGENTS/SKILL/prompts는 변경하지 않았다. SOURCE_SNAPSHOT의 원본 sourceSha256은 보존하고 변경한 export의 해시·크기·transformation만 갱신한다. 새 시험은 새로 작성한 공개 합성 시험이며 원본 export 파일로 기록하지 않는다.
+
+Phase 1b는 기존 ValidationContext와 AppendHistoryFixture gate에 PDF worker 수명·오류 진단, append 내용·형식·기대 목록 변조와 실제 실행 횟수 검사를 추가했다. gate 수는 12 public / 20 private-bundle 그대로이며, 별도 동일성 비교는 PDF 손상 2종을 포함한 24개 사례다.

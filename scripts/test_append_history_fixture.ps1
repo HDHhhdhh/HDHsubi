@@ -55,6 +55,10 @@ try {
     Assert-HistoryTest ($sample.calls.'Invoke-MathSecrStateMachine' -eq 3 -and $sample.calls.'Invoke-MathSecrProductionStep' -eq 3 -and
       $sample.hashCalls -gt 0 -and $sample.maxHashCallsPerPath -eq 1 -and
       $sample.calls.'ConvertFrom-MathSecrContractJson' -gt 0) 'Proxy counters did not reset or include recursive calls.'
+    Assert-HistoryTest ($sample.pdfValidatorStarts -le 1 -and $sample.pdfValidatorOneShots -eq 0 -and
+      $sample.pdfChecks -eq 2) 'PDF validation did not share one worker while checking every historical PDF.'
+    Assert-HistoryTest ($sample.appendReceiptCalls -eq 4 -and $sample.appendReceiptValidations -eq 2 -and
+      $sample.appendReceiptReuses -eq 2) 'Append receipt validation did not reuse exactly one result per historical session.'
   }
   Write-Output 'AppendHistoryFixture PASS (H=0/1/2, all intermediate stages, immutable FirstNext, tamper/missing receipt rejection, scoped cleanup, proxy recursion/reset).'
 } finally {

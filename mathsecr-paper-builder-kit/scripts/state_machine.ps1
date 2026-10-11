@@ -3,7 +3,7 @@
 . (Join-Path $PSScriptRoot 'read_contract_json.ps1')
 
 # Bump this when validation semantics change; the context itself stays call-local.
-$CONTRACT_VERSION = '2026-10-11.1'
+$CONTRACT_VERSION = '2026-10-11.2'
 
 function Get-MathSecrStateCacheKey {
   param([string]$ArtifactSha256, [string]$Phase)
@@ -1181,7 +1181,143 @@ function Read-MathSecrEditAppendArtifact {
   } finally { Exit-MathSecrValidationContext -Context $Context }
 }
 
+function Get-MathSecrAppendSnapshotTypeFingerprint {
+  param($Snapshot)
+  if (-not ('MathSecr.AppendSnapshotTypeFingerprint' -as [type])) {
+    Add-Type -TypeDefinition @'
+using System;
+using System.Collections.Generic;
+using System.Management.Automation;
+using System.Numerics;
+using System.Text;
+namespace MathSecr {
+    public static class AppendSnapshotTypeFingerprint {
+        private const PSMemberTypes ExtendedProperties = PSMemberTypes.NoteProperty |
+            PSMemberTypes.AliasProperty | PSMemberTypes.ScriptProperty | PSMemberTypes.CodeProperty;
+
+        public static string Get(PSObject snapshot) {
+            var pending = new Stack<object>();
+            var depths = new Stack<int>();
+            var seen = new HashSet<object>(ReferenceEqualityComparer.Instance);
+            var fingerprint = new StringBuilder();
+            pending.Push(snapshot);
+            depths.Push(0);
+            while (pending.Count > 0) {
+                object node = pending.Pop();
+                int depth = depths.Pop();
+                // ConvertTo-Json's depth limit must not hide deeper mutable data.
+                if (depth > 100) return null;
+                if (node == null) { fingerprint.Append("null;"); continue; }
+                PSObject wrapped = PSObject.AsPSObject(node);
+                object value = wrapped.BaseObject;
+                Type type = value.GetType();
+                fingerprint.Append(type.AssemblyQualifiedName).Append(';');
+                if (type.IsPrimitive || type.IsEnum || value is string || value is decimal ||
+                    value is DateTime || value is DateTimeOffset || value is Guid || value is BigInteger) {
+                    if (wrapped.Properties.Match("*", ExtendedProperties).Count > 0) return null;
+                    continue;
+                }
+                // PSCustomObject BaseObject can be a shared sentinel. Its wrapper
+                // owns the properties and is the identity needed for cycle checks.
+                object identity = value is PSCustomObject ? (object)wrapped : value;
+                if (!seen.Add(identity)) return null;
+                if (value is Array array) {
+                    if (array.Rank != 1 || array.GetLowerBound(0) != 0 ||
+                        wrapped.Properties.Match("*", ExtendedProperties).Count > 0) return null;
+                    fingerprint.Append(array.Length).Append(':');
+                    for (int index = array.Length - 1; index >= 0; index--) {
+                        pending.Push(array.GetValue(index));
+                        depths.Push(depth + 1);
+                    }
+                } else if (value is PSCustomObject) {
+                    var properties = new List<PSPropertyInfo>(wrapped.Properties);
+                    fingerprint.Append(properties.Count).Append(':');
+                    foreach (PSPropertyInfo property in properties) {
+                        if (property.MemberType != PSMemberTypes.NoteProperty) return null;
+                        fingerprint.Append(property.Name.Length).Append(':').Append(property.Name);
+                    }
+                    for (int index = properties.Count - 1; index >= 0; index--) {
+                        pending.Push(properties[index].Value);
+                        depths.Push(depth + 1);
+                    }
+                } else {
+                    // Opaque objects, computed properties, and repeated references
+                    // fall back to validation instead of hiding data in the cache.
+                    return null;
+                }
+            }
+            return fingerprint.ToString();
+        }
+    }
+}
+'@
+  }
+  return [MathSecr.AppendSnapshotTypeFingerprint]::Get($Snapshot)
+}
+
 function Test-MathSecrEditAppendReceipt {
+  param($Snapshot, $ExpectedIds, $ExpectedKeys, [string]$ProjectRoot, [int]$Depth, $Context = $null)
+  if ($null -eq $Context -or $Context.ActiveDepth -le 0 -or $null -eq $Snapshot -or $Depth -ge 64) {
+    return Invoke-MathSecrEditAppendReceiptValidation @PSBoundParameters
+  }
+
+  # Keep the original validator's early guards and error conversion authoritative
+  # if an input cannot be serialized for the optional successful-result cache.
+  try {
+    $snapshotJson = ConvertTo-Json -InputObject $Snapshot -Depth 100 -Compress -ErrorAction Stop
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try {
+      $snapshotDigest = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($snapshotJson))).Replace('-', '')
+    } finally { $sha.Dispose() }
+    # JSON erases some CLR distinctions (integer/enum and string/char).
+    # Preserve every data node's type as a separate cache condition.
+    $snapshotTypes = Get-MathSecrAppendSnapshotTypeFingerprint -Snapshot $Snapshot
+  } catch {
+    [void]$Context.AppendReceiptCache.Remove($Snapshot)
+    return Invoke-MathSecrEditAppendReceiptValidation @PSBoundParameters
+  }
+  if ($null -eq $snapshotTypes) {
+    [void]$Context.AppendReceiptCache.Remove($Snapshot)
+    return Invoke-MathSecrEditAppendReceiptValidation @PSBoundParameters
+  }
+
+  $entries = $null
+  if ($Context.AppendReceiptCache.TryGetValue($Snapshot, [ref]$entries)) {
+    # Discard stale entries before looking for a match. Restoring a mutated
+    # snapshot must run validation again instead of reviving an older success.
+    for ($index = $entries.Count - 1; $index -ge 0; $index--) {
+      if ($entries[$index].SnapshotDigest -cne $snapshotDigest -or
+          $entries[$index].SnapshotTypes -cne $snapshotTypes) { $entries.RemoveAt($index) }
+    }
+    foreach ($entry in $entries) {
+      if ($entry.ProjectRoot -ceq $ProjectRoot -and $entry.Depth -eq $Depth -and
+          (Test-OrderedIdsEqual $entry.ExpectedIds $ExpectedIds) -and
+          (Test-OrderedIdsEqual $entry.ExpectedKeys $ExpectedKeys)) {
+        return $entry.Result
+      }
+    }
+  }
+
+  $result = Invoke-MathSecrEditAppendReceiptValidation @PSBoundParameters
+  if ($result.Valid -eq $true) {
+    if ($null -eq $entries) {
+      $entries = [Collections.Generic.List[object]]::new()
+      $Context.AppendReceiptCache.Add($Snapshot, $entries)
+    }
+    $entries.Add([pscustomobject]@{
+      ProjectRoot = $ProjectRoot
+      Depth = $Depth
+      ExpectedIds = [string[]]@(ConvertTo-StringArray $ExpectedIds)
+      ExpectedKeys = [string[]]@(ConvertTo-StringArray $ExpectedKeys)
+      SnapshotDigest = $snapshotDigest
+      SnapshotTypes = $snapshotTypes
+      Result = $result
+    })
+  }
+  return $result
+}
+
+function Invoke-MathSecrEditAppendReceiptValidation {
   param($Snapshot, $ExpectedIds, $ExpectedKeys, [string]$ProjectRoot, [int]$Depth, $Context = $null)
   $contextEntered = $false
   try {

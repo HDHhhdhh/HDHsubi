@@ -21,6 +21,7 @@
 | [공개 회귀 inventory](docs/evidence/regression-inventory.md) | public 12개와 private-bundle 20개의 실행 범위 |
 | [Phase 0 성능 기준선](docs/evidence/phase-0.md) | 합성 입력, 재현 명령, 계측 수치와 한계 |
 | [Phase 1 검증 결과](docs/evidence/phase-1.md) | AfterReload 캐시, 변경 전후 동일성, 파일별 해시와 성능 |
+| [Phase 1b 검증 결과](docs/evidence/phase-1b.md) | PDF worker 수명, append 재검사 공유, 오류 동일성과 성능 |
 
 ## 제작 흐름
 

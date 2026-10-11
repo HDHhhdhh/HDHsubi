@@ -178,18 +178,21 @@ function Get-OccurrenceKeys {
   return $keys
 }
 
-function Assert-FailedProblemReportPdf {
-  param([string]$Path, [int[]]$FailedProblems)
-
-  Assert-True ($FailedProblems.Count -gt 0) "PDF validation requires at least one failed printed number"
-  $expectedNumbers = ($FailedProblems | ForEach-Object { [string]$_ }) -join ","
+function Get-MathSecrPdfValidatorProgram {
   # Keep PDF parsing deterministic and fail closed.  The report generator is
   # Python/reportlab-based, and pypdf is the narrow reader used here to verify
   # that the linked artifact is a readable PDF whose page/printed-number
   # sequence matches the public failure references.
-  $pythonCode = @'
+  return @'
+import contextlib
+import io
+import json
+import os
 import re
 import sys
+
+sys.stdin.reconfigure(encoding='utf-8')
+sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
 
 try:
     from pypdf import PdfReader
@@ -197,24 +200,44 @@ except Exception as exc:
     print('pypdf dependency is required for failed-problem report validation: ' + str(exc), file=sys.stderr)
     raise SystemExit(2)
 
-path = sys.argv[1]
-expected = [int(value) for value in sys.argv[2].split(',') if value]
-try:
-    reader = PdfReader(path, strict=True)
-    pages = list(reader.pages)
-    if len(pages) != len(expected):
-        raise ValueError('page count {} does not match failed printed-number count {}'.format(len(pages), len(expected)))
-    for page_index, (page, number) in enumerate(zip(pages, expected), start=1):
-        text = page.extract_text() or ''
-        marker_pattern = rf'(?<!\d){re.escape(str(number))}번(?!\d)'
-        if not re.search(marker_pattern, text):
-            raise ValueError('page {} is missing printed marker {}번'.format(page_index, number))
-except Exception as exc:
-    print('PDF parse/marker validation failed: ' + str(exc), file=sys.stderr)
-    raise SystemExit(3)
+def validate(path, expected):
+    try:
+        reader = PdfReader(path, strict=True)
+        pages = list(reader.pages)
+        if len(pages) != len(expected):
+            raise ValueError('page count {} does not match failed printed-number count {}'.format(len(pages), len(expected)))
+        for page_index, (page, number) in enumerate(zip(pages, expected), start=1):
+            text = page.extract_text() or ''
+            marker_pattern = rf'(?<!\d){re.escape(str(number))}번(?!\d)'
+            if not re.search(marker_pattern, text):
+                raise ValueError('page {} is missing printed marker {}번'.format(page_index, number))
+    except Exception as exc:
+        print('PDF parse/marker validation failed: ' + str(exc), file=sys.stderr)
+        return 3
 
-print('validated pages={} markers={}'.format(len(pages), ','.join(str(number) + '번' for number in expected)))
+    print('validated pages={} markers={}'.format(len(pages), ','.join(str(number) + '번' for number in expected)))
+    return 0
+
+if sys.argv[1] == '--serve':
+    for line in sys.stdin:
+        request = json.loads(line)
+        # Match the native one-shot diagnostic line endings, including warnings.
+        diagnostic = io.StringIO(newline=os.linesep)
+        with contextlib.redirect_stdout(diagnostic), contextlib.redirect_stderr(diagnostic):
+            code = validate(request['path'], request['expected'])
+        print(json.dumps({'ok': code == 0, 'code': code, 'message': diagnostic.getvalue()}, ensure_ascii=False))
+else:
+    path = sys.argv[1]
+    expected = [int(value) for value in sys.argv[2].split(',') if value]
+    raise SystemExit(validate(path, expected))
 '@
+}
+
+function Invoke-MathSecrPdfValidatorOnce {
+  param([string]$Path, [int[]]$FailedProblems)
+
+  $expectedNumbers = ($FailedProblems | ForEach-Object { [string]$_ }) -join ","
+  $pythonCode = Get-MathSecrPdfValidatorProgram
   $previousErrorAction = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
   try {
@@ -232,6 +255,122 @@ print('validated pages={} markers={}'.format(len(pages), ','.join(str(number) + 
     if ([string]::IsNullOrWhiteSpace($detail)) {
       $detail = "Python PDF validator exited with code $exitCode"
     }
+    throw "Failed-problem report PDF validation failed: $detail"
+  }
+}
+
+function Start-MathSecrPdfValidator {
+  param([Parameter(Mandatory=$true)]$Context)
+
+  # A compiled handler can run on Process's reader thread without a PowerShell
+  # runspace. Only its type is shared; each context owns its buffer and process.
+  if ($null -eq ('MathSecr.PdfStderrBuffer' -as [type])) {
+    Add-Type -TypeDefinition @'
+using System.Diagnostics;
+using System.Text;
+namespace MathSecr {
+    public sealed class PdfStderrBuffer {
+        private readonly StringBuilder buffer = new StringBuilder();
+        private readonly object gate = new object();
+        public PdfStderrBuffer(Process process) { process.ErrorDataReceived += Receive; }
+        private void Receive(object sender, DataReceivedEventArgs args) {
+            if (args.Data != null) { lock (gate) { buffer.AppendLine(args.Data); } }
+        }
+        public override string ToString() { lock (gate) { return buffer.ToString(); } }
+    }
+}
+'@
+  }
+  $process = [Diagnostics.Process]::new()
+  $encoding = [Text.UTF8Encoding]::new($false)
+  $process.StartInfo = [Diagnostics.ProcessStartInfo]::new()
+  $process.StartInfo.FileName = 'python'
+  $process.StartInfo.UseShellExecute = $false
+  $process.StartInfo.CreateNoWindow = $true
+  $process.StartInfo.RedirectStandardInput = $true
+  $process.StartInfo.RedirectStandardOutput = $true
+  $process.StartInfo.RedirectStandardError = $true
+  $process.StartInfo.StandardInputEncoding = $encoding
+  $process.StartInfo.StandardOutputEncoding = $encoding
+  $process.StartInfo.StandardErrorEncoding = $encoding
+  $process.StartInfo.ArgumentList.Add('-c')
+  $process.StartInfo.ArgumentList.Add((Get-MathSecrPdfValidatorProgram))
+  $process.StartInfo.ArgumentList.Add('--serve')
+  $worker = [pscustomobject]@{Process=$process;Stderr=[MathSecr.PdfStderrBuffer]::new($process)}
+  $dispose = {
+    param($resource)
+    $child = $resource.Process
+    try {
+      try { $child.StandardInput.Close() } catch { }
+      if (-not $child.WaitForExit(5000)) { $child.Kill() }
+      # The parameterless wait also drains pending asynchronous stderr events.
+      $child.WaitForExit()
+    } finally {
+      try { if (-not $child.HasExited) { $child.Kill(); $child.WaitForExit() } } finally { $child.Dispose() }
+    }
+  }
+  try {
+    if (-not $process.Start()) { throw 'Python PDF validator process did not start' }
+  } catch {
+    $process.Dispose()
+    throw "Unable to invoke Python for failed-problem report validation: $($_.Exception.Message)"
+  }
+  try {
+    # Register immediately so every later initialization/request failure is owned.
+    Register-MathSecrValidationResource -Context $Context -Name 'pdf-validator' -Value $worker -Dispose $dispose
+    $process.BeginErrorReadLine()
+  } catch {
+    & $dispose $worker
+    throw
+  }
+  return $worker
+}
+
+function Stop-MathSecrPdfValidatorWithFailure {
+  param([Parameter(Mandatory=$true)]$Worker)
+
+  $process = $Worker.Process
+  if (-not $process.HasExited) { $process.Kill() }
+  $process.WaitForExit()
+  $detail = $Worker.Stderr.ToString().Trim()
+  if ([string]::IsNullOrWhiteSpace($detail)) {
+    $detail = "Python PDF validator exited with code $($process.ExitCode)"
+  }
+  throw "Failed-problem report PDF validation failed: $detail"
+}
+
+function Assert-FailedProblemReportPdf {
+  param([string]$Path, [int[]]$FailedProblems, $Context)
+
+  Assert-True ($FailedProblems.Count -gt 0) "PDF validation requires at least one failed printed number"
+  if ($null -eq $Context -or $Context.ActiveDepth -eq 0) {
+    Invoke-MathSecrPdfValidatorOnce -Path $Path -FailedProblems $FailedProblems
+    return
+  }
+  if (-not $Context.Resources.ContainsKey('pdf-validator')) {
+    $null = Start-MathSecrPdfValidator -Context $Context
+  }
+  $worker = $Context.Resources['pdf-validator']
+  $process = $worker.Process
+  if ($process.HasExited) { Stop-MathSecrPdfValidatorWithFailure -Worker $worker }
+  $request = ConvertTo-Json -InputObject @{path=$Path;expected=@($FailedProblems)} -Compress
+  try {
+    $process.StandardInput.WriteLine($request)
+    $process.StandardInput.Flush()
+    $responseTask = $process.StandardOutput.ReadLineAsync()
+    $completed = $responseTask.Wait(120000)
+  } catch {
+    Stop-MathSecrPdfValidatorWithFailure -Worker $worker
+  }
+  if (-not $completed) { Stop-MathSecrPdfValidatorWithFailure -Worker $worker }
+  $line = $responseTask.GetAwaiter().GetResult()
+  if ([string]::IsNullOrWhiteSpace($line) -or $process.HasExited) {
+    Stop-MathSecrPdfValidatorWithFailure -Worker $worker
+  }
+  $response = ConvertFrom-Json -InputObject $line
+  if (-not $response.ok) {
+    $detail = ([string]$response.message).Trim()
+    if ([string]::IsNullOrWhiteSpace($detail)) { $detail = "Python PDF validator exited with code $($response.code)" }
     throw "Failed-problem report PDF validation failed: $detail"
   }
 }
@@ -632,7 +771,7 @@ function Invoke-MathSecrReportLint {
 }
 
 function Invoke-MathSecrUserSummaryLint {
-  param([string]$Text, [pscustomobject]$ExpectedProjection)
+  param([string]$Text, [pscustomobject]$ExpectedProjection, $Context)
 
   Assert-True (-not [string]::IsNullOrWhiteSpace($Text)) "User summary must not be blank"
   $normalized = (($Text -replace "`r`n", "`n") -replace "`r", "`n").Trim()
@@ -707,7 +846,7 @@ function Invoke-MathSecrUserSummaryLint {
     Assert-True ([IO.Path]::GetExtension($pdfPath).ToLowerInvariant() -eq '.pdf') "Failed-problem report path must end in .pdf"
     Assert-True (Test-Path -LiteralPath $pdfPath -PathType Leaf) "Failed-problem report PDF does not exist: $pdfPath"
     Assert-True ($failureCount -gt 0 -and -not $isBlocked) "A PDF link is only valid for per-problem failures"
-    Assert-FailedProblemReportPdf $pdfPath ([int[]]$failedProblems)
+    Assert-FailedProblemReportPdf $pdfPath ([int[]]$failedProblems) -Context $Context
   }
 
   $forbiddenInternalTokens = @($script:RequiredHeadings) + @($script:RequiredLabels) + @("### 개수", "## 성공한 문제", "## 실패한 문제")

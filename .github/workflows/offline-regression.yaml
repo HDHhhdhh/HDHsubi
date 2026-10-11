@@ -55,3 +55,13 @@ jobs:
             git worktree remove $baselineRoot
             if ($LASTEXITCODE -ne 0) { throw 'Baseline worktree cleanup failed.' }
           }
+      - name: Verify PDF workers exited
+        if: always()
+        shell: pwsh
+        run: |
+          $workers = @(Get-CimInstance Win32_Process -Filter "Name = 'python.exe'" | Where-Object {
+            $_.CommandLine -like '*--serve*' -and $_.CommandLine -like '*from pypdf import PdfReader*' -and
+            $_.CommandLine -like '*validated pages=*'
+          })
+          if ($workers.Count) { throw "PDF validator workers remain: $($workers.ProcessId -join ', ')" }
+          Write-Output 'PdfValidatorProcesses PASS (no remaining worker).'

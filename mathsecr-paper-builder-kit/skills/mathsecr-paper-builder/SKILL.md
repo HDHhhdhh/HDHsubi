@@ -16,8 +16,8 @@ description: Recreate MathSecr/수학비서 problem papers from a PDF or HWPX by
 - `출제하기`는 사용자가 명시 요청하지 않으면 절대 클릭하지 않는다.
 - 배점은 설정하거나 추론하지 않는다. 점수는 otherwise identical 후보를 구분할 때만 참고한다.
 - live MathSecr 클릭은 primary agent가 소유한다. subagent는 별도 live session을 명시 배정받지 않는 한 read-only다.
-- aside-repl-unavailable block: Aside REPL이 unavailable, crash, live paper 미검증 상태이면 즉시 `차단`으로 보고한다. 같은 세션에서 Codex in-app Browser(`iab`), Chrome, extension, Computer Use fallback으로 전환하지 않는다.
-- <!-- ASIDE_OFF_USER_RESPONSE --> 제작 요청의 현재 probe가 Aside 종료를 확인하면 사용자 응답은 `aside 키고 다시 오도록.` 한 줄만 쓴다. 정상 제작의 0–4 보고보다 이 예외를 우선한다. timeout·CLI 부재·로그인 실패를 종료로 단정하지 않는다. 코드 검토·구현은 이 제작 응답 예외와 구분한다.
+- <!-- SURFACE_HARD_STOP --> surface-unavailable block: 세션 입력의 surface가 unavailable, crash, live paper 미검증 상태이면 즉시 `차단`으로 보고한다. 같은 세션에서 다른 browser surface로 전환하지 않는다.
+- <!-- ASIDE_OFF_USER_RESPONSE --> 제작 요청의 현재 probe가 Aside 종료를 확인하면 사용자 응답은 `aside 키고 다시 오도록.` 한 줄만 쓴다. 정상 제작의 0–4 보고보다 이 예외를 우선한다. timeout·CLI 부재·로그인 실패를 종료로 단정하지 않는다. 코드 검토·구현은 이 제작 응답 예외와 구분한다. 이 예외는 surface가 aside-repl인 세션에만 적용한다.
 - live selection 전 true blocker: source PDF/HWPX 또는 source problem list 없음, login redirect, paper URL/title 미검증, source-paper identity mismatch, live browser/tooling unavailable.
 - live paper tab에서 API route, raw backend URL, verification URL, MathSecr help/docs를 열지 않는다. 사고가 나면 paper URL을 다시 열고 저장 상태를 확인한다.
 - empty/unverified source scope에서 `검색하기`를 누르지 않는다. 단, DB 미지정 입력의 source 추론을 위한 명시적 read-only blank probe는 예외이며 카드 선택, `전체 선택`, `다음 단계`, `문제지에 담기`를 금지한다. `전체 DB` retry는 visible/selected UI evidence로 `전체 DB` mode가 확인된 상태만 의미한다.
@@ -157,7 +157,7 @@ Checkpoint 내용: 선택 수, 활성 필터, 미발견 문제, 대체/범위 �
 ### 2. Browser 안정화
 
 1. 기본 selection viewport는 `1440x900`이다.
-2. Aside REPL을 우선 사용한다. `aside-browser` 지침에 따라 CLI/guide를 확인하고, `listBrowserTabs()`로 열린 탭을 먼저 조회한 뒤 관련 MathSecr 탭에 `attachBrowserTab(targetId)`로 attach한다. 현재 활성 탭 자체가 사용자 지목 대상일 때만 `attachActiveBrowserTab()`을 쓴다. 판독은 `snapshot(page, { interactive: true })`부터 시작해 필요한 경우 전체 snapshot과 screenshot으로 확장하며, 실제 관측을 바탕으로 `나만의 DB 선택`, `내 문제지 선택`, `단원 및 유형 선택`, text/formula search input, `검색하기`, sidebar collapse, `다음 단계`, edit-screen `문제 검색`, save-equivalent `확인` control map을 만든다.
+2. surface가 aside-repl이면 Aside REPL을 쓴다. `aside-browser` 지침에 따라 CLI/guide를 확인하고, `listBrowserTabs()`로 열린 탭을 먼저 조회한 뒤 관련 MathSecr 탭에 `attachBrowserTab(targetId)`로 attach한다. 현재 활성 탭 자체가 사용자 지목 대상일 때만 `attachActiveBrowserTab()`을 쓴다. 판독은 `snapshot(page, { interactive: true })`부터 시작해 필요한 경우 전체 snapshot과 screenshot으로 확장하며, 실제 관측을 바탕으로 `나만의 DB 선택`, `내 문제지 선택`, `단원 및 유형 선택`, text/formula search input, `검색하기`, sidebar collapse, `다음 단계`, edit-screen `문제 검색`, save-equivalent `확인` control map을 만든다.
 3. viewport, modal, scroll, reconnect/resume, chip wrapping 후 control map을 갱신한다.
 4. `/mypaper/<id>` URL, 로그인 상태, visible paper title을 확인한다.
 5. 같은 URL에서 start-over면 기존 edit/persisted 문제 존재 여부를 먼저 확인한다.
@@ -219,7 +219,7 @@ Checkpoint 내용: 선택 수, 활성 필터, 미발견 문제, 대체/범위 �
 
 일반 text-search의 receipt는 `scripts/prepare_selection_evidence.ps1`로 실제 target JSON을 검증·조립하고, metadata-rescue는 기존 검증 경로를 사용한다(`docs/selection_evidence_preparation.md`). 검증된 `Projection`/`SelectionEvidence`를 보고서에 재사용해 형식만을 위한 재판독이나 수기 복사를 줄인다. 실제 판독 횟수·동작·비교자·시각을 만들어 넣거나 본문 판정을 자동으로 exact로 채우지 않는다.
 
-<!-- PRODUCTION_VALIDATION_REF --> 실제 제작에서는 `scripts/check_aside_repl.ps1`로 현재 브라우저 응답을 기록하고 `scripts/validate_production_step.ps1`로 Select·BeforeNext·AfterReload를 검사한다. Select를 통과한 후보만 실제 UI에서 선택한다. BeforeNext는 미래 편집·저장·재로드를 요구하거나 생성하지 않는다. AfterReload는 실제 persisted 묶음에서 보고서를 파생하고 검증한다. 입력과 실행 예시는 `docs/production_validation.md`를 따른다.
+<!-- PRODUCTION_VALIDATION_REF --> 실제 제작에서는 `scripts/check_browser_surface.ps1 -Surface <surface>`로 현재 브라우저 응답을 기록하고 `scripts/validate_production_step.ps1`로 Select·BeforeNext·AfterReload를 검사한다. Select를 통과한 후보만 실제 UI에서 선택한다. BeforeNext는 미래 편집·저장·재로드를 요구하거나 생성하지 않는다. AfterReload는 실제 persisted 묶음에서 보고서를 파생하고 검증한다. 입력과 실행 예시는 `docs/production_validation.md`를 따른다.
 
 사용자 표시 최종 응답은 한국어 0–4 항목만 쓴다. 제작한 문제지 링크와 실패 이미지 크롭 보고서 PDF 링크만 공개 링크이며, 필터·내부 상태·도구·검증 설명은 상세 패킷에 남긴다.
 

@@ -162,16 +162,16 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/production_validation.ps1",
       "sourceSha256": "05bc6d9932213ece96fd84129e185671e86e089d3d215f11d3103a9e9937de15",
-      "exportSha256": "ab8d2ee0059dbc9fa10e31b86f8c540afbea0f2aceef7d97c86a02b74edb2259",
-      "bytes": 27774,
-      "transformation": "Phase 1: propagate per-invocation validation context, reuse validated prior states and artifact bytes, and index target joins; preserve output, early rejection order, and error contracts."
+      "exportSha256": "02ce4c8f93696dc62b2125caec5c9198ad55e508ba7c64c565804e35d93fde46",
+      "bytes": 27792,
+      "transformation": "Phase 1: propagate per-invocation validation context, reuse validated prior states and artifact bytes, and index target joins; preserve output, early rejection order, and error contracts. Phase 1b: pass the active validation context into user-summary PDF validation."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/read_contract_json.ps1",
       "sourceSha256": "60b40be0c4fd957bde00f96f41ee8e89fd6311d2e4739890783cb5d8dfafbd31",
-      "exportSha256": "e8df102ec48ae18d0ede5445f6e306cb2c5f2b94122c522efc3b72dfff8693d1",
-      "bytes": 4493,
-      "transformation": "Phase 1: read and hash artifact bytes once, preserve BOM-inclusive hashes and existing JSON type semantics, and scope artifact/state caches to one top-level invocation."
+      "exportSha256": "6e2ae022731c167a052fd56a0180da24253aee79a83bb2697e4c54e3df7df2e3",
+      "bytes": 6076,
+      "transformation": "Phase 1: read and hash artifact bytes once, preserve BOM-inclusive hashes and existing JSON type semantics, and scope artifact/state caches to one top-level invocation. Phase 1b: own generic resources and reverse-order disposers within the top-level context; clear append receipt cache at each call boundary."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/regression_evidence_contract.ps1",
@@ -183,9 +183,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/report_contract.ps1",
       "sourceSha256": "17e5c11d94a15ffbf5387dd73e2fe13220b82d932cf9a03370649a7a36eeaaa8",
-      "exportSha256": "17e5c11d94a15ffbf5387dd73e2fe13220b82d932cf9a03370649a7a36eeaaa8",
-      "bytes": 43034,
-      "transformation": null
+      "exportSha256": "9776a0cf332b2571a26b4c2bae051df5c2cf7a2711ac03b52fe25efd41d23414",
+      "bytes": 48619,
+      "transformation": "Phase 1b: share one UTF-8 pypdf worker per active validation context; retain one-shot validation and complete per-request diagnostics; close, kill when needed, and dispose the worker at scope exit."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/run_mathsecr_regression.ps1",
@@ -239,9 +239,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/state_machine.ps1",
       "sourceSha256": "09b2be660ea37b222db2f4200d782da36dadc6bf02dd80a859d0f06684bb92ff",
-      "exportSha256": "0f7745c808eb2b6c9c0ed8754da9291ab916e1251f931821dbe99fa165c6fde8",
-      "bytes": 109144,
-      "transformation": "Phase 1: cache validated state results within one invocation, retain append-depth rejection, and compare objects structurally while preserving scalar, property, and array semantics."
+      "exportSha256": "93c2e8b003065ecc74cec15ecea45cdc1697eb73cc3a03fd4f3fae57088715c7",
+      "bytes": 115623,
+      "transformation": "Phase 1: cache validated state results within one invocation, retain append-depth rejection, and compare objects structurally while preserving scalar, property, and array semantics. Phase 1b: share successful append validations only for the same snapshot reference, JSON content digest, CLR type fingerprint, copied expected lists, project root and depth; retain original validator body and rejection paths."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_aside_preflight.ps1",

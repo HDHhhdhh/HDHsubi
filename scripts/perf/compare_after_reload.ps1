@@ -61,8 +61,16 @@ try {
     $captureBytes = [IO.File]::ReadAllBytes($capturePath)
     $pngPath = Join-Path $root 'source-1.png'
     $pngBytes = [IO.File]::ReadAllBytes($pngPath)
-    foreach ($case in @('normal','prior-hash','missing-confirm','raw-visible-db','png-bytes','updated-hash-invalid-schema')) {
+    $pdfSessions = @(foreach ($entry in $fixture.Manifest.sessions) {
+      $historySession = ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath (Join-Path $root $entry.artifact.path) -Raw -Encoding UTF8)
+      if ($historySession.failureReportPdf -cne '없음') { $historySession }
+    })
+    if ($pdfSessions.Count -ne $historyDepth) { throw "H=$historyDepth failure PDF inventory differs from the fixture history." }
+    foreach ($case in @('normal','prior-hash','missing-confirm','raw-visible-db','png-bytes','updated-hash-invalid-schema','pdf-truncated-latest','pdf-truncated-earliest')) {
       $session = Copy-MathSecrBenchmarkObject $fixture.Session
+      $changedPdfPath = $null
+      $changedPdfBytes = $null
+      try {
       switch ($case) {
         'prior-hash' { $session.snapshot.editAppendReceipt.priorSessionArtifact.sha256 = '0' * 64 }
         'missing-confirm' { $session.snapshot.editAppendReceipt.PSObject.Properties.Remove('confirmActionArtifact') }
@@ -73,6 +81,12 @@ try {
           $capture.schemaVersion = 2
           [IO.File]::WriteAllText($capturePath, (ConvertTo-Json -InputObject $capture -Depth 100 -Compress), [Text.UTF8Encoding]::new($false))
           $session.persistedCardObservationArtifact.sha256 = (Get-FileHash -LiteralPath $capturePath -Algorithm SHA256).Hash
+        }
+        {$_ -cin @('pdf-truncated-latest','pdf-truncated-earliest')} {
+          $pdfSession = if ($case -ceq 'pdf-truncated-latest') {$pdfSessions[-1]} else {$pdfSessions[0]}
+          $changedPdfPath = $pdfSession.failureReportPdf
+          $changedPdfBytes = [IO.File]::ReadAllBytes($changedPdfPath)
+          [IO.File]::WriteAllBytes($changedPdfPath, [byte[]]$changedPdfBytes[0..([int][Math]::Floor($changedPdfBytes.Length / 2) - 1)])
         }
       }
       $sessionPath = Join-Path $root 'identity-input.json'
@@ -98,16 +112,22 @@ try {
         }
       } else {
         if ($before.accepted -or $after.accepted) { throw "H=$historyDepth case=$case was not rejected by both versions." }
+        if ($case -clike 'pdf-truncated-*' -and -not $before.error.StartsWith('Failed-problem report PDF validation failed: ')) {
+          throw "H=$historyDepth case=$case did not reach PDF validation: $($before.error)"
+        }
         if ($before.error -cne $after.error) {
           throw "H=$historyDepth case=$case error differs: baseline=$($before.error); candidate=$($after.error)"
         }
       }
-      [IO.File]::WriteAllBytes($capturePath, $captureBytes)
-      [IO.File]::WriteAllBytes($pngPath, $pngBytes)
       Write-Output (ConvertTo-Json -InputObject ([pscustomobject]@{
         problemCount=15;historyDepth=$historyDepth;case=$case;status='PASS'
         scalarCount=@($before.scalarTypes).Count;truthScope='offline-contract'
       }) -Compress)
+      } finally {
+        [IO.File]::WriteAllBytes($capturePath, $captureBytes)
+        [IO.File]::WriteAllBytes($pngPath, $pngBytes)
+        if ($null -ne $changedPdfPath -and $null -ne $changedPdfBytes) { [IO.File]::WriteAllBytes($changedPdfPath, $changedPdfBytes) }
+      }
     }
     Remove-MathSecrOwnedBenchmarkRoot $root
     $root = $null

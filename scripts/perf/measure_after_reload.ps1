@@ -11,7 +11,9 @@ try {
   # Generation and its uninstrumented AfterReload validation warm the module.
   # Only subsequent AfterReload calls enter the timed/instrumented region.
   $fixture = New-MathSecrAppendHistoryFixture -ProblemCount $ProblemCount -HistoryDepth $HistoryDepth -OutRoot $root
-  $names = @('Invoke-MathSecrStateMachine', 'Get-FileHash', 'Read-MathSecrArtifactBytes', 'ConvertFrom-MathSecrContractJson', 'Invoke-MathSecrProductionStep')
+  $names = @('Invoke-MathSecrStateMachine', 'Get-FileHash', 'Read-MathSecrArtifactBytes', 'ConvertFrom-MathSecrContractJson', 'Invoke-MathSecrProductionStep',
+    'Start-MathSecrPdfValidator', 'Invoke-MathSecrPdfValidatorOnce', 'Assert-FailedProblemReportPdf',
+    'Invoke-MathSecrEditAppendReceiptValidation', 'Test-MathSecrEditAppendReceipt')
   $script:phase0Counters = @{}
   $script:phase0OriginalFunctions = @{}
   $savedBodies = @{}
@@ -66,7 +68,11 @@ foreach ($inputPath in $inputPaths) {
       if ($hashCalls -ne $sum) { throw 'Hash function counts do not match path counts.' }
       $maxPerPath = if ($byPath.Count) { [int]($byPath.Values | Measure-Object -Maximum).Maximum } else { 0 }
       $samples.Add([pscustomobject]@{repeat=$index;elapsedMs=$timer.Elapsed.TotalMilliseconds;calls=$counts;status='PASS';
-        hashCalls=$hashCalls;hashCallsByPath=$byPath;maxHashCallsPerPath=$maxPerPath})
+        hashCalls=$hashCalls;hashCallsByPath=$byPath;maxHashCallsPerPath=$maxPerPath;
+        pdfValidatorStarts=$counts['Start-MathSecrPdfValidator'];pdfValidatorOneShots=$counts['Invoke-MathSecrPdfValidatorOnce'];
+        pdfChecks=$counts['Assert-FailedProblemReportPdf'];appendReceiptCalls=$counts['Test-MathSecrEditAppendReceipt'];
+        appendReceiptValidations=$counts['Invoke-MathSecrEditAppendReceiptValidation'];
+        appendReceiptReuses=($counts['Test-MathSecrEditAppendReceipt'] - $counts['Invoke-MathSecrEditAppendReceiptValidation'])})
     }
   } finally {
     # Restore before any cleanup or a caller's next measurement.
@@ -82,6 +88,11 @@ foreach ($inputPath in $inputPaths) {
   foreach ($name in $names) {
     $counts = @($samples.ToArray() | ForEach-Object {$_.calls[$name]} | Sort-Object)
     $medianCounts[$name] = if ($Repeat % 2) {$counts[$middle]} else {($counts[$middle - 1] + $counts[$middle]) / 2}
+  }
+  $median = [ordered]@{elapsedMs=$medianMs;calls=$medianCounts}
+  foreach ($metric in @('pdfValidatorStarts','pdfValidatorOneShots','pdfChecks','appendReceiptCalls','appendReceiptValidations','appendReceiptReuses')) {
+    $values = @($samples.ToArray() | ForEach-Object {$_.$metric} | Sort-Object)
+    $median[$metric] = if ($Repeat % 2) {$values[$middle]} else {($values[$middle - 1] + $values[$middle]) / 2}
   }
   $medianHashes = $medianCounts['Get-FileHash'] + $medianCounts['Read-MathSecrArtifactBytes']
   $maxByPath = [ordered]@{}
@@ -108,7 +119,7 @@ foreach ($inputPath in $inputPaths) {
     hashCallsByPath=$maxByPath
     maxHashCallsPerPath=$maxHashesPerPath
     hashCallsByPathScope='maximum per path across separate top-level validation calls; fixture-relative paths'
-    median=[ordered]@{elapsedMs=$medianMs;calls=$medianCounts}
+    median=$median
     samples=$samples.ToArray()
   } | ConvertTo-Json -Depth 12 -Compress
 } finally {

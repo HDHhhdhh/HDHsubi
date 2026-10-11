@@ -284,7 +284,7 @@ function Invoke-MathSecrProductionStep {
     Assert-MathSecrProduction ($projection.PersistedCardCapture.CaptureId -cne $priorValidation.ReportProjection.PersistedCardCapture.CaptureId -and $projection.PersistedCardCapture.ReadEvidenceId -cne $priorValidation.ReportProjection.PersistedCardCapture.ReadEvidenceId) 'Edit append reused the prior persisted read identity.'
   }
   $summary=New-MathSecrProductionUserSummary $projection
-  $null=Invoke-MathSecrUserSummaryLint -Text $summary -ExpectedProjection $projection
+  $null=Invoke-MathSecrUserSummaryLint -Text $summary -ExpectedProjection $projection -Context $Context
   return [pscustomobject]@{Valid=$true;Step=$Step;StateResult=$state;ReportProjection=$projection;UserSummary=$summary;TruthScope=$projection.TruthScope}
   } finally { Exit-MathSecrValidationContext -Context $Context }
 }

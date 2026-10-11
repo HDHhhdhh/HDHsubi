@@ -59,6 +59,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./mathsecr-paper-builder-kit/scrip
 ```
 
 - 네 surface 양성, 세 가지 음성이 모두 기대대로다.
+- Phase 2의 `test_assemble_pipeline.ps1` 경로 A(simulator 관측 → 조립 → Select → BeforeNext)가 거부에서 PASS로 바뀐다. `offline-dom-test` surface identity receipt가 있는 session만 통과한다. `aside-repl` session에 섞인 `offline-dom-test` receipt는 여전히 거부한다.
 - `validate_mathsecr_docs.ps1 -Scenario All`은 비공개 bundle이 필요하다. 사용자가 로컬에서 실행하고 결과를 Issue #2에 남긴다. PR 본문에 이 사실을 쓴다.
 - CI가 녹색이다.
 

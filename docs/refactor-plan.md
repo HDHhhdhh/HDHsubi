@@ -110,15 +110,16 @@ Codex는 이 공개 저장소에서 작업한다. 회귀가 돌지 않으면 구
 ```mermaid
 flowchart TD
     P0[Phase 0 · 기준선 고정·공개본 실행 가능화] --> P1[Phase 1 · AfterReload 중복 제거]
+    P1 --> P1b[Phase 1b · PDF 프로세스 통합·append 재검사 공유]
     P0 --> P2[Phase 2 · 관측 어댑터·조립 자동화]
-    P1 --> P3[Phase 3 · surface 추상화]
+    P1b --> P3[Phase 3 · surface 추상화]
     P2 --> P3
     P3 --> P4[Phase 4 · 지침 축소·구조 정리]
     P2 --> P5[Phase 5 · 실제 제작 재개·공정 비교]
     P3 --> P5
 ```
 
-Phase 1과 Phase 2는 서로 독립이다. 병렬로 진행할 수 있다.
+Phase 1·1b와 Phase 2는 서로 독립이다. 병렬로 진행할 수 있다.
 
 ### Phase 0 · 기준선 고정과 공개본 실행 가능화
 
@@ -170,6 +171,29 @@ Phase 1과 Phase 2는 서로 독립이다. 병렬로 진행할 수 있다.
 
 - 과거 결과 파일의 `Valid` 값을 읽어 재사용하지 않는다.
 - 해시 검사를 생략하지 않는다. 횟수만 줄인다.
+
+결과(2026-10-11, PR #4 병합): N=15, H=1/2/6 시간 0.930/1.177/2.857초. state machine 2/3/7회, 해시 42/52/92회, 경로별 최대 1회. 동일성 18개 PASS. H=6 시간은 기준선의 33.0%로 목표 2.2초에 못 미쳤다. 남은 비용은 세션마다 띄우는 PDF 검증 Python 프로세스 6회(약 1.15초)와 세션마다 2회 실행하는 append receipt 검증(약 1.0초)이다.
+
+### Phase 1b · PDF 검증 프로세스 통합과 append 재검사 공유
+
+목표: H=6 총 시간이 2.2초 이하다. 검증 결과와 거부 메시지는 Phase 0과 같다.
+
+작업:
+
+1. `Assert-FailedProblemReportPdf`의 Python(pypdf) 검증을 최상위 호출당 1개 프로세스로 묶는다. 프로세스는 검증 Context의 자원이다. 표준 입출력 JSON 한 줄로 요청과 응답을 주고받는다. 호출이 끝나면 프로세스를 끝낸다. Context가 없는 독립 호출은 지금처럼 한 번 실행 방식이다. Python 검증 함수와 오류 문장은 바꾸지 않는다.
+2. `Test-MathSecrEditAppendReceipt`의 결과를 같은 Context 안에서 공유한다. key는 snapshot 객체 참조, 기대 ID·키, 깊이다. `Valid`인 결과만 저장한다. state machine이 검증한 뒤 production 최종 재검사는 같은 결과를 쓴다.
+3. 계측에 `pdfValidatorStarts`, `pdfChecks`, `appendReceiptValidations`를 더한다. 동일성 비교에 실패 PDF 변조 2종을 더한다.
+
+완료 기준:
+
+- 동일성 24개 PASS. 기준 commit은 Phase 0 그대로다.
+- H=6 중앙값 2.2초 이하. 프로세스 시작 1회 이하. append receipt 실행 H회.
+- 최상위 호출이 끝나면 Python worker가 남지 않는다. worker가 죽으면 다음 검사는 기다리지 않고 거부한다.
+
+금지:
+
+- PDF 검증을 생략하거나 세션 사이에 결과를 재사용하지 않는다.
+- worker를 `$script:`·`$global:` 변수에 두지 않는다.
 
 ### Phase 2 · 관측 어댑터와 조립 자동화
 

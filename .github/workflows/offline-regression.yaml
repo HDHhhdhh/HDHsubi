@@ -1,6 +1,7 @@
 name: Offline regression
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -22,7 +23,7 @@ jobs:
       - name: Install offline test dependencies
         shell: pwsh
         run: |
-          python -m pip install Pillow reportlab pypdf
+          python -m pip install Pillow==12.3.0 reportlab==5.0.1 pypdf==6.20.0
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           npm install --prefix "$env:RUNNER_TEMP/mathsecr-dom" playwright@1.62.1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

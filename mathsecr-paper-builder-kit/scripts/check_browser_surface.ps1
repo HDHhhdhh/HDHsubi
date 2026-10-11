@@ -39,7 +39,7 @@ if ($Surface -ceq 'aside-repl') {
     $basis = if ($isLocal) { 'local' } else { 'explicit-remote-request' }
     $prefix = @('--host', $HostId)
     if ($AccountId) { $prefix += @('--account', $AccountId) }
-    $code = "console.log(JSON.stringify({kind:'mathsecr-aside-preflight-v1',tabCount:(await listBrowserTabs()).length,tabs:(await listBrowserTabs()).map(t=>({targetId:t.targetId,url:t.url,title:t.title}))}));"
+    $code = "const t=await listBrowserTabs();console.log(JSON.stringify({kind:'mathsecr-aside-preflight-v1',tabCount:t.length,tabs:t.map(x=>({targetId:x.targetId,url:x.url,title:x.title}))}));"
     foreach ($commandArguments in @(@('skills', 'list'), @('repl', $code))) {
       $arguments = @($prefix + $commandArguments)
       [pscustomobject]@{

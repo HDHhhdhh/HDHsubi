@@ -71,16 +71,16 @@
     {
       "path": "mathsecr-paper-builder-kit/prompts/start-prompt.md",
       "sourceSha256": "2e13aa96a0e461b0abf119f9059b8e9daf86a0afa987ab591803eafccc984120",
-      "exportSha256": "28523088fcb72dd219a09ebfd2dbd5d0171a485eaa3b752438c1d287289caf3d",
+      "exportSha256": "2adaa7f7be6d61e845b1eb8040eadbe5bc351ee068e03ed943d550475d86927e",
       "bytes": 2267,
-      "transformation": "Phase 3b: declare the session surface and require the canonical surface hard stop."
+      "transformation": "Phase 3b: declare the session surface and require the canonical surface hard stop. Phase 3b 후속: aside-repl 안내의 inspect 첫 글자를 소문자로 고친다."
     },
     {
       "path": "mathsecr-paper-builder-kit/README.md",
       "sourceSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
-      "exportSha256": "457b9e3a73b15db0557779e9a306ffd0ea6290f259ec03d596cbb3cd1a3f9342",
-      "bytes": 14600,
-      "transformation": "Phase 3b: name the canonical surface hard stop and off-surface fallback check."
+      "exportSha256": "3480e309670ebbe398a80ea5d7ab1b934bba590e11ba1a8403edf51268e4bf2d",
+      "bytes": 14601,
+      "transformation": "Phase 3b: name the canonical surface hard stop and off-surface fallback check. Phase 3b 후속: off-surface 앞의 관사를 an으로 고친다."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/aside_preflight.ps1",
@@ -106,9 +106,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/check_aside_repl.ps1",
       "sourceSha256": "6739c1f0f570c8464332a1ff6d7c573dd9be2ae5466d0a115d274d952bd62f12",
-      "exportSha256": "9e879581c6c9911ab6a49f8b0cc5c5a14c34f98d1db1c66c15263f80784b8fb1",
-      "bytes": 2249,
-      "transformation": "Phase 3b: forward live execution to the surface probe while retaining legacy stdout, exit codes and pure argv compatibility."
+      "exportSha256": "ece4690389e1bb973e39ac8d96c13ba503ab1088ad292a801a9aa45e8a25a7be",
+      "bytes": 588,
+      "transformation": "Phase 3b: forward live execution to the surface probe while retaining legacy stdout, exit codes and pure argv compatibility. Phase 3b 후속: argv 함수 사본을 제거하고 기존 forwarding 호출과 종료 코드를 유지한다."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/create_failed_problem_report.py",
@@ -246,9 +246,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_aside_preflight.ps1",
       "sourceSha256": "af2fa1fd1d9b1c582e0c28406041bdc2b924af6565c6a1d95550c240a2be389c",
-      "exportSha256": "1ffaba841139a31ba402a983747c622b1e111fb13a07735d13ccdc6c0ac5624e",
-      "bytes": 10352,
-      "transformation": "Synthetic host display names anonymized; no production implementation changed."
+      "exportSha256": "5e7178f147210166dea3044a7b40f19887b9bcd375abd2ecfce32c56e0c47120",
+      "bytes": 10492,
+      "transformation": "Synthetic host display names anonymized; no production implementation changed. Phase 3b 후속: 새 CLI의 argv 정의를 AST로 시험하고 단일 탭 조회 문자열을 기대한다."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_body_comparison_contract.ps1",

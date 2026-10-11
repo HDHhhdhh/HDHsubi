@@ -7,7 +7,7 @@
 | [phase-0.md](phase-0.md) | 공개본 회귀 실행 가능화, CI, 성능 기준선 | 없음 |
 | [phase-1.md](phase-1.md) | AfterReload 중복 검증 제거 | Phase 0 병합 |
 | [phase-1b.md](phase-1b.md) | PDF 검증 프로세스 통합, append 재검사 공유, H=6 ≤ 2.2초 | Phase 1 병합 |
-| [phase-2.md](phase-2.md) | 관측 어댑터·조립 자동화·상주 검증 | Phase 0 병합 |
+| [phase-2.md](phase-2.md) | 관측 어댑터·조립 자동화·상주 검증 | Phase 1b 병합 |
 | [phase-3.md](phase-3.md) | surface 추상화 | Phase 1·1b·2 병합, 사용자 승인 D1 |
 | [phase-4.md](phase-4.md) | 지침 축소·구조 정리 | Phase 3 병합 |
 | [research-tasks.md](research-tasks.md) | Aside·수학비서 UI·Codex 브라우저 조사 | 없음. Phase 2·3와 병행 |
@@ -21,7 +21,7 @@
 3. 제약. 바꾸지 말 것과 금지.
 4. 완료 조건. 실행할 명령과 기대 결과.
 
-Codex 실행 권장값: 추론 노력은 `high`다. Phase 1은 `extra high`다. Phase 1b는 `high`다. 모호하면 구현 전에 질문한다. 질문은 Issue #2 코멘트로 남긴다.
+Codex 실행 권장값: 추론 노력은 `high`다. Phase 1은 `extra high`다. Phase 1b·2는 `high`다. 모호하면 구현 전에 질문한다. 질문은 Issue #2 코멘트로 남긴다.
 
 ## 공통 제약
 

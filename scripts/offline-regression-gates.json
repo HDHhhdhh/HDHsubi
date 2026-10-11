@@ -499,6 +499,20 @@
       "reason": "Isolated DOM policy rejection plus public synthetic assembly, selection, helper equivalence and resident validation; no live product claim.",
       "publicationStatus": "public-new-synthetic",
       "passPattern": "AssemblePipeline PASS"
+    },
+    {
+      "id": "SurfaceContract",
+      "script": "scripts/test_surface_contract.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/scripts/surface_contract.ps1",
+        "scripts/perf/assembly_support.ps1",
+        "mathsecr-paper-builder-kit/test-fixtures/iab-simulator/index.html"
+      ],
+      "parameters": { "ProjectRoot": "{projectRoot}" },
+      "reason": "Phase 3a declared surface, identity, history and mixed-receipt contracts with OS-temp synthetic fixtures; no live product claim.",
+      "publicationStatus": "public-new-synthetic",
+      "passPattern": "SurfaceContract PASS"
     }
   ]
 }

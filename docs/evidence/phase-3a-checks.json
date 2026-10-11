@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-11T08:36:10.465Z",
+  "scope": "Phase 3a local public contracts and offline fixture verification",
+  "liveProductBehavior": false,
+  "publication": {
+    "status": "PASS",
+    "snapshotFiles": 72,
+    "hashDrift": 0
+  },
+  "publicChecks": {
+    "status": "PASS",
+    "schemaVersion": 1,
+    "startedAtUtc": "2026-10-11T08:33:41.4805894Z",
+    "completedAtUtc": "2026-10-11T08:33:43.840508Z",
+    "host": "7.6.5",
+    "publicationFiles": "PASS",
+    "checks": [
+      {
+        "name": "test_selection_journal.ps1",
+        "status": "PASS",
+        "scope": "offline-contract",
+        "liveProductBehavior": false
+      },
+      {
+        "name": "test_search_query_plan.ps1",
+        "status": "PASS",
+        "scope": "offline-contract",
+        "liveProductBehavior": false
+      }
+    ],
+    "fullRegressionRun": false,
+    "browserConnectionTest": false,
+    "bodyExactGroundTruthTest": false
+  },
+  "offlineRegression": {
+    "status": "PASS",
+    "passed": 14,
+    "failed": 0,
+    "skipped": 20,
+    "privateBundleTestsExecuted": false,
+    "publicGates": [
+      {
+        "kind": "gate",
+        "id": "FailedProblemReport",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 1439.878,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "FailedProblemReport PASS (pages=2; duplicate_number_rejected=true; out_of_bounds_rejected=true; network=false)"
+      },
+      {
+        "kind": "gate",
+        "id": "RegressionEvidence",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 12365.847,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "RegressionEvidence PASS truth_scope=offline-contract product_behavior=false intentional_red_cases=11"
+      },
+      {
+        "kind": "gate",
+        "id": "SearchObservationContract",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 1569.436,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "PASS Search Observation Contract: 130 checks; source_mode=offline-contract; normal2/risk3, strict schema, replay/drift rejection, bounded claims"
+      },
+      {
+        "kind": "gate",
+        "id": "SearchObservationCollector",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 1663.618,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "PASS Search Observation Collector Packet: actual isolated browser DOM observations accepted by the PowerShell contract; no live MathSecr verification"
+      },
+      {
+        "kind": "gate",
+        "id": "SearchObservationCuaRestricted",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 760.067,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "PASS Search Observation CUA Restricted Packet: DOM-only globals and Date/receipt v2 accepted; no live availability claim"
+      },
+      {
+        "kind": "gate",
+        "id": "SearchQueryPlan",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 1580.252,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "SearchQueryPlan PASS positive_cases=6 intentional_red_cases=38 source_order_preserved=true spans_and_hashes_recomputed=true truth_scope=transcription-query-preparation-only live_scope_or_exact_proof=false"
+      },
+      {
+        "kind": "gate",
+        "id": "SelectionJournal",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 1203.968,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "SelectionJournal PASS cases=5 file_read_cases=6 intentional_red_cases=11 append_prefix_preserved=true duplicate_event_rejected=true corrupt_tail_rejected=true explicit_quarantine=true three_replays_equal=true"
+      },
+      {
+        "kind": "gate",
+        "id": "YearRangeSerializerGuard",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 545.056,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "YearRangeSerializerGuard PASS assumption=already_normalized_numeric_tuple proves=defined_ordered_field_emission upstream_normalization_pinned=false live_reproducible=false bundle_verified=false"
+      },
+      {
+        "kind": "gate",
+        "id": "YearRangeLocalAdapter",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 4171.395,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "YearRangeLocalAdapter PASS fixtures=9 nonfinite_direct_probes=6 invalid_input_policy=conservative_local_only product_behavior_evidence=false"
+      },
+      {
+        "kind": "gate",
+        "id": "OfflineRunner",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 4754.059,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "OfflineRunner PASS (nonzero exit, missing public data, missing PASS marker, private SKIP, continued gates, JSON lines)."
+      },
+      {
+        "kind": "gate",
+        "id": "AppendHistoryFixture",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 10828.007,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "AppendHistoryFixture PASS (H=0/1/2, all intermediate stages, immutable FirstNext, tamper/missing receipt rejection, scoped cleanup, proxy recursion/reset)."
+      },
+      {
+        "kind": "gate",
+        "id": "ValidationContext",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 12536.596,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "ValidationContext PASS"
+      },
+      {
+        "kind": "gate",
+        "id": "AssemblePipeline",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 17613.445,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "AssemblePipeline PASS (A1 mixed-surface rejection, A2 offline simulator Select/BeforeNext, synthetic Select/BeforeNext, four specified negatives, roster binding, helper/CLI identity, resident isolation/exit/EOF)."
+      },
+      {
+        "kind": "gate",
+        "id": "SurfaceContract",
+        "grade": "public",
+        "status": "PASS",
+        "elapsedMs": 10088.398,
+        "truthScope": "offline-contract",
+        "liveProductBehavior": false,
+        "marker": "SurfaceContract PASS"
+      }
+    ]
+  },
+  "surfaceContract": {
+    "status": "PASS",
+    "positiveCases": 12,
+    "negativeCases": 9,
+    "positive": [
+      {
+        "surface": "aside-repl",
+        "step": "Select",
+        "status": "PASS"
+      },
+      {
+        "surface": "aside-repl",
+        "step": "BeforeNext",
+        "status": "PASS"
+      },
+      {
+        "surface": "aside-repl",
+        "step": "AfterReload",
+        "status": "PASS"
+      },
+      {
+        "surface": "codex-iab",
+        "step": "Select",
+        "status": "PASS"
+      },
+      {
+        "surface": "codex-iab",
+        "step": "BeforeNext",
+        "status": "PASS"
+      },
+      {
+        "surface": "codex-iab",
+        "step": "AfterReload",
+        "status": "PASS"
+      },
+      {
+        "surface": "codex-chrome-ext",
+        "step": "Select",
+        "status": "PASS"
+      },
+      {
+        "surface": "codex-chrome-ext",
+        "step": "BeforeNext",
+        "status": "PASS"
+      },
+      {
+        "surface": "codex-chrome-ext",
+        "step": "AfterReload",
+        "status": "PASS"
+      },
+      {
+        "surface": "offline-dom-test",
+        "step": "Select",
+        "status": "PASS"
+      },
+      {
+        "surface": "offline-dom-test",
+        "step": "BeforeNext",
+        "status": "PASS"
+      },
+      {
+        "surface": "offline-dom-test",
+        "step": "AfterReload",
+        "status": "PASS"
+      }
+    ],
+    "negative": [
+      {
+        "case": 1,
+        "surface": "codex-iab",
+        "token": "surface-browser-family",
+        "status": "PASS"
+      },
+      {
+        "case": 2,
+        "surface": "codex-iab",
+        "token": "Production validation: Persisted-card capture schema or surface is invalid.",
+        "status": "PASS"
+      },
+      {
+        "case": 3,
+        "surface": "chrome",
+        "token": "surface-unsupported",
+        "status": "PASS"
+      },
+      {
+        "case": 4,
+        "surface": "aside-repl",
+        "token": "surface-mismatch",
+        "status": "PASS"
+      },
+      {
+        "case": 5,
+        "surface": "offline-dom-test",
+        "token": "surface-url",
+        "status": "PASS"
+      },
+      {
+        "case": 6,
+        "surface": "codex-iab",
+        "token": "surface-mismatch",
+        "status": "PASS"
+      },
+      {
+        "case": 7,
+        "surface": "codex-chrome-ext",
+        "token": "edit-append-schema",
+        "status": "PASS"
+      },
+      {
+        "case": 8,
+        "surface": "codex-iab",
+        "token": "surface-mismatch",
+        "status": "PASS"
+      },
+      {
+        "case": 9,
+        "surface": "aside-repl",
+        "token": "surface-mismatch",
+        "status": "PASS"
+      }
+    ],
+    "typedSummaryLintAllSurfaces": "PASS",
+    "additionalEdges": [
+      "strict string/case surface",
+      "live/offline URL boundaries",
+      "ID/date/version shape",
+      "optional probe path/hash and artifact cache",
+      "metadata observation surface",
+      "nonwinning attempt positive control and state rejection"
+    ]
+  },
+  "assemblePipeline": {
+    "status": "PASS",
+    "pathA1": {
+      "status": "PASS",
+      "defaultSurface": "aside-repl",
+      "exitCode": 1,
+      "reason": "selected-search-receipt-invalid",
+      "outputCreated": false
+    },
+    "pathA2": {
+      "status": "PASS",
+      "surface": "offline-dom-test",
+      "exitCode": 0,
+      "actualSimulatorObservationUnmodified": true,
+      "residentSelectValid": true,
+      "residentBeforeNextValid": true
+    },
+    "existingAssertionsPreserved": true
+  },
+  "validationContext": {
+    "status": "PASS",
+    "sameSnapshotCrossSurfaceRevalidated": true,
+    "stateCacheSurfaceIsolated": true,
+    "appendCacheSurfaceIsolated": true
+  },
+  "afterReloadIdentity": {
+    "status": "PASS",
+    "baselineCommit": "961c41105e96f368c48f6a39303e15520e0b3213",
+    "cases": 24,
+    "historyDepths": [
+      1,
+      2,
+      6
+    ],
+    "scalarClrTypesCompared": true,
+    "normalJsonAndErrorsCompared": true
+  },
+  "defaultFixtureIdentity": {
+    "status": "PASS",
+    "baselineCommit": "b37179d3437a91c1ba4ebb37950933897389b76c",
+    "fixtureAndObservationReturnBytesIdentical": true,
+    "jsonAndPngArtifactsCompared": 21,
+    "pdfBytesCompared": false
+  },
+  "performance": {
+    "status": "PASS",
+    "evidence": "perf-phase3a.json",
+    "problemCount": 15,
+    "historyDepth": 6,
+    "repeats": 3,
+    "medianMs": 1915.3255,
+    "limitMs": 2200,
+    "pdfValidatorStarts": 1,
+    "appendReceiptValidations": 6,
+    "stateMachineCalls": 7,
+    "maxHashCallsPerPath": 1
+  },
+  "syntax": {
+    "status": "PASS"
+  },
+  "preservation": {
+    "status": "PASS",
+    "originalSourceHashes": 72,
+    "changedExports": [
+      "state_machine.ps1",
+      "production_validation.ps1",
+      "body_comparison_contract.ps1",
+      "search_observation_contract.ps1",
+      "report_contract.ps1"
+    ],
+    "frozenFilesUnchanged": true,
+    "earlierPerformanceEvidenceUnchanged": true,
+    "newSurfaceContractInSnapshot": false
+  },
+  "processCleanup": {
+    "status": "PASS",
+    "remainingPdfWorkers": 0,
+    "remainingResidentProcesses": 0
+  },
+  "ciEvidence": "See the implementation PR and Issue #2 for the Actions run on the exact implementation head; local checks do not establish CI success.",
+  "deviations": [
+    "A1 retains its existing selected-search-receipt-invalid message at the earlier explicit surface guard.",
+    "H=1 Select/BeforeNext fixtures remove the append operation receipt and select all current exact targets, using the existing assembly helper pattern."
+  ],
+  "followups": [
+    "Phase 3b real probe and non-offline probeArtifact requirement",
+    "Phase 4 ASIDE_REPL_READY name cleanup"
+  ],
+  "scopeLimits": [
+    "Private-bundle fixtures unavailable; 20 gates SKIP.",
+    "No live MathSecr behavior or mathematical/visual ground-truth claim."
+  ]
+}

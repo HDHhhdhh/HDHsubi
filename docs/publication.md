@@ -50,7 +50,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_offline_regression.p
 | publication validator | 새 문서의 로컬 링크, JSON 형식, public allowlist, 복사 해시, 실제 개인 경로·키·토큰·금지 확장자 |
 | Selection Journal All | 요청·재시도·ACK·재개, 실파일 왕복, 중복과 손상 입력 거부 |
 | Search Query Plan | 원본 순서, literal 단서, 원본 위치, 입력 shape의 허용·거부 |
-| public offline regression | 13개 공개 gate: 연도 계약, 관측/collector, 회귀 receipt, PDF 생성, 저널, 검색어, 이력 fixture·runner·캐시·조립/상주 검증 |
+| public offline regression | 14개 공개 gate: 연도 계약, 관측/collector, 회귀 receipt, PDF 생성, 저널, 검색어, 이력 fixture·runner·캐시·조립/상주·surface 검증 |
 
 이들은 공개 packaging과 독립 가능한 지역 계약의 검사다. 전체 production 회귀, 브라우저 연결, 저장, 수학적 정답을 증명하지 않는다. 기존 전체 검사 PASS 기록을 새로 실행한 것처럼 표시하지 않는다.
 
@@ -65,3 +65,5 @@ Phase 0은 원래 full runner를 수정하지 않고 별도 public runner와 Win
 공개는 재배포 라이선스를 새로 지정하는 행동과 다르다. 이 공개 작업에서는 별도 라이선스를 부여하지 않았다. 수학비서·Aside·Codex 등 외부 제품의 코드나 실행 파일을 배포하지 않는다.
 
 Phase 2는 기존 export 계약을 유지하며 새 조립기·상주 검증 CLI와 공개 합성 gate를 더한다. [입력 계약](search_attempt_input.md)과 [본문 판정](body_judgment_input.md)은 입력 사실과 자동 계산을 구분한다. simulator receipt는 현재 선택 정책대로 거부하고 공개 합성 receipt로 Select·BeforeNext를 검증한다. [Phase 2 결과](evidence/phase-2.md)는 명령 격리·동일성·시간 측정 범위를 기록한다.
+
+Phase 3a는 선언한 surface 4종을 지원하고, receipt·append 이력·캐시를 같은 surface에 결합한다. 새 SurfaceContract gate와 simulator A2 경로를 검증한다. 기본 Aside session의 동일성 24개와 H=6 성능은 [Phase 3a 결과](evidence/phase-3a.md)에 있다. export 5개의 해시·크기·transformation을 갱신하며 원본 sourceSha256 72개는 보존한다. 실제 연결 probe·canonical 지침과 비공개 자료의 검증 범위는 후속 작업이다.

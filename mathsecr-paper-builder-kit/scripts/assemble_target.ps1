@@ -6,7 +6,8 @@ param(
   [Parameter(Mandatory)][string]$BodyJudgmentPath,
   [Parameter(Mandatory)][string]$CandidateRenderPath,
   [Parameter(Mandatory)][string]$OutPath,
-  [string]$ProjectRoot=(Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+  [string]$ProjectRoot=(Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
+  [string]$Surface='aside-repl'
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -28,7 +29,7 @@ try {
     Observation=(ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $paths.observation -Raw -Encoding UTF8))
     Judgment=(ConvertFrom-MathSecrContractJson (Get-Content -LiteralPath $paths.judgment -Raw -Encoding UTF8))
     OccurrenceKey=$OccurrenceKey;CandidateRelativePath=$candidateRelative;ProjectRoot=$ProjectRoot
-    InputHashes=[pscustomobject]$hashes
+    InputHashes=[pscustomobject]$hashes;Surface=$Surface
   }
   $target=New-MathSecrAssembledTarget @arguments
   foreach ($key in $paths.Keys) {

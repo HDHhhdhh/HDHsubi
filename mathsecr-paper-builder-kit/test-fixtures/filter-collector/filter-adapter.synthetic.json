@@ -1,0 +1,126 @@
+{
+  "id": "latency-filter-synthetic-v1",
+  "evidenceId": "synthetic-dom-control-map",
+  "scopeMode": {
+    "selector": "#mode",
+    "read": "text"
+  },
+  "sourceChips": {
+    "selector": ".source-chip",
+    "read": "text"
+  },
+  "selectedScopeChecks": [
+    {
+      "selector": "#scope-selected",
+      "read": "attribute",
+      "attribute": "aria-checked",
+      "equals": "true"
+    }
+  ],
+  "filterChips": [
+    {
+      "key": "filter-panel",
+      "selector": "#filter-panel",
+      "read": "attribute",
+      "attribute": "data-visible-panel",
+      "minCount": 1,
+      "maxCount": 1
+    },
+    {
+      "key": "subject",
+      "selector": ".subject-chip",
+      "read": "text"
+    },
+    {
+      "key": "unit",
+      "selector": ".unit-chip",
+      "read": "text"
+    },
+    {
+      "key": "answer-kind",
+      "selector": ".answer-kind-selected",
+      "read": "attribute",
+      "attribute": "data-answer-kind"
+    },
+    {
+      "key": "year-min",
+      "selector": "#year-min",
+      "read": "attribute",
+      "attribute": "data-visible-value",
+      "minCount": 1,
+      "maxCount": 1
+    },
+    {
+      "key": "year-max",
+      "selector": "#year-max",
+      "read": "attribute",
+      "attribute": "data-visible-value",
+      "minCount": 1,
+      "maxCount": 1
+    },
+    {
+      "key": "difficulty-min",
+      "selector": "#difficulty-min",
+      "read": "attribute",
+      "attribute": "data-visible-value",
+      "minCount": 1,
+      "maxCount": 1
+    },
+    {
+      "key": "difficulty-max",
+      "selector": "#difficulty-max",
+      "read": "attribute",
+      "attribute": "data-visible-value",
+      "minCount": 1,
+      "maxCount": 1
+    },
+    {
+      "key": "exclude-condition",
+      "selector": ".exclude-condition-selected",
+      "read": "text"
+    },
+    {
+      "key": "content",
+      "selector": ".content-selected",
+      "read": "text"
+    },
+    {
+      "key": "query-polarity",
+      "selector": ".query-chip",
+      "read": "attribute",
+      "attribute": "data-mode"
+    }
+  ],
+  "queryChips": [
+    {
+      "selector": ".query-text",
+      "read": "attribute",
+      "attribute": "data-value",
+      "kind": "text"
+    },
+    {
+      "selector": ".query-formula",
+      "read": "attribute",
+      "attribute": "data-value",
+      "kind": "formula"
+    }
+  ],
+  "resultCount": {
+    "selector": "#count",
+    "read": "text",
+    "pattern": "^검색결과 : ([0-9]+)개$"
+  },
+  "resultIds": {
+    "selector": ".card",
+    "read": "attribute",
+    "attribute": "data-id"
+  },
+  "loading": {
+    "selector": "#loading",
+    "read": "attribute",
+    "attribute": "aria-busy",
+    "equals": "true"
+  },
+  "resultSubmitId": null,
+  "resultCriteriaKey": null
+}

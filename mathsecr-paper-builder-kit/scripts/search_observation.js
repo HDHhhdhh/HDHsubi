@@ -60,6 +60,32 @@ function collectMathSecrSearchObservation(input) {
     if (d === null) return [];
     return nodes(d).map((el) => text(extract(el, d), "observed list value"));
   };
+  // Preserve the existing string[] packet while binding each observed filter
+  // group to its adapter key and DOM order. Selectors are never inferred here.
+  const filters = (descriptors) => {
+    if (!Array.isArray(descriptors)) return many(descriptors);
+    const keys = [];
+    return descriptors.map((d) => {
+      if (!object(d)) throw new Error("observed filter descriptor required");
+      text(d.key, "filter descriptor.key");
+      if (keys.includes(d.key)) throw new Error("duplicate filter descriptor key");
+      keys.push(d.key);
+      const minimum = d.minCount === undefined ? 0 : d.minCount;
+      const maximum = d.maxCount === undefined ? Number.MAX_SAFE_INTEGER : d.maxCount;
+      if (!Number.isSafeInteger(minimum) || !Number.isSafeInteger(maximum) ||
+          minimum < 0 || maximum < minimum) throw new Error("invalid filter descriptor cardinality");
+      const found = nodes(d);
+      if (found.length < minimum || found.length > maximum) throw new Error(`filter descriptor cardinality mismatch: ${d.key}`);
+      const values = found.map((el) => {
+        const value = extract(el, d);
+        if (value === null) throw new Error(`missing observed filter value: ${d.key}`);
+        if (typeof value === "string") text(value, "observed filter value");
+        if (typeof value === "number" && !Number.isFinite(value)) throw new Error(`nonfinite observed filter value: ${d.key}`);
+        return value;
+      });
+      return JSON.stringify([d.key, values]);
+    });
+  };
   if (!Array.isArray(a.selectedScopeChecks) || a.selectedScopeChecks.length === 0) throw new Error("selectedScopeChecks required");
   const scopeSelectionConfirmed = a.selectedScopeChecks.every((check) =>
     object(check) && Object.prototype.hasOwnProperty.call(check, "equals") && one(check) === check.equals);
@@ -111,7 +137,7 @@ function collectMathSecrSearchObservation(input) {
     criteria: {
       scopeMode: text(one(a.scopeMode), "scope mode"),
       sourceChips: many(a.sourceChips),
-      filterChips: many(a.filterChips),
+      filterChips: filters(a.filterChips),
       chips: chipNodes.map(({ kind, value }) => ({ kind, value }))
     },
     scopeSelectionConfirmed,

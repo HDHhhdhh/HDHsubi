@@ -4,7 +4,8 @@ param(
   [string]$EvidenceRoot,
   [string]$EvidencePath,
   [switch]$PromptDriftRed,
-  [int]$SimulatorPort = 8785
+  [int]$SimulatorPort = 8785,
+  [switch]$NoBrowser
 )
 
 $ErrorActionPreference = "Stop"
@@ -21,6 +22,7 @@ if (-not [string]::IsNullOrWhiteSpace($CodexHome)) { $arguments.CodexHome = $Cod
 if (-not [string]::IsNullOrWhiteSpace($EvidenceRoot)) { $arguments.EvidenceRoot = $EvidenceRoot }
 if (-not [string]::IsNullOrWhiteSpace($EvidencePath)) { $arguments.EvidencePath = $EvidencePath }
 if ($PromptDriftRed) { $arguments.PromptDriftRed = $true }
+if ($NoBrowser) { $arguments.NoBrowser = $true }
 
 & $runner @arguments
 if ($LASTEXITCODE -ne 0) {

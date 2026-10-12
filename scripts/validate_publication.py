@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
-ALLOWED = {".ps1", ".py", ".js", ".md", ".yaml", ".json", ".html"}
+ALLOWED = {".ps1", ".py", ".js", ".cjs", ".md", ".yaml", ".json", ".html"}
 ROOT_NAMES = {".gitignore", ".gitattributes", "README.md", "SOURCE_SNAPSHOT.json"}
 FORBIDDEN_PARTS = {".omo", ".codex", ".agents", "node_modules", "tmp", ".tmp", "output", "evaluation-sets", "__pycache__"}
 

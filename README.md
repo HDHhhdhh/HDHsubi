@@ -24,6 +24,7 @@
 | [Phase 1b 검증 결과](docs/evidence/phase-1b.md) | PDF worker 수명, append 재검사 공유, 오류 동일성과 성능 |
 | [Phase 2 검증](docs/evidence/phase-2.md) | 관측·판정 조립, simulator 정책 거부, 합성 선택과 상주 검증, Select 시간 비교 |
 | [Phase 3a 검증](docs/evidence/phase-3a.md) | 선언한 surface 4종의 계약, 혼입 거부, simulator 선택, 기본 출력 동일성과 H=6 성능 |
+| [2026-10-12 필터 수집기 패치](docs/collector-patch-2026-10-12.md) | 활성 필터 기록, 합성 검사, 동결·미완료 실험의 경계 |
 
 ## 제작 흐름
 
@@ -61,7 +62,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_public_checks.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_offline_regression.ps1
 ```
 
-첫 명령은 공개 문서의 링크, 파일 목록, 복사 해시와 공개 금지 자료를 확인한다. 둘째 명령은 공개본에 포함한 합성 자료로 선택 저널과 검색어 준비를 검사한다. 실제 수학비서 연결·검색·저장을 검사하는 명령은 아니다.
+첫 명령은 공개 문서의 링크, 파일 목록, 복사 해시와 공개 금지 자료를 확인한다. 둘째 명령은 공개본에 포함한 합성 자료로 선택 저널, 검색어 준비, 다중 필터 수집과 기존 관측 계약을 검사한다. 실제 수학비서 연결·검색·저장을 검사하는 명령은 아니다.
 
 셋째 명령은 공개 gate 14개를 실행하고, 원래 bundle이 필요한 20개는 이유를 포함한 SKIP으로 표시한다. Python의 Pillow/reportlab/pypdf, Node, Playwright와 Edge/Chrome이 필요하다. 설정과 실행 범위는 [회귀 inventory](docs/evidence/regression-inventory.md)를 따른다. CI는 필요한 의존성을 설치한다.
 

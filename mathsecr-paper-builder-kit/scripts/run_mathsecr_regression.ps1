@@ -4,7 +4,8 @@ param(
   [string]$EvidenceRoot,
   [string]$EvidencePath,
   [switch]$PromptDriftRed,
-  [int]$SimulatorPort = 8785
+  [int]$SimulatorPort = 8785,
+  [switch]$NoBrowser
 )
 
 $ErrorActionPreference = "Stop"
@@ -256,6 +257,8 @@ function Invoke-PromptDriftRed {
 Add-Summary "# MathSecr Regression Pack"
 Add-Summary "ProjectRoot: $ProjectRoot"
 Add-Summary "PromptDriftRed: $PromptDriftRed"
+Add-Summary "NoBrowser: $NoBrowser"
+if ($NoBrowser) { Add-Summary "Browser Collector integration: NOT RUN; Contract and restricted-DOM VM suites remain required." }
 Add-Summary "truth_scope=offline-contract product_behavior=false"
 Add-Summary "InputFileCount: $($regressionInputSnapshot.FileCount)"
 Add-Summary "InputManifestSha256: $($regressionInputSnapshot.InputManifestSha256)"
@@ -328,7 +331,15 @@ try {
     Invoke-Script -RelativePath "mathsecr-paper-builder-kit\scripts\test_search_query_plan.ps1" -Parameters @{ ProjectRoot = $ProjectRoot; Case = "All" }
   }
   Invoke-Logged "Search Observation Contract All" {
-    Invoke-Script -RelativePath "mathsecr-paper-builder-kit\scripts\test_search_observation.ps1" -Parameters @{ ProjectRoot = $ProjectRoot; Case = "All" }
+    if ($NoBrowser) {
+      Invoke-Script -RelativePath "mathsecr-paper-builder-kit\scripts\test_search_observation.ps1" -Parameters @{ ProjectRoot = $ProjectRoot; Case = "Contract" }
+      Invoke-Script -RelativePath "mathsecr-paper-builder-kit\scripts\test_search_observation.ps1" -Parameters @{ ProjectRoot = $ProjectRoot; Case = "CuaRestricted" }
+    } else {
+      Invoke-Script -RelativePath "mathsecr-paper-builder-kit\scripts\test_search_observation.ps1" -Parameters @{ ProjectRoot = $ProjectRoot; Case = "All" }
+    }
+  }
+  Invoke-Logged "Multi Filter Collector Contract" {
+    Invoke-Script -RelativePath "mathsecr-paper-builder-kit\scripts\test_filter_contract.ps1" -Parameters @{ ProjectRoot = $ProjectRoot }
   }
   Invoke-Logged "Body Comparison Selection Contract All" {
     Invoke-Script -RelativePath "mathsecr-paper-builder-kit\scripts\test_body_comparison_contract.ps1" -Parameters @{ ProjectRoot = $ProjectRoot; Case = "All" }

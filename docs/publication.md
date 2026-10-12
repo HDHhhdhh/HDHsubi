@@ -51,6 +51,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/run_offline_regression.p
 | Selection Journal All | 요청·재시도·ACK·재개, 실파일 왕복, 중복과 손상 입력 거부 |
 | Search Query Plan | 원본 순서, literal 단서, 원본 위치, 입력 shape의 허용·거부 |
 | public offline regression | 14개 공개 gate: 연도 계약, 관측/collector, 회귀 receipt, PDF 생성, 저널, 검색어, 이력 fixture·runner·캐시·조립/상주·surface 검증 |
+| Multi Filter Collector | 여러 필터 그룹, visible cardinality, 형식·순서·escape, 2/3회 freshness와 변조 거부 |
+| Observation Contract·restricted DOM | 기존 130검사, Date/capture profile, DOM 제약과 replay 거부 |
 
 이들은 공개 packaging과 독립 가능한 지역 계약의 검사다. 전체 production 회귀, 브라우저 연결, 저장, 수학적 정답을 증명하지 않는다. 기존 전체 검사 PASS 기록을 새로 실행한 것처럼 표시하지 않는다.
 

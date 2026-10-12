@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "startedAtUtc": "2026-10-10T11:23:17.5149044Z",
-  "completedAtUtc": "2026-10-10T11:23:28.7398598Z",
+  "startedAtUtc": "2026-10-12T11:00:11.3531880Z",
+  "completedAtUtc": "2026-10-12T11:00:16.5769957Z",
   "host": "7.6.5",
   "publicationFiles": "PASS",
   "checks": [
@@ -13,6 +13,24 @@
     },
     {
       "name": "test_search_query_plan.ps1",
+      "status": "PASS",
+      "scope": "offline-contract",
+      "liveProductBehavior": false
+    },
+    {
+      "name": "test_filter_contract.ps1",
+      "status": "PASS",
+      "scope": "offline-contract",
+      "liveProductBehavior": false
+    },
+    {
+      "name": "test_search_observation.ps1/Contract",
+      "status": "PASS",
+      "scope": "offline-contract",
+      "liveProductBehavior": false
+    },
+    {
+      "name": "test_search_observation.ps1/CuaRestricted",
       "status": "PASS",
       "scope": "offline-contract",
       "liveProductBehavior": false

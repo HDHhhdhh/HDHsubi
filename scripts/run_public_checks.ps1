@@ -9,11 +9,16 @@ if ($LASTEXITCODE -ne 0) { throw 'Publication file checks failed.' }
 
 $started = [DateTime]::UtcNow
 $checks = @()
-foreach ($suite in @('test_selection_journal.ps1', 'test_search_query_plan.ps1')) {
+foreach ($suite in @('test_selection_journal.ps1', 'test_search_query_plan.ps1', 'test_filter_contract.ps1')) {
     $suitePath = Join-Path $publicationRoot (Join-Path 'mathsecr-paper-builder-kit/scripts' $suite)
     & $suitePath -ProjectRoot $publicationRoot
     if (-not $?) { throw "Public synthetic suite failed: $suite" }
     $checks += [pscustomobject]@{ name = $suite; status = 'PASS'; scope = 'offline-contract'; liveProductBehavior = $false }
+}
+foreach ($case in @('Contract', 'CuaRestricted')) {
+    & (Join-Path $publicationRoot 'mathsecr-paper-builder-kit/scripts/test_search_observation.ps1') -ProjectRoot $publicationRoot -Case $case
+    if (-not $?) { throw "Search observation suite failed: $case" }
+    $checks += [pscustomobject]@{ name = "test_search_observation.ps1/$case"; status = 'PASS'; scope = 'offline-contract'; liveProductBehavior = $false }
 }
 
 $result = [ordered]@{

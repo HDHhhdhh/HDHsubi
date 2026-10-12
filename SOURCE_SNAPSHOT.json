@@ -13,6 +13,13 @@
       "transformation": null
     },
     {
+      "path": "mathsecr-paper-builder-kit/README.md",
+      "sourceSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
+      "exportSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
+      "bytes": 14606,
+      "transformation": null
+    },
+    {
       "path": "mathsecr-paper-builder-kit/docs/db_inference_contract.md",
       "sourceSha256": "1d57b558549938db51b65632d2805a3beb1a15553fbb19a257203e92ced334b0",
       "exportSha256": "1d57b558549938db51b65632d2805a3beb1a15553fbb19a257203e92ced334b0",
@@ -76,13 +83,6 @@
       "transformation": null
     },
     {
-      "path": "mathsecr-paper-builder-kit/README.md",
-      "sourceSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
-      "exportSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
-      "bytes": 14606,
-      "transformation": null
-    },
-    {
       "path": "mathsecr-paper-builder-kit/scripts/aside_preflight.ps1",
       "sourceSha256": "92248ecb4392c8a9713f782896d2e051e627e6aca2ece3e117bfc63586b40822",
       "exportSha256": "92248ecb4392c8a9713f782896d2e051e627e6aca2ece3e117bfc63586b40822",
@@ -141,9 +141,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/install.ps1",
       "sourceSha256": "9cc7423a8210fab525df0e35d23a1dcd5228838bde4198ae78c68373de1f58a1",
-      "exportSha256": "9cc7423a8210fab525df0e35d23a1dcd5228838bde4198ae78c68373de1f58a1",
-      "bytes": 35365,
-      "transformation": null
+      "exportSha256": "350042aad1a1221f9e4dc5c76c8dd95376d7531e81e2b48b2acae3ad6e69212d",
+      "bytes": 35508,
+      "transformation": "Declare required synthetic multi-filter regression assets."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/new_test_fixtures.ps1",
@@ -190,16 +190,16 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/run_mathsecr_regression.ps1",
       "sourceSha256": "ad9126f731c2c97b14cdbbece73990ffb78b8146b8511e6792a86072f30c8510",
-      "exportSha256": "ad9126f731c2c97b14cdbbece73990ffb78b8146b8511e6792a86072f30c8510",
-      "bytes": 18680,
-      "transformation": null
+      "exportSha256": "b1f1a23c13fe577af7edc51e6f98b053bd83be2a841a488bf9a6eedd2c990aa7",
+      "bytes": 19433,
+      "transformation": "Add multi-filter gate and explicit NoBrowser mode; ordinary browser integration remains required by default."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/run_validations.ps1",
       "sourceSha256": "958eef3e95baa891772f84d8adbcab8baeaa2fdb7ccbad87cb189d1aa0e42f75",
-      "exportSha256": "958eef3e95baa891772f84d8adbcab8baeaa2fdb7ccbad87cb189d1aa0e42f75",
-      "bytes": 907,
-      "transformation": null
+      "exportSha256": "a0b0f38e028602d61dc52332a5de09e9465a67421c7ebd054fce53aa7e6f4276",
+      "bytes": 978,
+      "transformation": "Forward explicit NoBrowser switch to canonical runner."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/search_attempt_contract.ps1",
@@ -211,9 +211,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/search_observation.js",
       "sourceSha256": "a7452efa0f3a1b11472d5d2f504d136dc5414b7d4fb3e754edc58c62ae8a1ecf",
-      "exportSha256": "a7452efa0f3a1b11472d5d2f504d136dc5414b7d4fb3e754edc58c62ae8a1ecf",
-      "bytes": 7453,
-      "transformation": null
+      "exportSha256": "a8a84101e428de995ca9c99dd652c58202e3c17c201436823906be321f1b107d",
+      "bytes": 8955,
+      "transformation": "Reviewed multi-filter descriptor collector; packet schema and freshness contract unchanged."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/search_observation_contract.ps1",
@@ -277,6 +277,20 @@
       "exportSha256": "e60493c138838092184d764275e7e323f6c86e5ca029ce8dff6c4a216400730b",
       "bytes": 7689,
       "transformation": null
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_filter_collector.cjs",
+      "sourceSha256": "4c7bd2409101e72a29075631d43828241e762545a5d95e27c3f79685dc489ecb",
+      "exportSha256": "3ab3d0a8270aff1791f62dbc2da4776fe74657c14069d6d44f99fd01e00e1621",
+      "bytes": 11872,
+      "transformation": "Public relative fixture, optional non-overwriting temp output; additional synthetic negative tests."
+    },
+    {
+      "path": "mathsecr-paper-builder-kit/scripts/test_filter_contract.ps1",
+      "sourceSha256": "0f72d38c98041f5bd5c2a2521d703a4d0e2ce140e0dea14088c9ebd2b4e736f6",
+      "exportSha256": "4cf207ab9cbf55b909ebe0cc9a92de1686a6d17049bb601de55ba5b9b13b4611",
+      "bytes": 4610,
+      "transformation": "Public relative paths and owned temp packet; official-reader ISO string preservation regressions."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_ground_truth_contract.ps1",
@@ -440,6 +454,13 @@
       "transformation": null
     },
     {
+      "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/SKILL.md",
+      "sourceSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
+      "exportSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
+      "bytes": 43927,
+      "transformation": null
+    },
+    {
       "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/agents/openai.yaml",
       "sourceSha256": "54ce5128e7702ca3746aac21f56db971564ff6cf0442becd592b5844c4907bdf",
       "exportSha256": "54ce5128e7702ca3746aac21f56db971564ff6cf0442becd592b5844c4907bdf",
@@ -447,11 +468,11 @@
       "transformation": null
     },
     {
-      "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/SKILL.md",
-      "sourceSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
-      "exportSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
-      "bytes": 43927,
-      "transformation": null
+      "path": "mathsecr-paper-builder-kit/test-fixtures/filter-collector/filter-adapter.synthetic.json",
+      "sourceSha256": "d4f42281d84697fdefe6fa4a37a62d9b851f62482d77321d4f3ff78d519b1076",
+      "exportSha256": "9b90518c62dad0621d2b06bc36b45cd6c6e54d038d45a48854fb468ac841cf0e",
+      "bytes": 2693,
+      "transformation": "Synthetic adapter only; formatted for public fixture. No live selectors."
     },
     {
       "path": "mathsecr-paper-builder-kit/test-fixtures/iab-simulator/index.html",
@@ -509,5 +530,7 @@
       "bytes": 1499,
       "transformation": null
     }
-  ]
+  ],
+  "updatedAt": "2026-10-12",
+  "patchBaseCommit": "dc3b19c00a31d017299cf8c3f339ea4382a927f9"
 }

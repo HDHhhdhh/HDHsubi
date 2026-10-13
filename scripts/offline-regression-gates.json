@@ -509,10 +509,26 @@
         "scripts/perf/assembly_support.ps1",
         "mathsecr-paper-builder-kit/test-fixtures/iab-simulator/index.html"
       ],
-      "parameters": { "ProjectRoot": "{projectRoot}" },
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
       "reason": "Phase 3a declared surface, identity, history and mixed-receipt contracts with OS-temp synthetic fixtures; no live product claim.",
       "publicationStatus": "public-new-synthetic",
       "passPattern": "SurfaceContract PASS"
+    },
+    {
+      "id": "FilterContract",
+      "script": "mathsecr-paper-builder-kit/scripts/test_filter_contract.ps1",
+      "grade": "public",
+      "requiredPaths": [
+        "mathsecr-paper-builder-kit/scripts/test_filter_collector.cjs"
+      ],
+      "parameters": {
+        "ProjectRoot": "{projectRoot}"
+      },
+      "reason": "Public synthetic grouped-filter packet regression; no live service claim.",
+      "publicationStatus": "public-new-synthetic",
+      "passPattern": "PASS Filter Contract:"
     }
   ]
 }

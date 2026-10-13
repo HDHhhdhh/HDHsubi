@@ -11,6 +11,12 @@ from unittest.mock import patch
 
 import install
 
+# macOS exposes its temp tree through /var -> /private/var. Use its canonical
+# spelling for the synthetic harness, whose cleanup rejects linked ancestors.
+if sys.platform == 'darwin':
+    tempfile.tempdir = str(Path(tempfile.gettempdir()).resolve())
+    os.environ['TMPDIR'] = tempfile.tempdir
+
 
 class InstallerTests(unittest.TestCase):
     def test_public_sources_complete(self):

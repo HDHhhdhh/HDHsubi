@@ -66,4 +66,4 @@ Phase 1b는 기존 ValidationContext와 AppendHistoryFixture gate에 PDF worker 
 
 Phase 2는 AssemblePipeline gate를 추가했다. 실제 DOM 관측의 선택 정책 거부와 별도 합성 입력의 조립·Select·BeforeNext 성공, helper/CLI 동일성 및 상주 명령 격리를 검사한다. 공개 13개, 비공개 자료 미제공 20개를 유지한다.
 
-Phase 3a는 SurfaceContract gate를 추가해 공개 14개가 된다. 양성 12개와 음성 9개를 검사한다. AssemblePipeline은 기존 A1 혼입 거부를 유지하고, 선언한 offline-dom-test session으로 A2 조립·상주 Select·BeforeNext 성공을 추가한다. ValidationContext에는 state/append 캐시의 surface 격리 단정을 추가한다. 비공개 gate 20개는 계속 SKIP이다.
+Phase 3a는 SurfaceContract gate를 추가해 공개 15개가 된다. 양성 12개와 음성 9개를 검사한다. AssemblePipeline은 기존 A1 혼입 거부를 유지하고, 선언한 offline-dom-test session으로 A2 조립·상주 Select·BeforeNext 성공을 추가한다. ValidationContext에는 state/append 캐시의 surface 격리 단정을 추가한다. 비공개 gate 20개는 계속 SKIP이다.

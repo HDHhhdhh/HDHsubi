@@ -28,7 +28,11 @@ def safe_path(root, relative):
     if not parts or relative != '/'.join(parts) or any(p in ('.', '..') for p in parts) or ':' in relative or '\\' in relative or relative.startswith('/'):
         raise ValueError(f'Unsafe package path: {relative}')
     full = root.joinpath(*parts)
+    # macOS /var and /tmp are system aliases. Resolve the chosen root, while
+    # rejecting links at or below that root where package writes occur.
     for ancestor in (full, *full.parents):
+        if ancestor != root and not ancestor.is_relative_to(root):
+            break
         if ancestor.is_symlink() or (hasattr(ancestor, 'is_junction') and ancestor.is_junction()):
             raise ValueError(f'Linked installation path: {ancestor}')
     if not full.resolve().is_relative_to(root.resolve()):
@@ -110,7 +114,7 @@ def prepare_runtime(project):
         venv.EnvBuilder(with_pip=True).create(env_root)
     dependencies = json.loads((ROOT / 'scripts/runtime-dependencies.json').read_text(encoding='utf-8'))
     run([py, '-m', 'pip', 'install', '--disable-pip-version-check', *dependencies['pythonPackages']])
-    font_root = env_root / 'share/mathsecr-fonts'
+    font_root = safe_path(project, '.hdhsubi/venv/share/mathsecr-fonts')
     font_root.mkdir(parents=True, exist_ok=True)
     for font in dependencies['fonts']:
         dest = font_root / font['name']
@@ -184,7 +188,7 @@ def install(project, codex_home, force=False, install_tools=False):
         if dest.is_file() and digest(dest) == digest(source):
             continue
         if dest.is_file():
-            backup_root = project / '.hdhsubi/backups'
+            backup_root = safe_path(project, '.hdhsubi/backups')
             backup_root.mkdir(parents=True, exist_ok=True)
             backup = backup_root / (hashlib.sha256(str(dest).encode()).hexdigest() + '-' + digest(dest))
             if not backup.exists():

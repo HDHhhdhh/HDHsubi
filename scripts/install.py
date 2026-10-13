@@ -97,8 +97,9 @@ def ensure_tools(install_tools):
         elif platform.system() == 'Darwin':
             with tempfile.TemporaryDirectory(prefix='hdhsubi-aside-') as temp:
                 path = Path(temp) / 'install.sh'
-                with urllib.request.urlopen('https://releases.aside.com/install.sh', timeout=60) as response:
-                    path.write_bytes(response.read())
+                # Use the official macOS curl transport, not Python urllib's
+                # distinct user agent (which some release CDNs reject).
+                run(['curl', '-fsSL', '--connect-timeout', '20', '--max-time', '120', 'https://releases.aside.com/install.sh', '-o', path])
                 run(['bash', path])
         if not tool_path('aside'):
             raise ValueError('Aside CLI installation did not produce a discoverable CLI. See the official Developer settings and docs/installation.md; retry in a new terminal.')

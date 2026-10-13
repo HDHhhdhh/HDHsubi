@@ -349,7 +349,7 @@
     },
     {
       "path": "scripts/install.py",
-      "sha256": "679346ca4ea9ddc80d448b7f5fdf5e77af96815661eaefbb7d6ad8a7aa44223d"
+      "sha256": "9a29000d114c0de0545fcea43a9bd63c927fd08416e5cf7fff1bb81fb9a1d4de"
     },
     {
       "path": "scripts/run.py",

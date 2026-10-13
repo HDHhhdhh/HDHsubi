@@ -60,7 +60,10 @@ if ($null -eq $command) {
   $receipt.executable = $command.Source
   foreach ($probeCommand in $probeCommands) {
     $info = [Diagnostics.ProcessStartInfo]::new()
-    $info.FileName = $command.Source; $info.Arguments = $probeCommand.ArgumentString
+    $info.FileName = $command.Source
+    if ($null -ne $info.PSObject.Properties['ArgumentList']) {
+      foreach ($argument in $probeCommand.ArgumentList) { $info.ArgumentList.Add($argument) }
+    } else { $info.Arguments = $probeCommand.ArgumentString }
     $info.UseShellExecute = $false; $info.CreateNoWindow = $true
     $info.RedirectStandardOutput = $true; $info.RedirectStandardError = $true
     $process = [Diagnostics.Process]::new(); $process.StartInfo = $info

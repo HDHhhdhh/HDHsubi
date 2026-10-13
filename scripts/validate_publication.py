@@ -8,7 +8,7 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED = {".ps1", ".py", ".js", ".cjs", ".md", ".yaml", ".json", ".html"}
-ROOT_NAMES = {".gitignore", ".gitattributes", "README.md", "SOURCE_SNAPSHOT.json"}
+ROOT_NAMES = {".gitignore", ".gitattributes", "README.md", "AGENTS.md", "SOURCE_SNAPSHOT.json"}
 FORBIDDEN_PARTS = {".omo", ".codex", ".agents", "node_modules", "tmp", ".tmp", "output", "evaluation-sets", "__pycache__"}
 
 def digest(path):
@@ -65,7 +65,7 @@ def main():
             errors.append(f"undeclared transformation: {record['path']}")
     # Archived canonical kit docs refer to intentionally withheld private assets.
     # Validate every link in the newly authored public narrative instead.
-    markdown = [ROOT / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]
+    markdown = [ROOT / "README.md", ROOT / "AGENTS.md", *sorted((ROOT / "docs").rglob("*.md"))]
     links = 0
     for path in markdown:
         text = path.read_text(encoding="utf-8")

@@ -385,17 +385,18 @@ function Resolve-MathSecrStateArtifactPath {
   }
 
   try {
-    $rootFull = [System.IO.Path]::GetFullPath($ProjectRoot).TrimEnd('\')
+    $rootFull = [System.IO.Path]::GetFullPath($ProjectRoot).TrimEnd('\', '/')
     $fullPath = [System.IO.Path]::GetFullPath((Join-Path $rootFull $normalized))
   } catch {
     return $null
   }
-  if (-not $fullPath.StartsWith($rootFull + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+  $pathComparison = if ([IO.Path]::DirectorySeparatorChar -eq '\') { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
+  if (-not $fullPath.StartsWith($rootFull + [IO.Path]::DirectorySeparatorChar, $pathComparison)) {
     return $null
   }
   $currentPath = $rootFull
   foreach ($segment in $segments) {
-    $currentPath = [System.IO.Path]::Combine($currentPath, [string]$segment)
+    $currentPath = Join-Path $currentPath ([string]$segment)
     if (Test-Path -LiteralPath $currentPath) {
       $item = Get-Item -LiteralPath $currentPath -Force
       if (($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0) {

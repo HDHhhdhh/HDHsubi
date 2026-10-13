@@ -23,7 +23,7 @@
 
 - 개인 시험지, 실제 문제지 URL, 계정, 원시 세션, 화면 캡처를 올리지 않는다.
 - 파일 확장자는 `.ps1 .py .js .md .yaml .json .html`만 쓴다.
-- 루트에는 새 파일을 만들지 않는다. 문서는 `docs/` 아래에 둔다.
+- 일반 문서는 `docs/` 아래에 둔다. root `AGENTS.md`는 사용자가 요청한 Windows/macOS 설치를 Codex가 실행하도록 연결하는 설치 진입점이다. 제작용 canonical AGENTS는 kit에 보관하고 installer가 작업공간 mirror를 만든다.
 - 문서의 로컬 링크는 실제 파일을 가리켜야 한다. `validate_publication.py`가 검사한다.
 - 문제지 URL 예시는 `/mypaper/123` 같은 합성 번호만 쓴다.
 

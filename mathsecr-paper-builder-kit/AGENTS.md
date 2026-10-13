@@ -1,5 +1,14 @@
 # MathSecr Paper Builder Hub
 
+## 공개 설치 프로필
+
+- 이 Git 배포본의 기본 설치는 `scripts/install.py`의 `public-runtime`이다. Windows 11과 macOS에서 같은 제작 검증기를 사용한다. 설치·환경 안내는 workspace `docs/installation.md`에 있다.
+- 최초 설치 요청에서는 source checkout의 root `AGENTS.md`에 따라 Python·PowerShell·Aside를 준비하고 공개 installer를 실행한다. 설치된 작업공간은 이 문서와 installed SKILL을 따른다.
+- 과거 `.omo/evidence`, 실제 문항 inventory, 평가 registry, 테스트 이미지는 비공개 회귀 자료다. 새 수신자의 설치 조건으로 요구하지 않는다. 참조가 없으면 과거 기록을 읽었다고 주장하지 않는다. 새 제작의 원본·검색·본문·선택·저장·재로드 증거는 아래 계약대로 직접 만든다.
+- 과거 기록에 대한 전체 validator는 private bundle을 가진 개발 환경 전용이다. 공개 설치는 `scripts/install.py --check`의 SyncContract와 production 모듈 로드를 확인한다. 이를 전체 비공개 회귀 PASS나 실제 제작 성공으로 보고하지 않는다.
+- helper는 `python scripts/run.py mathsecr-paper-builder-kit/scripts/<파일> <인수>`로 실행한다. 이 runner가 workspace `.hdhsubi/venv`의 Python과 확인된 local Aside CLI를 사용한다. macOS에서 기본 `python`이 없으면 `python3`을 사용한다.
+- Codex home은 `CODEX_HOME`을 우선하고 기본값은 현재 사용자의 `.codex`다. macOS에서도 Windows 사용자 경로를 만들지 않는다. 계정·로그인은 수신자 본인 환경에서 준비한다.
+
 이 워크스페이스는 MathSecr/수학비서 문제지 생성 세션과 재사용 skill을 관리하는 허브다. 모든 작업자는 이 문서와 Codex home 아래 `skills/mathsecr-paper-builder/SKILL.md`를 함께 따른다. Codex home은 `CODEX_HOME` 설정값을 우선하고, 없으면 `%USERPROFILE%\.codex`를 사용한다.
 
 ## 문서 역할

@@ -3,10 +3,26 @@ param(
   [string]$CodexHome = $env:CODEX_HOME,
   [string]$EvidenceRoot,
   [switch]$CheckOnly,
-  [switch]$Force
+  [switch]$Force,
+  [switch]$PrivateBundle
 )
 
 $ErrorActionPreference = "Stop"
+
+# A public Git checkout installs the production runtime, not private archives.
+$publicInstaller = Join-Path $PSScriptRoot '../../scripts/install.py'
+if (-not $PrivateBundle -and -not $EvidenceRoot -and (Test-Path -LiteralPath $publicInstaller -PathType Leaf)) {
+  $pythonCommand = Get-Command python -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+  if (-not $pythonCommand) { $pythonCommand = Get-Command python3 -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1 }
+  if (-not $pythonCommand) { throw 'Python is missing. Run scripts/bootstrap.ps1 -InstallDependencies or follow docs/installation.md.' }
+  $arguments = @($publicInstaller, '--project-root', $ProjectRoot)
+  if ($CodexHome) { $arguments += @('--codex-home', $CodexHome) }
+  if ($Force) { $arguments += '--force' }
+  if ($CheckOnly) { $arguments += '--check' }
+  & $pythonCommand.Source @arguments
+  if ($LASTEXITCODE -ne 0) { throw 'Public runtime installation/check failed. See docs/installation.md.' }
+  return
+}
 
 function Write-Item {
   param([string]$Name, [string]$Status, [string]$Detail = "")

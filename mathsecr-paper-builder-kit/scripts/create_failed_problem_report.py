@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from dataclasses import dataclass
 from io import BytesIO
@@ -37,8 +38,12 @@ from reportlab.pdfgen import canvas
 
 
 PAGE_SIZE = landscape(A4)
-REGULAR_FONT = Path(r"C:\Windows\Fonts\malgun.ttf")
-BOLD_FONT = Path(r"C:\Windows\Fonts\malgunbd.ttf")
+FONT_ROOT = Path(os.environ.get("MATHSECR_FONT_DIR", Path(sys.prefix) / "share/mathsecr-fonts"))
+REGULAR_FONT = FONT_ROOT / "NanumGothic-Regular.ttf"
+BOLD_FONT = FONT_ROOT / "NanumGothic-Bold.ttf"
+if not REGULAR_FONT.is_file() and sys.platform == "win32":
+    REGULAR_FONT = Path(r"C:\Windows\Fonts\malgun.ttf")
+    BOLD_FONT = Path(r"C:\Windows\Fonts\malgunbd.ttf")
 
 
 @dataclass(frozen=True)

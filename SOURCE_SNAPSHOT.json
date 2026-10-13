@@ -8,16 +8,16 @@
     {
       "path": "mathsecr-paper-builder-kit/AGENTS.md",
       "sourceSha256": "c3e26773c5886a2566583049145453377a78d80fdd9ac731da4cf188974dd454",
-      "exportSha256": "c3e26773c5886a2566583049145453377a78d80fdd9ac731da4cf188974dd454",
-      "bytes": 34528,
-      "transformation": null
+      "exportSha256": "a182f4557afb1e1b5433cfb4409fe446d74a533f593ecfac239b1921b713e663",
+      "bytes": 36157,
+      "transformation": "; public-runtime installation and Windows/macOS portability"
     },
     {
       "path": "mathsecr-paper-builder-kit/README.md",
       "sourceSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
-      "exportSha256": "a6a1000ffbb9ac10b7dfb6cb2fe27934be4463d918f205b2c3cecd1280057f28",
-      "bytes": 14606,
-      "transformation": null
+      "exportSha256": "0bb028d734d23413d203009a411e6f0f9830ecd140c1adee3e7ac37f04cbdc28",
+      "bytes": 15170,
+      "transformation": "; public-runtime installation and Windows/macOS portability"
     },
     {
       "path": "mathsecr-paper-builder-kit/docs/db_inference_contract.md",
@@ -106,16 +106,16 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/check_aside_repl.ps1",
       "sourceSha256": "6739c1f0f570c8464332a1ff6d7c573dd9be2ae5466d0a115d274d952bd62f12",
-      "exportSha256": "6739c1f0f570c8464332a1ff6d7c573dd9be2ae5466d0a115d274d952bd62f12",
-      "bytes": 5295,
-      "transformation": null
+      "exportSha256": "9b5aebf4289f4fb0c37a8fb0b5dbfa9487ce2d48360230052fe7d7bc542a55e5",
+      "bytes": 5466,
+      "transformation": "; public-runtime installation and Windows/macOS portability"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/create_failed_problem_report.py",
       "sourceSha256": "b94f929b4131241f0adcb39c3debc60b30dd36f76fe0fb2653f6f8a229cefc09",
-      "exportSha256": "b94f929b4131241f0adcb39c3debc60b30dd36f76fe0fb2653f6f8a229cefc09",
-      "bytes": 9022,
-      "transformation": null
+      "exportSha256": "b6f9dff06c3b8ba163ac08ec89b1db3c75470403da465e3a8df4f9817af30bfe",
+      "bytes": 9296,
+      "transformation": "; public-runtime installation and Windows/macOS portability"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/db_inference.ps1",
@@ -141,9 +141,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/install.ps1",
       "sourceSha256": "9cc7423a8210fab525df0e35d23a1dcd5228838bde4198ae78c68373de1f58a1",
-      "exportSha256": "350042aad1a1221f9e4dc5c76c8dd95376d7531e81e2b48b2acae3ad6e69212d",
-      "bytes": 35508,
-      "transformation": "Declare required synthetic multi-filter regression assets."
+      "exportSha256": "dd0b0c1697b42b11609126f70a3fc12b46fc2f937e82c1bb08dd82bce7498ab1",
+      "bytes": 36576,
+      "transformation": "Declare required synthetic multi-filter regression assets.; public-runtime installation and Windows/macOS portability"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/new_test_fixtures.ps1",
@@ -239,9 +239,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/state_machine.ps1",
       "sourceSha256": "09b2be660ea37b222db2f4200d782da36dadc6bf02dd80a859d0f06684bb92ff",
-      "exportSha256": "c9ff7651a8b0d3a8d47c695e11d9b518429cc1999270f097f80af7f7bddbed14",
-      "bytes": 118331,
-      "transformation": "Phase 1: cache validated state results within one invocation, retain append-depth rejection, and compare objects structurally while preserving scalar, property, and array semantics. Phase 1b: share successful append validations only for the same snapshot reference, JSON content digest, CLR type fingerprint, copied expected lists, project root and depth; retain original validator body and rejection paths. Phase 3a: declared Surface argument, surface-specific snapshot block, all-observation and prior-session guards, and surface isolation of state/append caches; default Aside state names and trace retained."
+      "exportSha256": "faa1ca0b9f03ce57eca45383b8100fa4bc61a9eda7218da0c7695453d99b9b29",
+      "bytes": 118467,
+      "transformation": "Phase 1: cache validated state results within one invocation, retain append-depth rejection, and compare objects structurally while preserving scalar, property, and array semantics. Phase 1b: share successful append validations only for the same snapshot reference, JSON content digest, CLR type fingerprint, copied expected lists, project root and depth; retain original validator body and rejection paths. Phase 3a: declared Surface argument, surface-specific snapshot block, all-observation and prior-session guards, and surface isolation of state/append caches; default Aside state names and trace retained.; public-runtime installation and Windows/macOS portability"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/test_aside_preflight.ps1",
@@ -456,9 +456,9 @@
     {
       "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/SKILL.md",
       "sourceSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
-      "exportSha256": "1f49167530522ad3278c4bb877a566cfb2699955468aad15aebf4a16165935ce",
-      "bytes": 43927,
-      "transformation": null
+      "exportSha256": "4e90b8835298d5c16d0a25de63718cf54e3aebecf7c72335f6fed1e19788695c",
+      "bytes": 44613,
+      "transformation": "; public-runtime installation and Windows/macOS portability"
     },
     {
       "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/agents/openai.yaml",

@@ -5,6 +5,10 @@ description: Recreate MathSecr/수학비서 problem papers from a PDF or HWPX by
 
 # MathSecr Paper Builder
 
+## Public Runtime Environment
+
+Git 배포본의 공개 설치와 환경 점검은 workspace `docs/installation.md`를 따른다. 비공개 과거 테스트 자료를 설치 조건으로 요구하지 않는다. 새 제작에서는 원본·검색·본문·선택·저장·재로드의 실제 증거와 기존 계약을 유지한다. helper는 workspace root에서 `python scripts/run.py mathsecr-paper-builder-kit/scripts/<파일> <인수>`로 실행한다. macOS는 `python3`도 사용할 수 있다. Runner는 설치한 workspace Python 환경을 사용한다. Python PDF 렌더는 `pymupdf`를 사용할 수 있으며, 실패 크롭 보고서는 설치한 한글 글꼴로 만든다.
+
 ## Goal
 
 제공된 PDF/HWPX 원본을 기준으로 MathSecr/수학비서 문제지를 만든다. exact 문제를 원본 순서대로 담고, 일부를 못 찾으면 검증된 부분 완성으로 끝내며, 최종 edit/settings 화면에서 `출제하기` 전 상태로 남긴다.

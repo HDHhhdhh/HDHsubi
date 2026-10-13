@@ -1,0 +1,29 @@
+name: Public installation
+on:
+  push:
+    branches: [main, 'codex/portable-installer']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  installation:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      PYTHONUTF8: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate public package
+        run: python scripts/validate_publication.py
+      - name: Fresh public installation and production smoke
+        shell: pwsh
+        run: python scripts/test_installation.py --integration

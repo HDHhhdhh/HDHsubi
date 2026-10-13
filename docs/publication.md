@@ -21,15 +21,15 @@ Phase 1b는 같은 최상위 호출 안에서 PDF 검증 프로세스와 성공�
 
 원본 PDF/HWPX, 문항 렌더와 크롭, 실제 문제 DB inventory, 개인 문제지 주소, 원시 세션 JSONL, 실제 브라우저 캡처·프로필·인증 자료를 제외했다. 임시 OCR/Python 환경과 개별 문제지용 one-off 스크립트도 제외했다.
 
-실제 시험지를 사용하는 body-exact·PDF 분할 자료와 그 자료에 의존하는 평가·lesson registry 원본도 공개하지 않았다. 개인 자료를 제거한 상태에서 전체 kit의 설치 가능성과 전체 회귀 통과를 주장하지 않는다.
+실제 시험지를 사용하는 body-exact·PDF 분할 자료와 그 자료에 의존하는 평가·lesson registry 원본도 공개하지 않았다. 공개 제작 runtime은 이 과거 자료 없이 설치한다. 과거 비공개 자료의 전체 회귀 통과는 주장하지 않는다.
 
 기존 비공개 Git 저장소를 공개로 전환하지 않았다. 로컬에 남은 `.git`을 수정하지 않았다. 공개본은 별도 초기 Git 이력으로 시작한다.
 
 ## 원래 kit와 공개본의 차이
 
-원래 kit의 [README](../mathsecr-paper-builder-kit/README.md)는 full hub checkout과 인덱스의 `.omo/evidence`를 설치 계약으로 요구한다. 공개본에는 그 비공개 자료가 없다.
+원래 kit의 비공개 bundle 설치는 full hub checkout과 인덱스의 `.omo/evidence`를 요구한다. 공개본에는 그 비공개 자료가 없다. 공개 설치는 [설치 안내](installation.md)의 `scripts/install.py`를 사용하며 과거 자료를 요구하지 않는다.
 
-따라서 `install.ps1`, `check.ps1`, `run_validations.ps1`의 전체 계약은 공개 clone만으로 통과한다고 안내하지 않는다. 해당 코드도 구조 검토를 위해 포함했다. 실제 지원 bundle을 갖춘 별도 환경에서 사용한다.
+`install.ps1`과 `check.ps1`은 공개 checkout에서 새 public-runtime 경로로 연결된다. `-PrivateBundle` 또는 `-EvidenceRoot`를 명시한 설치와 `run_validations.ps1`의 과거 전체 계약은 원래 지원 bundle을 갖춘 개발 환경에서 사용한다. 제작의 검색·본문·선택·저장 검증기는 공개 runtime에 포함하며 판단 계약을 완화하지 않는다.
 
 기존 kit 문서의 과거 `.omo/evidence`·평가·렌더 참조는 원래 비공개 bundle을 가리킨다. 공개본에서 열 수 있는 링크로 위장하지 않는다. 새 공개 문서는 공개 파일에만 링크한다.
 

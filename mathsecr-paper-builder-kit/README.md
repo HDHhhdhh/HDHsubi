@@ -2,6 +2,10 @@
 
 Portable setup kit for repeating the MathSecr/수학비서 paper-building workflow in another local Codex environment.
 
+## Public Git Installation
+
+For Windows 11 and macOS, follow [the public installation guide](../docs/installation.md). The default public checkout installer installs the production runtime, an isolated Python environment, PDF packages, Korean fonts, AGENTS and the Codex skill without historical private data. `install.ps1` and `check.ps1` dispatch to this public installer. The remaining full-bundle sections below describe the historical developer installation selected by `-PrivateBundle` or `-EvidenceRoot`; they are not prerequisites for the public runtime.
+
 ## Bundle Contract
 
 The supported installer source is a full MathSecr hub checkout containing both:

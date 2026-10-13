@@ -1,5 +1,6 @@
 # Private inputs and generated state do not belong in the public source snapshot.
 .omo/
+.hdhsubi/
 .codex/
 .agents/
 .env

@@ -133,10 +133,10 @@ def destinations(files, project, codex_home):
     result = [(source, safe_path(project, relative)) for relative, source in files]
     result += [(ROOT / 'scripts/runtime-package.json', safe_path(project, 'scripts/runtime-package.json'))]
     result += [(ROOT / 'mathsecr-paper-builder-kit/AGENTS.md', safe_path(project, 'AGENTS.md'))]
-    prefix = 'mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/'
+    prefix = 'mathsecr-paper-builder-kit/skills/'
     for relative, source in files:
         if relative.startswith(prefix):
-            result.append((source, safe_path(codex_home, 'skills/mathsecr-paper-builder/' + relative[len(prefix):])))
+            result.append((source, safe_path(codex_home, 'skills/' + relative[len(prefix):])))
     return result
 
 

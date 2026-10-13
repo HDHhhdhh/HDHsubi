@@ -60,7 +60,7 @@ Aside **앱**은 [공식 다운로드](https://aside.com/download)에서 Windows
 brew install python@3.12
 git clone https://github.com/HDHhhdhh/HDHsubi.git
 cd HDHsubi
-python3 ./scripts/install.py --project-root "$HOME/Documents/HDHsubi-workspace" --install-tools
+"$(brew --prefix python@3.12)/bin/python3.12" ./scripts/install.py --project-root "$HOME/Documents/HDHsubi-workspace" --install-tools
 ```
 
 installer는 누락된 PowerShell을 `brew install --cask powershell`, Aside 앱을 `brew install --cask aside`로 준비한다. CLI가 없으면 [공식 Aside macOS 설치 스크립트](https://docs.aside.com/help/developers)를 사용한다. 다운로드가 실패하면 실제 오류를 보고하고 Aside 앱 Developer 설정의 CLI 설치 경로를 사용한다. Apple Silicon과 Intel의 venv 실행 파일 경로는 동일하게 처리한다. OS 지원 범위는 설치 시 [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/install-powershell-on-macos)과 [Aside cask](https://formulae.brew.sh/cask/aside)의 현재 요구사항을 확인한다.

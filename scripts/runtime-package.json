@@ -280,6 +280,10 @@
       "sha256": "1ce48a9f6bb6651f63f1a6627a7ae5e7a3c66a87295836fd01da40e012d3dd6d"
     },
     {
+      "path": "mathsecr-paper-builder-kit/skills/aside-browser/SKILL.md",
+      "sha256": "284ba06a08ef1b030b7d7f771b44fb4912dc7577ff706b7ca1ffc5f89ca3746c"
+    },
+    {
       "path": "mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/agents/openai.yaml",
       "sha256": "54ce5128e7702ca3746aac21f56db971564ff6cf0442becd592b5844c4907bdf"
     },
@@ -345,7 +349,7 @@
     },
     {
       "path": "scripts/install.py",
-      "sha256": "6109567fbba0f541c3ba609a4202ffde22601a315e97fe468435df731879938e"
+      "sha256": "679346ca4ea9ddc80d448b7f5fdf5e77af96815661eaefbb7d6ad8a7aa44223d"
     },
     {
       "path": "scripts/run.py",
@@ -369,7 +373,7 @@
     },
     {
       "path": "docs/installation.md",
-      "sha256": "e3d554d40ccef349036215d9ab3d0274c9e62a2ed5bdb727be66f1d66cf52085"
+      "sha256": "1f0777ee862880675eec13974fd6ccee7342fdd674bbc6aee2cb829515896302"
     }
   ]
 }

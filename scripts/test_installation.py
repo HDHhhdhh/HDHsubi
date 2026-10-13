@@ -87,6 +87,7 @@ class InstallerTests(unittest.TestCase):
             self.assertTrue(any(p.read_text() == 'custom policy' for p in backups))
             self.assertEqual((project / 'custom.md').read_text(), 'keep')
             skill = codex / 'skills/mathsecr-paper-builder/SKILL.md'
+            self.assertTrue((codex / 'skills/aside-browser/SKILL.md').is_file())
             self.assertEqual(install.digest(skill), install.digest(install.ROOT / 'mathsecr-paper-builder-kit/skills/mathsecr-paper-builder/SKILL.md'))
             skill.write_text('drift')
             with self.assertRaisesRegex(ValueError, 'sync failure'):

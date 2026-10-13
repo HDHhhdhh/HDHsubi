@@ -25,6 +25,7 @@
 | [Phase 2 검증](docs/evidence/phase-2.md) | 관측·판정 조립, simulator 정책 거부, 합성 선택과 상주 검증, Select 시간 비교 |
 | [Phase 3a 검증](docs/evidence/phase-3a.md) | 선언한 surface 4종의 계약, 혼입 거부, simulator 선택, 기본 출력 동일성과 H=6 성능 |
 | [2026-10-12 필터 수집기 패치](docs/collector-patch-2026-10-12.md) | 활성 필터 기록, 합성 검사, 동결·미완료 실험의 경계 |
+| [2026-10-13 검색·입력·삭제 비교](docs/search-controller-characterization-2026-10-13.md) | C30·M20·C12 집계, 운영 원본 7파일 적용, 확인한 효과와 한계 |
 
 ## 제작 흐름
 

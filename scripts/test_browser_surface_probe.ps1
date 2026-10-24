@@ -71,6 +71,33 @@ try {
     [regex]::Matches($definitions[0].Body.Extent.Text,[regex]::Escape($expectedCode)).Count -eq 1 -and
     [regex]::Matches([IO.File]::ReadAllText($wrapperPath),'Get-MathSecrAsideProbeCommands').Count -eq 0) aside-argv-single-definition source-contract
 
+  # Exercise the real process setup statements without starting any CLI.
+  foreach ($name in @('info','versionInfo')) {
+    $setup=@($builderAst.FindAll({
+      param($node)
+      $node -is [Management.Automation.Language.AssignmentStatementAst] -and
+        $node.Left -is [Management.Automation.Language.VariableExpressionAst] -and
+        $node.Left.VariablePath.UserPath -ceq $name
+    },$true))
+    if ($setup.Count -ne 1) { throw "Expected one process setup for $name." }
+    $statements=@($setup[0].Parent.Statements)
+    $start=[array]::IndexOf($statements,$setup[0])
+    $end=$start+1
+    while ($end -lt $statements.Count -and -not (
+      $statements[$end] -is [Management.Automation.Language.AssignmentStatementAst] -and
+      $statements[$end].Left -is [Management.Automation.Language.VariableExpressionAst] -and
+      $statements[$end].Left.VariablePath.UserPath -cin @('process','versionProcess'))) { $end++ }
+    $command=[pscustomobject]@{Source='synthetic-aside'}
+    $expected=if ($name -ceq 'info') { @('repl','space value','quote"value','trailing\') } else { @('--host','synthetic host','--version') }
+    $probeCommand=[pscustomobject]@{ArgumentList=$expected;ArgumentString='must-not-be-used'}
+    $probeCommands=@([pscustomobject]@{HostId='synthetic host'})
+    $code=($statements[$start..($end-1)] | ForEach-Object {$_.Extent.Text}) -join "`n"
+    $processInfo=& ([scriptblock]::Create($code+"`n"+'$'+$name))
+    Assert-SurfaceProbeCase ($processInfo.Arguments -ceq '' -and
+      (ConvertTo-Json -InputObject @($processInfo.ArgumentList) -Compress) -ceq
+      (ConvertTo-Json -InputObject $expected -Compress)) "$name-portable-argv" process-arguments
+  }
+
   $url='https://www.mathsecr.com/mypaper/123'
   $artifact=[pscustomobject]@{path='synthetic-tool.json';sha256=('a'*64)}
   foreach ($reason in @('repl-reachable','cli-unavailable','probe-timeout','probe-auth-or-transport-failed','browser-not-running','probe-failed-or-unrecognized','invalid-probe-receipt')) {

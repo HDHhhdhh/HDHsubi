@@ -74,8 +74,9 @@ if ((Get-MathSecrAsideAvailabilityFromProbe $inconsistent).Valid) { throw 'Rever
 
 # Load only the pure argv builders; do not execute the live probe in this test.
 $probePath = Join-Path $PSScriptRoot 'check_aside_repl.ps1'
+$builderPath = Join-Path $PSScriptRoot 'check_browser_surface.ps1'
 $parseErrors = $null; $tokens = $null
-$probeAst = [Management.Automation.Language.Parser]::ParseFile($probePath, [ref]$tokens, [ref]$parseErrors)
+$probeAst = [Management.Automation.Language.Parser]::ParseFile($builderPath, [ref]$tokens, [ref]$parseErrors)
 if ($parseErrors.Count -ne 0) { throw 'Aside probe has parser errors.' }
 foreach ($name in @('ConvertTo-MathSecrAsideProcessArgumentString','Get-MathSecrAsideProbeCommands')) {
   $definition = @($probeAst.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] }, $true) | Where-Object Name -CEQ $name)
@@ -124,7 +125,7 @@ try {
     $commands = @(Get-MathSecrAsideProbeCommands @parameters)
     if ($commands.Count -ne 2) { throw 'Probe must retain exactly two commands.' }
     for ($index=0; $index -lt 2; $index++) {
-      $expectedTail = if ($index -eq 0) { @('skills','list') } else { @('repl',"console.log(JSON.stringify({kind:'mathsecr-aside-preflight-v1',tabCount:(await listBrowserTabs()).length}));") }
+      $expectedTail = if ($index -eq 0) { @('skills','list') } else { @('repl',"const t=await listBrowserTabs();console.log(JSON.stringify({kind:'mathsecr-aside-preflight-v1',tabCount:t.length,tabs:t.map(x=>({targetId:x.targetId,url:x.url,title:x.title}))}));") }
       $expected = @($case.Prefix + $expectedTail)
       if (($commands[$index].ArgumentList | ConvertTo-Json -Compress) -cne ($expected | ConvertTo-Json -Compress)) { throw 'Wrong host/account command vector.' }
       $info = [Diagnostics.ProcessStartInfo]::new()

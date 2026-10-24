@@ -515,9 +515,9 @@ try {
   }
 
   $installedPrompt = Get-Content -LiteralPath (Join-Path $targetProject "mathsecr-paper-builder-kit\prompts\start-prompt.md") -Raw
-  $canonicalAsideReplHardStop = 'ASIDE_REPL_HARD_STOP: If Aside REPL is unavailable or cannot attach to and verify the live paper, report `차단`. Do not switch that session to the Codex in-app Browser, Chrome, an extension, or Computer Use.'
+  $canonicalAsideReplHardStop = 'SURFACE_HARD_STOP: Stay on the surface declared by the session input. If that surface is unavailable or cannot attach to and verify the live paper, report `차단`. Do not switch that session to any other browser surface.'
   if (-not $installedPrompt.Contains($canonicalAsideReplHardStop)) {
-    throw "installed start prompt lacks the non-Aside-REPL fallback hard stop"
+    throw "installed start prompt lacks the off-surface fallback hard stop"
   }
 
   $targetAgentsPath = Join-Path $targetProject "AGENTS.md"

@@ -119,7 +119,8 @@ function New-MathSecrAppendHistoryFixture {
     [ValidateRange(0, 63)][int]$HistoryDepth,
     [Parameter(Mandatory)][string]$OutRoot,
     [string]$Surface='aside-repl',
-    [string]$PaperUrl
+    [string]$PaperUrl,
+    [scriptblock]$PrepareSession = $null
   )
   if ($HistoryDepth -ge $ProblemCount) { throw 'Each append must add a new row; ProblemCount must exceed HistoryDepth.' }
   if (-not $PaperUrl) {
@@ -244,6 +245,9 @@ for number in range(1, int(sys.argv[2]) + 1):
         draftObservationArtifact=(Write-MathSecrBenchmarkArtifact $draft $root "draft-$stage.json")}
       $session.snapshot | Add-Member -NotePropertyName editAppendReceipt -NotePropertyValue $receipt
     }
+    # Opt-in surface tests attach synthetic probes before immutable history
+    # artifacts are written. The default Phase 0 fixture remains unchanged.
+    if ($null -ne $PrepareSession) { $null = & $PrepareSession $session $root $stage $Surface }
     $prior = Write-MathSecrBenchmarkArtifact $session $root "session-$stage.json"
     $sessions.Add([pscustomobject]@{stage=$stage;selectedCount=$selectedCount;artifact=$prior})
   }

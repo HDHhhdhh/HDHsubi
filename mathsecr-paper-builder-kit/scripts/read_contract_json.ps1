@@ -50,7 +50,7 @@ function New-MathSecrValidationContext {
   return [pscustomobject]@{
     ProjectRoot=[IO.Path]::GetFullPath($ProjectRoot).TrimEnd('\','/')
     ActiveDepth=0
-    ArtifactCache=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::OrdinalIgnoreCase)
+    ArtifactCache=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
     StateCache=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
     AppendReceiptCache=[Collections.Generic.Dictionary[object,object]]::new([Collections.Generic.ReferenceEqualityComparer]::Instance)
     Resources=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
@@ -97,7 +97,7 @@ function Enter-MathSecrValidationContext {
     # Even an explicitly reused context begins a fresh top-level validation.
     Clear-MathSecrValidationContext -Context $Context
     $Context.ProjectRoot = $root
-  } elseif (-not [string]::Equals($Context.ProjectRoot,$root,[StringComparison]::OrdinalIgnoreCase)) {
+  } elseif (-not [string]::Equals($Context.ProjectRoot,$root,[StringComparison]::Ordinal)) {
     throw 'Validation context cannot cross project roots during a validation.'
   }
   $Context.ActiveDepth++

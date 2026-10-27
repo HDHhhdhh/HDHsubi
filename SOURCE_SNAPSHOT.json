@@ -169,9 +169,9 @@
     {
       "path": "mathsecr-paper-builder-kit/scripts/read_contract_json.ps1",
       "sourceSha256": "60b40be0c4fd957bde00f96f41ee8e89fd6311d2e4739890783cb5d8dfafbd31",
-      "exportSha256": "6e2ae022731c167a052fd56a0180da24253aee79a83bb2697e4c54e3df7df2e3",
-      "bytes": 6076,
-      "transformation": "Phase 1: read and hash artifact bytes once, preserve BOM-inclusive hashes and existing JSON type semantics, and scope artifact/state caches to one top-level invocation. Phase 1b: own generic resources and reverse-order disposers within the top-level context; clear append receipt cache at each call boundary."
+      "exportSha256": "e7afba9d1eac4a49aabddc5e9af69b4794d711fc61809995294e3b90a43481dd",
+      "bytes": 6056,
+      "transformation": "Phase 1: read and hash artifact bytes once, preserve BOM-inclusive hashes and existing JSON type semantics, and scope artifact/state caches to one top-level invocation. Phase 1b: own generic resources and reverse-order disposers within the top-level context; clear append receipt cache at each call boundary. HDHSUBI-01: preserve exact path case in artifact cache and active project-root identity."
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/regression_evidence_contract.ps1",

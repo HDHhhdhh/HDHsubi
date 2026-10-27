@@ -105,7 +105,7 @@
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/read_contract_json.ps1",
-      "sha256": "6e2ae022731c167a052fd56a0180da24253aee79a83bb2697e4c54e3df7df2e3"
+      "sha256": "e7afba9d1eac4a49aabddc5e9af69b4794d711fc61809995294e3b90a43481dd"
     },
     {
       "path": "mathsecr-paper-builder-kit/scripts/regression_evidence_contract.ps1",

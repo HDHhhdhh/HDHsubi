@@ -95,7 +95,7 @@ class Aside {
 // Evaluated inside the mathsecr.com tab. Uses the page's own session token
 // (next-auth /api/auth/session -> accessToken) like the site's axios client.
 const PAGE_LIB = String.raw`(() => {
-  const VERSION = 8;
+  const VERSION = 9;
   if (window.__subi && window.__subi.v === VERSION) return 'ready';
   const API = 'https://api.mathsecr.com';
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -169,6 +169,33 @@ const PAGE_LIB = String.raw`(() => {
     }
     return out;
   }
+  // Formula search: the site stores LaTeX and textIncludes matches it as a
+  // substring (that is what the f(x) button sends). Observed 2026-11-14:
+  // no spaces inside algebra (x^{4}+ax^{2}, tf(t), (x+1)f(x)), braces on
+  // exponents, a space before subscripts of commands (\int _{0}^{x}),
+  // \frac{13}{2}. Unknown forms (lim, primes) are not generated.
+  function formulaAtoms(text) {
+    let s = stemOnly(text)
+      .replace(/∫/g, '\\int ').replace(/∞/g, '\\infty ')
+      .replace(/\^\(?(-?\d+|[a-z])\)?/g, '^{$1}').replace(/_\(?(-?\d+|[a-z])\)?(?![}])/g, '_{$1}');
+    const out = [];
+    const balanced = (a) => { let p = 0, b = 0; for (const ch of a) { p += ch === '(' ? 1 : ch === ')' ? -1 : 0; b += ch === '{' ? 1 : ch === '}' ? -1 : 0; if (p < 0 || b < 0) return false; } return p === 0 && b === 0 && (a.split('|').length % 2 === 1); };
+    const add = (a) => { if (a && a.length >= 5 && balanced(a) && !out.includes(a)) out.push(a); };
+    for (let chunk of s.split(/[가-힣]+|[,=]|\[|\]/)) {
+      chunk = chunk.replace(/\s+/g, '').replace(/\\int_/g, '\\int _').replace(/\\infty/g, '\\infty ').trim();
+      if (!chunk || /lim|->|\\rightarrow|'/.test(chunk)) continue;
+      for (const m of chunk.matchAll(/\\int _\{[^}]*\}\^\{[^}]*\}/g)) add(m[0]);
+      let body = chunk.replace(/\\int _\{[^}]*\}\^\{[^}]*\}/g, ' ').replace(/d[a-z]\b/g, ' ').replace(/d[a-z]$/g, '');
+      for (let part of body.split(/\s+/)) {
+        part = part.replace(/^[^\w(\\{]+|[^\w)}]+$/g, '');
+        const frac = part.match(/^(\d+)\/(\d+)$/);
+        if (frac) { add('\\frac{' + frac[1] + '}{' + frac[2] + '}'); continue; }
+        if (part.includes('/')) { const num = part.match(/^\(([^()]*(?:\([^()]*\)[^()]*)*)\)\//); if (num) add(num[1]); continue; }
+        if (/[a-z]/.test(part) && /[\^(+\-]/.test(part) && !/^[a-z]\([a-z0-9]\)$/.test(part)) add(part);
+      }
+    }
+    return out.sort((a, b) => b.length - a.length).slice(0, 4);
+  }
   function scopeParams(scope) {
     const p = { curriculumId: scope.curriculumId || 2, source: 'mypaper', isSoftMode: true, problemBankScope: 'include' };
     for (const k of ['dbFolderIds','myDbIds','myPaperIds','paperFolderIds','chapterTreeIds','excludeDbFolderIds','excludeDbIds','answerTypes'])
@@ -191,7 +218,8 @@ const PAGE_LIB = String.raw`(() => {
     const cells = []; let total = 0, cursor = null, pages = 0;
     do {
       const j = await lim(() => req('GET', '/bms/api/v1/question-cells', cursor ? { ...base, cursor } : base));
-      total = (j && j.pagination && j.pagination.totalItems) || 0;
+      // totalItems is only meaningful on the first page (later pages report 0)
+      if (pages === 0) total = (j && j.pagination && j.pagination.totalItems) || 0;
       for (const g of (j && j.data && j.data.cellsByChapter) || []) for (const c of g.cells || []) if (c) cells.push(slim(c, g));
       cursor = j && j.pagination ? j.pagination.cursor : null;
       pages++;
@@ -216,20 +244,32 @@ const PAGE_LIB = String.raw`(() => {
     if (r[0] && r[1] && r[1].length >= 3) list.push([r[0], r[1]]);
     return uniq(list);
   }
+  // Formula queries: each long atom alone, each atom with the longest Korean
+  // word, and the two longest atoms together. They matter most for items with
+  // fewer than two Korean words (formula-only problems).
+  function formulaPass(f, t) {
+    if (!f.length) return [];
+    const w = [...(t || [])].sort((a, b) => b.length - a.length)[0];
+    const list = [];
+    for (const a of f) { if (a.length >= 8 || (t || []).length < 2) list.push([a]); if (w) list.push([a, w]); }
+    if (f.length >= 2) list.push([f[0], f[1]]);
+    return uniq(list);
+  }
   function fallbackPass(t) {
     const r = t.map((w, i) => ({ w, i })).sort((a, b) => b.w.length - a.w.length || a.i - b.i).map((x) => x.w);
     const pick = (...ix) => ix.every((i) => i < r.length) ? ix.map((i) => r[i]) : null;
     const list = [pick(0,1), pick(0,2), pick(1,2), pick(0,3), pick(1,3), pick(2,3)];
-    return uniq(list); // single words return 0 from the server; never sent
+    return uniq(list); // single Korean words are too broad; never sent
   }
   async function runItem(item, opt, lim, stage) {
     const scope = stage && stage.scope ? { ...stage.scope } : { ...opt.scope, ...(item.scope || {}) };
     const res = { key: item.key, terms: null, queries: [], all: [], error: null };
     try {
       const terms = item.queries ? null : (item.terms || autoTerms(item.text)).slice(0, opt.maxTerms);
-      res.terms = terms;
+      const formulas = item.queries || opt.formulas === false ? [] : (item.formulas || formulaAtoms(item.text));
+      res.terms = terms; res.formulas = formulas;
       const runAll = (qs) => Promise.all(qs.map((q) => query(lim, scope, q, 48, opt.maxPages, opt.maxTotal).then((r) => ({ q, ...r }), (e) => ({ q, total: 0, cells: [], error: String(e && e.message || e) }))));
-      let runs = await runAll(item.queries || firstPass(terms));
+      let runs = await runAll(item.queries || firstPass(terms).concat(formulaPass(formulas, terms)));
       if (terms && ((stage && stage.fallback) || !runs.some((r) => r.total > 0 && r.total <= opt.maxTotal))) runs = runs.concat(await runAll(fallbackPass(terms)));
       const byId = new Map();
       for (const r of runs) {
@@ -314,7 +354,7 @@ const PAGE_LIB = String.raw`(() => {
           }
           const candidates = [...byId.values()].sort((x, y) => y.score - x.score || y.hits - x.hits).slice(0, opt.top)
             .map((c) => ({ ...c, score: Math.round(c.score * 1000) / 1000 }));
-          return { key: it.key, terms: (a || b).terms, queries: [...(a ? a.queries : []), ...(b ? b.queries.map((q) => ({ ...q, book: true })) : [])],
+          return { key: it.key, terms: (a || b).terms, formulas: (a || b).formulas, queries: [...(a ? a.queries : []), ...(b ? b.queries.map((q) => ({ ...q, book: true })) : [])],
             error: [a && a.error, b && b.error].filter(Boolean).join('; ') || null, candidates };
         });
       } catch (e) { job.error = String(e && e.message || e); }
@@ -356,7 +396,7 @@ const PAGE_LIB = String.raw`(() => {
     const t = (document.body && document.body.innerText) || '';
     return { url: location.href, deviceLimit: /기기/.test(t) && /(초과|제한|최대)/.test(t) && /로그아웃|다른 기기/.test(t) };
   }
-  window.__subi = { v: VERSION, autoTerms, startSearch, status, chunk, drop, listCells, createPaper, addCells, pageState, token };
+  window.__subi = { v: VERSION, autoTerms, formulaAtoms, startSearch, status, chunk, drop, listCells, createPaper, addCells, pageState, token };
   return 'loaded';
 })()`;
 

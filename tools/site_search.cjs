@@ -95,7 +95,7 @@ class Aside {
 // Evaluated inside the mathsecr.com tab. Uses the page's own session token
 // (next-auth /api/auth/session -> accessToken) like the site's axios client.
 const PAGE_LIB = String.raw`(() => {
-  const VERSION = 9;
+  const VERSION = 10;
   if (window.__subi && window.__subi.v === VERSION) return 'ready';
   const API = 'https://api.mathsecr.com';
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -111,6 +111,7 @@ const PAGE_LIB = String.raw`(() => {
   }
   async function req(method, p, params, body) {
     const u = new URL(API + p);
+    const readOnly = method === 'GET';
     for (const [k, v] of Object.entries(params || {})) if (v != null) for (const x of [].concat(v)) u.searchParams.append(k, String(x));
     for (let attempt = 0; attempt < 4; attempt++) {
       S.requests++;
@@ -120,13 +121,14 @@ const PAGE_LIB = String.raw`(() => {
       const timer = setTimeout(() => ac.abort(), 30000);
       let r;
       try { r = await fetch(u, { method, credentials: 'include', headers, body: body != null ? JSON.stringify(body) : undefined, signal: ac.signal }); }
+      catch (e) { if (!readOnly) e.writeUncertain = true; throw e; }
       finally { clearTimeout(timer); }
       S.last401 = r.status === 401;
       if (r.status === 401 && attempt === 0) continue;
-      if ((r.status === 429 || r.status >= 500) && attempt < 3) { await sleep(1000 * (attempt + 1)); continue; }
+      if (readOnly && (r.status === 429 || r.status >= 500) && attempt < 3) { await sleep(1000 * (attempt + 1)); continue; }
       const t = await r.text();
       let j = null; try { j = t ? JSON.parse(t) : null; } catch {}
-      if (!r.ok) { const e = new Error('HTTP ' + r.status + ' ' + method + ' ' + p + ' ' + t.slice(0, 300)); e.status = r.status; e.body = j; throw e; }
+      if (!r.ok) { const e = new Error('HTTP ' + r.status + ' ' + method + ' ' + p + ' ' + t.slice(0, 300)); e.status = r.status; e.body = j; e.writeUncertain = !readOnly && r.status >= 500; throw e; }
       return j;
     }
   }
@@ -262,7 +264,13 @@ const PAGE_LIB = String.raw`(() => {
     return uniq(list); // single Korean words are too broad; never sent
   }
   async function runItem(item, opt, lim, stage) {
-    const scope = stage && stage.scope ? { ...stage.scope } : { ...opt.scope, ...(item.scope || {}) };
+    const scope = { ...opt.scope, ...(item.scope || {}) };
+    if (stage && stage.bookDbIds) {
+      const explicit = [].concat(scope.myDbIds || []);
+      const ids = explicit.length ? explicit.filter((id) => stage.bookDbIds.some((bookId) => String(bookId) === String(id))) : stage.bookDbIds;
+      if (!ids.length) return { key: item.key, queries: [], all: [], error: null };
+      scope.myDbIds = ids;
+    }
     const res = { key: item.key, terms: null, queries: [], all: [], error: null };
     try {
       const terms = item.queries ? null : (item.terms || autoTerms(item.text)).slice(0, opt.maxTerms);
@@ -282,6 +290,7 @@ const PAGE_LIB = String.raw`(() => {
           e.score += w; e.hits++; byId.set(c.id, e);
         }
       }
+      if (runs.length && runs.every((r) => r.error)) res.error = 'All search queries failed: ' + runs[0].error;
       res.all = [...byId.values()].sort((a, b) => b.score - a.score || b.hits - a.hits).slice(0, 80);
     } catch (e) { res.error = String(e && e.message || e); if (e && e.code === 'NOT_LOGGED_IN') throw e; }
     return res;
@@ -338,7 +347,7 @@ const PAGE_LIB = String.raw`(() => {
         }
         if (job.bookDbIds && job.bookDbIds.length) {
           job.total += n;
-          const st = { scope: { curriculumId: opt.scope.curriculumId, myDbIds: job.bookDbIds }, fallback: true };
+          const st = { bookDbIds: job.bookDbIds, fallback: true };
           await Promise.all(items.map((it, i) => runItem(it, opt, lim, st).then((r) => { s2[i] = r; tick(); })));
         }
         const rest = items.map((it, i) => i).filter((i) => !s1[i] && !(s2[i] && s2[i].all.length));
@@ -377,20 +386,42 @@ const PAGE_LIB = String.raw`(() => {
     return cells;
   }
   async function createPaper(title, folderId) {
-    const j = await req('POST', '/bms/api/v1/my-papers', null, { title, folderId: Number(folderId), category: 'paper' });
-    return j.data.id;
+    try {
+      const j = await req('POST', '/bms/api/v1/my-papers', null, { title, folderId: Number(folderId), category: 'paper' });
+      if (j && j.data && j.data.id != null) return j.data.id;
+      throw new Error('생성 응답에 ID가 없습니다. 다시 생성하기 전에 대상 폴더를 확인하세요.');
+    } catch (e) {
+      if (!e.writeUncertain) throw e;
+      throw new Error('학습지 생성 여부를 확인한 뒤에만 다시 시도하세요: ' + e.message);
+    }
   }
   async function addCells(paperId, ids, curriculumId) {
-    const before = await listCells(paperId, curriculumId);
-    let after = before.length;
-    for (let i = 0; i < ids.length; i += 50) {
-      const batch = ids.slice(i, i + 50);
-      await req('POST', '/bms/api/v1/my-papers/' + paperId + '/cells', { action: 'add', curriculumId: curriculumId || 2 }, { cellIds: batch, afterNumber: after });
-      after += batch.length;
+    let expected = null, before = null, completedBatches = 0, completedCells = 0;
+    const matches = (actual, want) => actual && actual.length === want.length &&
+      actual.every((id, i) => String(id) === String(want[i]));
+    try {
+      expected = (await listCells(paperId, curriculumId)).map((c) => c.id);
+      before = expected.length;
+      for (let i = 0; i < ids.length; i += 50) {
+        const batch = ids.slice(i, i + 50);
+        const next = expected.concat(batch);
+        try {
+          await req('POST', '/bms/api/v1/my-papers/' + paperId + '/cells', { action: 'add', curriculumId: curriculumId || 2 }, { cellIds: batch, afterNumber: expected.length });
+        } catch (e) {
+          if (!e.writeUncertain) throw e;
+          const observed = await listCells(paperId, curriculumId).then((rows) => rows.map((c) => c.id), () => null);
+          if (!matches(observed, next)) throw new Error('추가 결과 미확인. 다시 추가하기 전에 학습지 상태를 확인하세요: ' + e.message);
+          // Exact prefix and batch were read back. Never resend the ambiguous write.
+        }
+        expected = next;
+        completedBatches++;
+        completedCells += batch.length;
+      }
+      const cells = (await listCells(paperId, curriculumId)).map((c) => c.id);
+      return { paperId, before, count: cells.length, orderOk: matches(cells, expected), cells, completedBatches, completedCells };
+    } catch (e) {
+      return { paperId, before, completedBatches, completedCells, orderOk: false, error: String(e && e.message || e) };
     }
-    const now = await listCells(paperId, curriculumId);
-    const tail = now.slice(before.length).map((c) => c.id);
-    return { before: before.length, count: now.length, orderOk: JSON.stringify(tail) === JSON.stringify(ids), cells: now.map((c) => c.id) };
   }
   function pageState() {
     const t = (document.body && document.body.innerText) || '';
@@ -433,11 +464,17 @@ const pageCall = (aside, expr, title) => aside.repl(`const v = await globalThis.
 function loadItems(raw) {
   const arr = Array.isArray(raw) ? raw : raw.items;
   if (!Array.isArray(arr)) throw new Error('items file must be an array or {items:[...]}');
-  return arr.map((x, i) => ({
-    key: String(x.key ?? x.id ?? x.number ?? i + 1),
-    text: x.text, terms: x.terms, queries: x.queries, scope: x.scope,
-    expect: x.expect ?? x.site_cell_id ?? null,
-  }));
+  return arr.map((x, i) => {
+    if (x.formulas !== undefined && (!Array.isArray(x.formulas) || x.formulas.some((s) => typeof s !== 'string' || !s.trim()))) {
+      throw new Error('item ' + (i + 1) + ': formulas must be an array of nonempty strings');
+    }
+    return {
+      key: String(x.key ?? x.id ?? x.number ?? i + 1),
+      text: x.text, terms: x.terms, queries: x.queries, scope: x.scope,
+      formulas: x.formulas && x.formulas.map((s) => s.trim()),
+      expect: x.expect ?? x.site_cell_id ?? null,
+    };
+  });
 }
 
 async function cmdSearch(args) {
@@ -556,7 +593,9 @@ async function cmdCreatePaper(args) {
   try {
     const paperId = await pageCall(aside, `([t, f]) => window.__subi.createPaper(t, f), ${JSON.stringify([String(args.title), Number(args.folder || DEFAULT_FOLDER)])}`, 'HDHsubi site_search: create paper');
     let add = null;
-    if (ids.length) add = await pageCall(aside, `([p, ids]) => window.__subi.addCells(p, ids), ${JSON.stringify([paperId, ids])}`, 'HDHsubi site_search: add cells');
+    if (ids.length) add = await pageCall(aside, `([p, ids]) => window.__subi.addCells(p, ids), ${JSON.stringify([paperId, ids])}`, 'HDHsubi site_search: add cells').catch((e) => ({
+      orderOk: false, completedBatches: null, completedCells: null, error: String(e && e.message || e),
+    }));
     const out = { paperId, url: `${SITE}/mypaper/${paperId}`, rule: STEM_RULE, title: String(args.title), folderId: Number(args.folder || DEFAULT_FOLDER), requested: ids.length, ...(add || {}) };
     process.stdout.write(JSON.stringify(out, null, 1) + '\n');
     if (add && !add.orderOk) process.exitCode = 2;

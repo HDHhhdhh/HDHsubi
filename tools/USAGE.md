@@ -66,9 +66,13 @@ stderr 마지막 줄에 요약이 찍힌다: `{"items":18,"ms":...,"requests":..
 ## 2) 문제지 만들기 + 셀 넣기
 
 ```
-node tools/site_search.cjs create-paper --title "문제지 이름" --cells 7231979,7232826,... [--folder 194543]
-node tools/site_search.cjs create-paper --title "문제지 이름" --cells-file picks.json
+node tools/site_search.cjs create-paper --title "문제지 이름" --cells 7231979,7232826,... [--folder 194543] \
+  --print-name "26 행신 공수2 기말 프린트2" --mathbank-db <MathBankData/mathbank.sqlite> --mathbank-out <작업 폴더>
+node tools/site_search.cjs create-paper --title "문제지 이름" --cells-file picks.json --print-name "<정식 프린트 이름>" ...
 ```
+
+- **학교 프린트 문제지는 항상 `--print-name`에 정식 프린트 이름을 넣는다**(`연도 학교 과목 중간|기말 프린트[N]`, 예: `26 행신 공수2 기말 프린트2`). `--title`은 사이트에 보이는 문제지 이름이고, `--print-name`은 MathBank에 "이 문항이 어느 프린트에 들어갔는지"를 남기는 이름이다(아래 3). 학년이 공통수학이 아니면 `--grade`, 학기를 알면 `--semester`를 함께 준다. 기존 문제지의 일부만 쓰는 프린트는 `create-paper` 대신 3의 `record`를 실행한다.
+- 출력의 `mathbank.status`가 `recorded`/`enriched`/`already_recorded`인지, `mathbank.unmatched`가 몇 개인지 작업 영수증에 적는다. `failed`(종료 코드 3)면 문제지는 그대로 두고 `record`만 다시 실행한다.
 
 - 폴더 기본값은 subi 계약의 194543이다.
 - 셀은 준 순서대로 맨 뒤에 붙는다(50개씩 나눠 보냄). 끝나면 문제지 셀 목록을 다시 읽어 순서가 맞는지 확인한다. 결과의 `orderOk`가 false면 종료 코드는 2다.
@@ -76,6 +80,30 @@ node tools/site_search.cjs create-paper --title "문제지 이름" --cells-file 
 - `--cells-file`은 숫자 배열, `{id}`/`{site_cell_id}` 객체 배열, `{cells:[...]}` 중 하나를 받는다.
 
 기존 문제지 뒤에 붙이기는 `add-cells --paper <id> --cells ...`, 확인만 하려면 `paper-cells --paper <id>`.
+
+## 3) MathBank에 "이 원본이 어느 학교 프린트에 들어갔다" 기록
+
+`create-paper`에 `--print-name`을 주면 셀 추가와 순서 확인이 끝난 뒤 탭을 닫고, 그 프린트에 들어간 문항을 MathBank 기존 문항에 연결한다. 결과는 출력의 `mathbank` 필드에 남는다.
+
+```
+node tools/site_search.cjs create-paper --title "행신 공수2 프린트2" --cells-file picks.json \
+  --print-name "26 행신 공수2 기말 프린트2" --mathbank-db <MathBankData/mathbank.sqlite> --mathbank-out <작업 폴더>
+```
+
+새 문제지를 만들지 않는 경우(기존 문제지 일부만 쓰는 프린트)나 나중에 기록할 때는 직접 실행한다.
+
+```
+node tools/mathbank_membership.cjs record --db <mathbank.sqlite> --name "주엽 26 미적1 기말 프린트" \
+  --paper 2102155 --cells 846168,2296167,... --grade 2 --semester 2 --out <작업 폴더> [--dry-run]
+```
+
+- DB 경로는 `--mathbank-db`/`--db` 또는 환경변수 `MATHBANK_DB`. Node 22.13 이상(`node:sqlite`)이 필요하다.
+- 이름에서 연도(`26`), 학교, 과목(`공수2`, `미적1` 등), `중간`/`기말`, `프린트N`의 N을 읽는다. `--school --year --subject --exam --part --grade --semester`로 덮어쓸 수 있다. 학년은 공통수학1·2면 1, 그 밖의 과목은 `--grade`로 준다.
+- 연결은 MathBank가 이미 가진 수학비서 셀 ID 대응(`external_identities` workroom_item/mathsecr, resolved)만 쓴다. 대응이 없거나 둘 이상이면 연결하지 않고 `unmatched`에 위치·셀·이유를 적는다. 추측으로 잇지 않는다.
+- 쓰기: worksheet 소스 1개(`print_membership_v1`: 이름·학교·학년·연도·학기·과목·시험·순번, 문제지 id, 위치별 결과, 기록 시각, 영수증)와 일치한 문항마다 occurrence 1개. 같은 프린트를 다시 기록하면 아무것도 쓰지 않는다(`already_recorded`). 예전 방식으로 만든 같은 프린트 기록이 있으면 새로 만들지 않고 정보만 보탠다(`enriched`).
+- MathBank writer lock(`MathBankData/index.lock`)을 잡고 쓴다. 다른 작업자가 잡고 있으면 기다리고(`--lock-wait` 초, 기본 1800), 남의 lock은 지우지 않는다. 쓰기 전에 바뀌는 행을 `<out>/mathbank-membership-<paper>-<시각>.backup.json`에 남기고, 쓴 뒤 따로 다시 읽어 확인한 결과를 `.receipt.json`에 남긴다.
+- MathBank는 occurrence가 생긴 문항의 유사문항 캐시를 비우고 다음 색인 때 다시 만든다. 비워진 행 수는 `neighbors_invalidated`, 원래 행은 backup에 있다.
+- 기록이 실패해도 문제지는 그대로 두고 `create-paper`는 종료 코드 3을 낸다.
 
 ## 사용한 사이트 API (2026-11-14 관측)
 

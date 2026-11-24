@@ -590,16 +590,22 @@ async function cmdCreatePaper(args) {
   if (!args.title || args.title === true) throw new Error('--title required');
   const ids = await readCells(args);
   const aside = await openSession(args);
+  let out, add = null;
   try {
     const paperId = await pageCall(aside, `([t, f]) => window.__subi.createPaper(t, f), ${JSON.stringify([String(args.title), Number(args.folder || DEFAULT_FOLDER)])}`, 'HDHsubi site_search: create paper');
-    let add = null;
     if (ids.length) add = await pageCall(aside, `([p, ids]) => window.__subi.addCells(p, ids), ${JSON.stringify([paperId, ids])}`, 'HDHsubi site_search: add cells').catch((e) => ({
       orderOk: false, completedBatches: null, completedCells: null, error: String(e && e.message || e),
     }));
-    const out = { paperId, url: `${SITE}/mypaper/${paperId}`, rule: STEM_RULE, title: String(args.title), folderId: Number(args.folder || DEFAULT_FOLDER), requested: ids.length, ...(add || {}) };
-    process.stdout.write(JSON.stringify(out, null, 1) + '\n');
-    if (add && !add.orderOk) process.exitCode = 2;
+    out = { paperId, url: `${SITE}/mypaper/${paperId}`, rule: STEM_RULE, title: String(args.title), folderId: Number(args.folder || DEFAULT_FOLDER), requested: ids.length, ...(add || {}) };
   } finally { await closeSession(aside); }
+  // --print-name: record in MathBank which existing items this print uses (after the tab is closed;
+  // the writer lock may make it wait). A failure here keeps the paper and exits 3.
+  if (args['print-name'] && add && add.orderOk) {
+    out.mathbank = await require(path.join(__dirname, 'mathbank_membership.cjs')).recordForPaper(args, out.paperId, add.cells);
+  }
+  process.stdout.write(JSON.stringify(out, null, 1) + '\n');
+  if (add && !add.orderOk) process.exitCode = 2;
+  else if (out.mathbank && out.mathbank.status === 'failed') process.exitCode = 3;
 }
 
 async function cmdAddCells(args) {
@@ -626,6 +632,7 @@ const USAGE = `usage:
   node tools/site_search.cjs search --in items.json [--out result.json] [--scope-folder 81500] [--years 2025-2026]
          [--top 15] [--images DIR] [--images-top 8] [--concurrency 6] [--max-total 300] [--probe 6] [--no-auto-scope]
   node tools/site_search.cjs create-paper --title NAME [--folder ${DEFAULT_FOLDER}] [--cells 1,2,3 | --cells-file f.json]
+         [--print-name "26 행신 공수2 기말 프린트2" [--mathbank-db PATH] [--mathbank-out DIR] [--grade N] [--semester N]]
   node tools/site_search.cjs add-cells --paper ID --cells 1,2,3
   node tools/site_search.cjs paper-cells --paper ID`;
 
